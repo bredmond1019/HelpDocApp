@@ -1,23 +1,20 @@
-use mockall::mock;
-use mockall::predicate::*;
-use std::sync::Arc;
-
-use backend::db::vector_db::init_test_vector_db;
-
-use chrono::Utc;
-use dotenv::dotenv;
-use sqlx::postgres::PgPoolOptions;
-use std::env;
-
-use backend::{
-    data_processing::{generate_embeddings, store_in_postgres},
-    models::{Article, Collection},
-};
-use qdrant_client::qdrant::PointStruct;
-use sqlx::PgPool;
-
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
+    use backend::db::vector_db::init_test_vector_db;
+
+    use chrono::Utc;
+    use dotenv::dotenv;
+    use sqlx::postgres::PgPoolOptions;
+    use std::env;
+
+    use backend::{
+        data_processing::{generate_embeddings, store_in_postgres},
+        models::{Article, Collection},
+    };
+
+    use sqlx::PgPool;
 
     async fn setup_test_db() -> PgPool {
         dotenv().ok();
@@ -33,7 +30,7 @@ mod tests {
     async fn test_store_in_postgres() {
         let pool = setup_test_db().await;
 
-        let collection = Collection::new(
+        let collection = NewCollection::new(
             "Test Collection".to_string(),
             Some("Test Description".to_string()),
             "test-collection".to_string(),
@@ -91,30 +88,20 @@ mod tests {
 
         // Create test articles
         let articles = vec![
-            Article {
-                id: 1,
-                collection_id: 1,
-                title: "Test Article 1".to_string(),
-                slug: "test-article-1".to_string(),
-                html_content: Some("<p>Test content 1</p>".to_string()),
-                markdown_content: Some("Test content 1".to_string()),
-                version: 1,
-                last_edited_by: Some("Test User".to_string()),
-                created_at: Utc::now(),
-                updated_at: Utc::now(),
-            },
-            Article {
-                id: 2,
-                collection_id: 1,
-                title: "Test Article 2".to_string(),
-                slug: "test-article-2".to_string(),
-                html_content: Some("<p>Test content 2</p>".to_string()),
-                markdown_content: Some("Test content 2".to_string()),
-                version: 1,
-                last_edited_by: Some("Test User".to_string()),
-                created_at: Utc::now(),
-                updated_at: Utc::now(),
-            },
+            NewArticle::new(
+                1,
+                "Test Article 1".to_string(),
+                "test-article-1".to_string(),
+                Some("<p>Test content 1</p>".to_string()),
+                "helpscout_collection_id_1".to_string(),
+            ),
+            NewArticle::new(
+                1,
+                "Test Article 2".to_string(),
+                "test-article-2".to_string(),
+                Some("<p>Test content 2</p>".to_string()),
+                "helpscout_collection_id_2".to_string(),
+            ),
         ];
 
         // Call the function under test

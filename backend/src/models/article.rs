@@ -1,10 +1,11 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Article {
-    pub id: i32,
-    pub collection_id: i32,
+    pub id: Uuid,
+    pub collection_id: Uuid,
     pub title: String,
     pub slug: String,
     pub html_content: Option<String>,
@@ -13,26 +14,51 @@ pub struct Article {
     pub last_edited_by: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub helpscout_collection_id: String,
 }
 
-impl Article {
+#[derive(Debug, Serialize, Deserialize)]
+pub struct NewArticle {
+    pub collection_id: Uuid,
+    pub title: String,
+    pub slug: String,
+    pub html_content: Option<String>,
+    pub helpscout_collection_id: String,
+}
+
+impl NewArticle {
     pub fn new(
-        collection_id: i32,
+        collection_id: Uuid,
         title: String,
         slug: String,
         html_content: Option<String>,
+        helpscout_collection_id: String,
     ) -> Self {
-        Article {
-            id: 0, // This will be set by the database
+        NewArticle {
             collection_id,
             title,
             slug,
             html_content,
-            markdown_content: None,
-            version: 0,
-            last_edited_by: None,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
+            helpscout_collection_id,
         }
     }
+
+    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ArticleJson {
+    pub id: String,
+    #[serde(rename = "collectionId")]
+    pub collection_id: String,
+    pub title: String,
+    pub slug: String,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: String,
+    #[serde(rename = "lastPublishedAt")]
+    pub last_published_at: String,
 }

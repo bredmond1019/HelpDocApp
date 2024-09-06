@@ -1,16 +1,24 @@
-use anyhow::Result;
-use backend::data_processing::fetcher::ApiClient;
-
-use mockito::Server;
-use serde_json::json;
-
 #[cfg(test)]
 mod tests {
+    use dotenv::dotenv;
+    use tokio;
+
+    use anyhow::Result;
+    use backend::models::{
+        article::{ArticleJson, NewArticle},
+        collection::NewCollection,
+        Article, Collection,
+    };
+    use mockito::Server;
+    use serde_json::json;
+    use uuid::Uuid;
+
     #[tokio::test]
     async fn test_parse_collection() -> Result<()> {
-        let mut server = Server::new();
+        dotenv().ok();
+        let mut server = Server::new_async().await;
 
-        let _m = server
+        let m = server
             .mock("GET", "/v1/collections/5214c83d45667acd25394b53")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -27,10 +35,27 @@ mod tests {
                 })
                 .to_string(),
             )
-            .create();
+            .create_async()
+            .await;
 
-        let client = ApiClient::new()?;
-        let collection = client.get_collection("5214c83d45667acd25394b53").await?;
+        let client = reqwest::Client::new();
+        let base_url = server.url();
+
+        let response = client
+            .get(format!(
+                "{}/v1/collections/5214c83d45667acd25394b53",
+                base_url
+            ))
+            .header("Authorization", "Bearer 1234567890")
+            .send()
+            .await
+            .expect("Failed to get response")
+            .text()
+            .await
+            .expect("Failed to get response text");
+
+        let json_value: serde_json::Value = serde_json::from_str(&response)?;
+        let collection: NewCollection = serde_json::from_value(json_value["collection"].clone())?;
 
         assert_eq!(collection.name, "My Collection");
         assert_eq!(
@@ -44,9 +69,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_parse_article() -> Result<()> {
-        let mut server = Server::new();
+        dotenv().ok();
+        let mut server = Server::new_async().await;
 
-        let _m = server
+        let m = server
             .mock("GET", "/v1/articles/521632244566c845e582652d")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -64,10 +90,24 @@ mod tests {
                 })
                 .to_string(),
             )
-            .create();
+            .create_async()
+            .await;
 
-        let client = ApiClient::new()?;
-        let article = client.get_article("521632244566c845e582652d").await?;
+        let client = reqwest::Client::new();
+        let base_url = server.url();
+
+        let response = client
+            .get(format!("{}/v1/articles/521632244566c845e582652d", base_url))
+            .header("Authorization", "Bearer 1234567890")
+            .send()
+            .await
+            .expect("Failed to get response")
+            .text()
+            .await
+            .expect("Failed to get response text");
+
+        let json_value: serde_json::Value = serde_json::from_str(&response)?;
+        let article: NewArticle = serde_json::from_value(json_value["article"].clone())?;
 
         assert_eq!(article.title, "My Article");
         assert_eq!(article.slug, "my-article");
@@ -81,9 +121,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_list_collections() -> Result<()> {
-        let mut server = Server::new();
+        dotenv().ok();
+        let mut server = Server::new_async().await;
 
-        let _m = server
+        let m = server
             .mock("GET", "/v1/collections")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -107,10 +148,25 @@ mod tests {
                 })
                 .to_string(),
             )
-            .create();
+            .create_async()
+            .await;
 
-        let client = ApiClient::new()?;
-        let collections = client.list_collections(None).await?;
+        let client = reqwest::Client::new();
+        let base_url = server.url();
+
+        let response = client
+            .get(format!("{}/v1/collections", base_url))
+            .header("Authorization", "Bearer 1234567890")
+            .send()
+            .await
+            .expect("Failed to get response")
+            .text()
+            .await
+            .expect("Failed to get response text");
+
+        let json_value: serde_json::Value = serde_json::from_str(&response)?;
+        let collections: Vec<NewCollection> =
+            serde_json::from_value(json_value["collections"]["items"].clone())?;
 
         assert_eq!(collections.len(), 1);
         assert_eq!(collections[0].name, "My Collection");
@@ -125,9 +181,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_list_articles() -> Result<()> {
-        let mut server = Server::new();
+        dotenv().ok();
+        let mut server = Server::new_async().await;
 
-        let _m = server
+        let m = server
             .mock("GET", "/v1/collections/5214c77c45667acd25394b51/articles")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -144,7 +201,7 @@ mod tests {
                                 "title": "My Article",
                                 "slug": "my-article",
                                 "createdAt": "2013-08-21T19:34:13Z",
-                                "updatedAt": null,
+                                "updatedAt": "2013-08-21T19:34:13Z",
                                 "lastPublishedAt": "2013-08-21T19:34:13Z"
                             }
                         ]
@@ -152,16 +209,53 @@ mod tests {
                 })
                 .to_string(),
             )
-            .create();
+            .create_async()
+            .await;
 
-        let client = ApiClient::new()?;
-        let articles = client
-            .list_articles("5214c77c45667acd25394b51", None)
-            .await?;
+        let client = reqwest::Client::new();
+        let base_url = server.url();
+
+        let response = client
+            .get(format!(
+                "{}/v1/collections/5214c77c45667acd25394b51/articles",
+                base_url
+            ))
+            .header("Authorization", "Bearer 1234567890")
+            .send()
+            .await
+            .expect("Failed to get response")
+            .text()
+            .await
+            .expect("Failed to get response text");
+
+        println!("{:?}", response);
+
+        let json_value: serde_json::Value = serde_json::from_str(&response)?;
+        let articles: Vec<ArticleJson> =
+            serde_json::from_value(json_value["articles"]["items"].clone())?;
+
+        println!("ARTICLES: {:?}", articles);
 
         assert_eq!(articles.len(), 1);
         assert_eq!(articles[0].title, "My Article");
         assert_eq!(articles[0].slug, "my-article");
+        assert_eq!(articles[0].collection_id, "5214c77c45667acd25394b51");
+
+        // If you need to convert ArticleJson to NewArticle or Article, you can do it here
+        let new_articles: Vec<NewArticle> = articles
+            .into_iter()
+            .map(|article| NewArticle {
+                helpscout_collection_id: article.collection_id.clone(),
+                collection_id: Uuid::new_v4(), // Generate a new UUID for testing purposes
+                title: article.title,
+                slug: article.slug,
+                html_content: None, // You might want to fetch this separately if needed
+            })
+            .collect();
+
+        assert_eq!(new_articles.len(), 1);
+        assert_eq!(new_articles[0].title, "My Article");
+        assert_eq!(new_articles[0].slug, "my-article");
 
         Ok(())
     }

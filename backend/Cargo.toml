@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.32", features = ["full", "rt-multi-thread"] }
+tokio = { version = "1.32", features = ["full", "rt-multi-thread", "macros"] }
 async-graphql = "6.0"
 async-graphql-actix-web = "6.0"
 actix-web = "4.4"
@@ -24,6 +24,7 @@ torch-sys = { version = "=0.14.0" }
 rust_tokenizers = "8.1.1"
 tonic = "0.12.2"
 url = "2.5.2"
+uuid = { version = "1.10.0", features = ["serde"] }
 
 [dev-dependencies]
 mockito = "1.5.0"

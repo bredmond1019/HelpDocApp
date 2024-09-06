@@ -2,7 +2,7 @@
 
 use std::env;
 
-use crate::models::{Article, Collection};
+use crate::models::{article::NewArticle, collection::NewCollection, Article, Collection};
 use anyhow::{anyhow, Result};
 use reqwest;
 use serde_json::Value;
@@ -79,16 +79,19 @@ fn parse_collections(data: Value) -> Result<Vec<Collection>> {
 }
 
 fn parse_articles(data: Value) -> Result<Vec<Article>> {
+    let collectionId = data["articles"]["collectionId"]
+        .as_str()
+        .ok_or_else(|| anyhow!("Invalid collection id"))?;
     data["articles"]["items"]
         .as_array()
         .ok_or_else(|| anyhow!("Invalid articles data"))?
         .iter()
-        .map(parse_article)
+        .map(|article| parse_article(article, collectionId))
         .collect()
 }
 
-fn parse_collection(data: &Value) -> Result<Collection> {
-    Ok(Collection::new(
+fn parse_collection(data: &Value) -> Result<NewCollection> {
+    Ok(NewCollection::new(
         data["name"]
             .as_str()
             .ok_or_else(|| anyhow!("Invalid collection name"))?
@@ -98,14 +101,16 @@ fn parse_collection(data: &Value) -> Result<Collection> {
             .as_str()
             .ok_or_else(|| anyhow!("Invalid collection slug"))?
             .to_string(),
+        data["id"]
+            .as_str()
+            .ok_or_else(|| anyhow!("Invalid collection id"))?
+            .to_string(),
     ))
 }
 
-fn parse_article(data: &Value) -> Result<Article> {
-    Ok(Article::new(
-        data["collection_id"]
-            .as_i64()
-            .ok_or_else(|| anyhow!("Invalid collection id"))? as i32,
+fn parse_article(data: &Value, collectionId: ) -> Result<NewArticle> {
+    Ok(NewArticle::new(
+        collection.id,
         data["title"]
             .as_str()
             .ok_or_else(|| anyhow!("Invalid article title"))?
@@ -115,5 +120,9 @@ fn parse_article(data: &Value) -> Result<Article> {
             .ok_or_else(|| anyhow!("Invalid article slug"))?
             .to_string(),
         data["html_content"].as_str().map(|s| s.to_string()),
+        data["collection_id"]
+            .as_str()
+            .ok_or_else(|| anyhow!("Invalid collection id"))?
+            .to_string(),
     ))
 }

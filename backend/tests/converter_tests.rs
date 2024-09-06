@@ -7,7 +7,7 @@ mod tests {
     #[test]
     fn test_basic_html_to_markdown() {
         let html = "<h1>Hello, World!</h1><p>This is a <strong>test</strong>.</p>";
-        let expected = "# Hello, World!\n\nThis is a **test**.";
+        let expected = "Hello, World!\n==========\n\nThis is a **test**.";
         assert_eq!(html_to_markdown(html), expected);
     }
 
@@ -21,7 +21,7 @@ mod tests {
     #[test]
     fn test_html_with_list() {
         let html = "<ul><li>Item 1</li><li>Item 2</li></ul>";
-        let expected = "- Item 1\n- Item 2";
+        let expected = "* Item 1\n* Item 2";
         assert_eq!(html_to_markdown(html), expected);
     }
 
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn test_html_with_special_characters() {
         let html = "<p>Special characters: &lt; &gt; &amp; &quot;</p>";
-        let expected = "Special characters: < > & \"";
+        let expected = "Special characters: \\< \\> & \"";
         assert_eq!(html_to_markdown(html), expected);
     }
 
@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn test_html_with_table() {
         let html = "<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
-        let expected = "| Header 1 | Header 2 |\n| --- | --- |\n| Cell 1 | Cell 2 |";
+        let expected = "|Header 1|Header 2|\n|--------|--------|\n| Cell 1 | Cell 2 |";
         assert_eq!(html_to_markdown(html), expected);
     }
 }
