@@ -1,5 +1,5 @@
 use backend::data_processing;
-mod db;
+pub mod db;
 use backend::models;
 use backend::routes;
 
