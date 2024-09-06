@@ -17,6 +17,7 @@ use rust_bert::pipelines::sentence_embeddings::{
 
 use sqlx::types::time::OffsetDateTime;
 use sqlx::PgPool;
+use uuid::Uuid;
 
 pub async fn store_in_postgres(
     pool: &PgPool,
@@ -100,7 +101,7 @@ pub async fn generate_embeddings(
         let mut payload = HashMap::new();
         payload.insert(
             "article_id".to_string(),
-            QdrantValue::from(article.id as i64),
+            QdrantValue::from(article.id.to_string()),
         );
 
         let point = PointStruct {
