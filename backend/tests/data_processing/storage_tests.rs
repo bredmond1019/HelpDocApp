@@ -4,7 +4,10 @@ mod tests {
     use mockall::mock;
     use mockall::predicate::*;
 
-    // ... other imports and mocks ...
+    use chrono::Utc;
+    use dotenv::dotenv;
+    use sqlx::postgres::PgPoolOptions;
+    use std::env;
 
     mock! {
         SentenceEmbeddings {}
@@ -64,15 +67,6 @@ mod tests {
         assert_eq!(embeddings[0].article_id, 1);
         assert!(!embeddings[0].embedding_vector.is_empty());
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use chrono::Utc;
-    use dotenv::dotenv;
-    use sqlx::postgres::PgPoolOptions;
-    use std::env;
 
     async fn setup_test_db() -> PgPool {
         dotenv().ok();
