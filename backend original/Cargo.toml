@@ -1,0 +1,37 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.32", features = ["full", "rt-multi-thread"] }
+async-graphql = "6.0"
+async-graphql-actix-web = "6.0"
+actix-web = "4.4"
+serde = { version = "1.0", features = ["derive"] }
+dotenv = "0.15"
+sqlx = { version = "0.8.2", features = ["postgres", "runtime-tokio", "time"] }
+qdrant-client = "1.11.2"
+reqwest = { version = "0.12.7", features = ["json"] }
+serde_json = "1.0.128"
+html2md = "0.2.14"
+chrono = { version = "0.4.38", features = ["serde"] }
+anyhow = "1.0.86"
+scraper = "0.20.0"
+rust-bert = "0.22.0"
+tch = { version = "0.14.0", features = ["download-libtorch"] }
+torch-sys = { version = "=0.14.0" }
+rust_tokenizers = "8.1.1"
+tonic = "0.12.2"
+url = "2.5.2"
+
+[dev-dependencies]
+mockito = "1.5.0"
+
+[lib]
+name = "backend"
+path = "src/main.rs"
+
+[[bin]]
+name = "backend"
+path = "src/main.rs"

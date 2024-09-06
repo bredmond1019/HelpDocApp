@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO articles (id, collection_id, title, slug, html_content, markdown_content, version, last_edited_by, created_at, updated_at)\n            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)\n            ON CONFLICT (id) DO UPDATE\n            SET collection_id = EXCLUDED.collection_id,\n                title = EXCLUDED.title,\n                slug = EXCLUDED.slug,\n                html_content = EXCLUDED.html_content,\n                markdown_content = EXCLUDED.markdown_content,\n                version = EXCLUDED.version,\n                last_edited_by = EXCLUDED.last_edited_by,\n                updated_at = EXCLUDED.updated_at\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Text",
+        "Int4",
+        "Varchar",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3b472da401a4e5e604fed4f43ce92e8fff46c2846c492568d702558aa33deabc"
+}
