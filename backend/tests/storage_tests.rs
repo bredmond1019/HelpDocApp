@@ -1,22 +1,24 @@
 use mockall::mock;
 use mockall::predicate::*;
-use qdrant_client::Qdrant;
 
-use rust_bert::pipelines::sentence_embeddings::SentenceEmbeddingsModelType;
-
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use dotenv::dotenv;
 use sqlx::postgres::PgPoolOptions;
 use std::env;
+
+use backend::{
+    data_processing::{generate_embeddings, store_in_postgres},
+    models::{Article, Collection},
+};
+use qdrant_client::qdrant::PointStruct;
+use sqlx::PgPool;
+
 #[cfg(test)]
 mod tests {
-    use backend::{
-        data_processing::{generate_embeddings, store_in_postgres},
-        models::{Article, Collection},
-    };
-    use chrono::{DateTime, Utc};
-    use qdrant_client::qdrant::PointStruct;
-    use sqlx::{types::time::OffsetDateTime, PgPool};
+
+    use std::sync::Arc;
+
+    use backend::db::vector_db::init_test_vector_db;
 
     use super::*;
 
@@ -80,5 +82,75 @@ mod tests {
         );
         assert_eq!(stored_article.version, Some(articles[0].version));
         assert_eq!(stored_article.last_edited_by, articles[0].last_edited_by);
+    }
+
+    mock! {
+        pub Qdrant {
+            async fn upsert_points(&self, collection_name: String, points: Vec<PointStruct>) -> Result<(), Box<dyn std::error::Error>>;
+        }
+    }
+
+    mock! {
+        #[derive(Clone)]
+        pub SentenceEmbeddings {
+            fn encode<'a>(&self, input: &'a [&'a str]) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>>;
+        }
+    }
+
+    mock! {
+        pub SentenceEmbeddingsBuilder {
+            fn create_model(&self) -> Result<MockSentenceEmbeddings, Box<dyn std::error::Error>>;
+        }
+    }
+
+    #[tokio::test]
+    async fn test_generate_embeddings() {
+        let vector_db = Arc::new(
+            init_test_vector_db()
+                .await
+                .expect("Failed to initialize vector db"),
+        );
+
+        // Create test articles
+        let articles = vec![
+            Article {
+                id: 1,
+                collection_id: 1,
+                title: "Test Article 1".to_string(),
+                slug: "test-article-1".to_string(),
+                html_content: Some("<p>Test content 1</p>".to_string()),
+                markdown_content: Some("Test content 1".to_string()),
+                version: 1,
+                last_edited_by: Some("Test User".to_string()),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+            },
+            Article {
+                id: 2,
+                collection_id: 1,
+                title: "Test Article 2".to_string(),
+                slug: "test-article-2".to_string(),
+                html_content: Some("<p>Test content 2</p>".to_string()),
+                markdown_content: Some("Test content 2".to_string()),
+                version: 1,
+                last_edited_by: Some("Test User".to_string()),
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+            },
+        ];
+
+        // Call the function under test
+        let result = generate_embeddings(&vector_db, &articles).await;
+
+        // Assert the result
+        assert!(result.is_ok());
+        let embeddings = result.expect("Failed to generate embeddings");
+        assert_eq!(embeddings.len(), 2);
+
+        for (i, embedding) in embeddings.iter().enumerate() {
+            assert_eq!(embedding.id, articles[i].id);
+            assert_eq!(embedding.article_id, articles[i].id);
+            assert_eq!(embedding.embedding_vector, vec![0.1, 0.2, 0.3]);
+        }
     }
 }
