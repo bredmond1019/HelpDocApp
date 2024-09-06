@@ -30,8 +30,5 @@ mockito = "1.5.0"
 
 [lib]
 name = "backend"
-path = "src/main.rs"
+path = "src/lib.rs"
 
-[[bin]]
-name = "backend"
-path = "src/main.rs"

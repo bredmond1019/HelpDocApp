@@ -1,7 +1,7 @@
-pub mod data_processing;
+use backend::data_processing;
 mod db;
-pub mod models;
-mod routes;
+use backend::models;
+use backend::routes;
 
 use crate::data_processing::sync_processor::SyncProcessor;
 

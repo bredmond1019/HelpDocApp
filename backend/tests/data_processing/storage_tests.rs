@@ -1,3 +1,5 @@
+use backend::data_processing::storage;
+
 #[cfg(test)]
 mod tests {
     use super::*;
