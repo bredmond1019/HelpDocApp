@@ -1,6 +1,4 @@
 use backend::data_processing;
-pub mod db;
-use backend::models;
 use backend::routes;
 
 use crate::data_processing::sync_processor::SyncProcessor;
