@@ -1,5 +1,8 @@
 use mockall::mock;
 use mockall::predicate::*;
+use std::sync::Arc;
+
+use backend::db::vector_db::init_test_vector_db;
 
 use chrono::Utc;
 use dotenv::dotenv;
@@ -15,12 +18,6 @@ use sqlx::PgPool;
 
 #[cfg(test)]
 mod tests {
-
-    use std::sync::Arc;
-
-    use backend::db::vector_db::init_test_vector_db;
-
-    use super::*;
 
     async fn setup_test_db() -> PgPool {
         dotenv().ok();
@@ -82,25 +79,6 @@ mod tests {
         );
         assert_eq!(stored_article.version, Some(articles[0].version));
         assert_eq!(stored_article.last_edited_by, articles[0].last_edited_by);
-    }
-
-    mock! {
-        pub Qdrant {
-            async fn upsert_points(&self, collection_name: String, points: Vec<PointStruct>) -> Result<(), Box<dyn std::error::Error>>;
-        }
-    }
-
-    mock! {
-        #[derive(Clone)]
-        pub SentenceEmbeddings {
-            fn encode<'a>(&self, input: &'a [&'a str]) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>>;
-        }
-    }
-
-    mock! {
-        pub SentenceEmbeddingsBuilder {
-            fn create_model(&self) -> Result<MockSentenceEmbeddings, Box<dyn std::error::Error>>;
-        }
     }
 
     #[tokio::test]
