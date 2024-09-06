@@ -1,0 +1,112 @@
+{
+  "collection": {
+    "id": "5214c83d45667acd25394b53",
+    "siteId": "52404efc4566740003092640",
+    "number": 33,
+    "slug": "my-collection",
+    "visibility": "public",
+    "order": 1,
+    "name": "My Collection",
+    "description": "Description of my collection",
+    "publicUrl": "https://my-docs.helpscoutdocs.com/collection/1-test",
+    "articleCount": 3,
+    "publishedArticleCount": 1,
+    "createdBy": 73423,
+    "updatedBy": 73423,
+    "createdAt": "2013-08-21T14:01:33Z",
+    "updatedAt": "2013-08-21T14:01:33Z"
+  },
+  "article": {
+    "id": "521632244566c845e582652d",
+    "number": 125,
+    "collectionId": "5214c77c45667acd25394b51",
+    "slug": "my-article",
+    "status": "published",
+    "hasDraft": false,
+    "name": "My Article",
+    "text": "This is the text of the article.",
+    "categories": [
+      "5214c77d45667acd25394b52"
+    ],
+    "related": [
+      "521632244566c845e582652b",
+      "521632244566c845e582652c"
+    ],
+    "publicUrl": "https://docs.helpscout.net/article/100-my-article",
+    "popularity": 4.3,
+    "viewCount": 237,
+    "createdBy": 73423,
+    "updatedBy": 73423,
+    "createdAt": "2013-08-22T15:45:40Z",
+    "updatedAt": "2013-08-22T21:40:56Z",
+    "lastPublishedAt": "2013-08-22T21:40:56Z"
+  },
+  "listArticles": {
+    "articles": {
+      "page": 1,
+      "pages": 1,
+      "count": 4,
+      "items": [
+        {
+          "id": "5215163545667acd25394b5c",
+          "number": 121,
+          "collectionId": "5214c77c45667acd25394b51",
+          "status": "published",
+          "hasDraft": false,
+          "name": "My Article",
+          "publicUrl": "https://docs.helpscout.net/article/100-my-article",
+          "popularity": 4.3,
+          "viewCount": 237,
+          "createdBy": 73423,
+          "updatedBy": null,
+          "createdAt": "2013-08-21T19:34:13Z",
+          "updatedAt": null,
+          "lastPublishedAt": "2013-08-21T19:34:13Z"
+        }
+      ]
+    }
+  },
+  "listCollection": {
+    "collections": {
+      "page": 1,
+      "pages": 1,
+      "count": 4,
+      "items": [
+        {
+          "id": "5214c83d45667acd25394b53",
+          "siteId": "52404efc4566740003092640",
+          "number": 33,
+          "slug": "my-collection",
+          "visibility": "public",
+          "order": 1,
+          "name": "My Collection",
+          "description": "Description of my collection",
+          "publicUrl": "https://my-docs.helpscoutdocs.com/collection/1-test",
+          "articleCount": 3,
+          "publishedArticleCount": 1,
+          "createdBy": 73423,
+          "updatedBy": 73423,
+          "createdAt": "2013-08-21T14:01:33Z",
+          "updatedAt": "2013-08-21T14:01:33Z"
+        }
+      ]
+    }
+  }
+}
+
+/*
+Let's do this all with a rust backend.
+Here are the URLs I'll need to hit:
+List Collections
+REST Method: GET
+URL: https://docsapi.helpscout.net/v1/collections
+Get Collection
+REST Method: GET
+URL: https://docsapi.helpscout.net/v1/collections/{id}
+List Articles
+REST Method: GET
+URL: https://docsapi.helpscout.net/v1/collections/{id}/articles
+Get Article
+REST Method: GET
+URL: https://docsapi.helpscout.net/v1/articles/{id}
+*/
