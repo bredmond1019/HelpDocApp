@@ -2,19 +2,19 @@ use crate::data_processing::{
     fetcher::ApiClient, generate_embeddings, html_to_markdown, store_in_postgres,
 };
 use crate::db::vector_db::init_vector_db;
+use crate::db::DbPool;
 use crate::models::{Article, Collection};
 use anyhow::Result;
-use sqlx::PgPool;
 use std::sync::Arc;
 
 pub struct SyncProcessor {
     api_client: ApiClient,
-    db_pool: Arc<PgPool>,
+    db_pool: Arc<DbPool>,
     vector_db: Arc<qdrant_client::Qdrant>,
 }
 
 impl SyncProcessor {
-    pub async fn new(db_pool: Arc<PgPool>) -> Result<Self> {
+    pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
         let api_client = ApiClient::new().map_err(|e| anyhow::anyhow!("{}", e))?;
         let vector_db = Arc::new(
             init_vector_db()

@@ -1,4 +1,5 @@
 use backend::data_processing;
+use backend::db::DbPool;
 use backend::routes;
 
 use crate::data_processing::sync_processor::SyncProcessor;
@@ -15,15 +16,7 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env::set_var("RUST_BACKTRACE", "1");
 
-    // Initialize PostgreSQL connection
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = Arc::new(
-        PgPoolOptions::new()
-            .max_connections(5)
-            .connect(&database_url)
-            .await
-            .expect("Failed to connect to database"),
-    );
+    let pool: DbPool = Arc::new(db::init_pool());
 
     // Create the sync processor
     let sync_processor = Arc::new(

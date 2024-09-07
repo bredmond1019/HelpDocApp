@@ -1,11 +1,15 @@
 use chrono::{DateTime, Utc};
+use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Queryable, Selectable, Insertable)]
+#[diesel(table_name = crate::schema::articles)]
 pub struct Article {
     pub id: Uuid,
     pub collection_id: Uuid,
+    pub helpscout_collection_id: String,
+    pub helpscout_article_id: String,
     pub title: String,
     pub slug: String,
     pub html_content: Option<String>,
@@ -14,37 +18,54 @@ pub struct Article {
     pub last_edited_by: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub helpscout_collection_id: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct NewArticle {
-    pub collection_id: Uuid,
-    pub title: String,
-    pub slug: String,
-    pub html_content: Option<String>,
-    pub helpscout_collection_id: String,
-}
-
-impl NewArticle {
+impl Article {
     pub fn new(
         collection_id: Uuid,
+        helpscout_collection_id: String,
+        helpscout_article_id: String,
         title: String,
         slug: String,
         html_content: Option<String>,
-        helpscout_collection_id: String,
     ) -> Self {
-        NewArticle {
+        Article {
+            id: Uuid::new_v4(),
             collection_id,
+            helpscout_collection_id,
+            helpscout_article_id,
             title,
             slug,
             html_content,
-            helpscout_collection_id,
+            markdown_content: None,
+            version: 0,
+            last_edited_by: None,
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
         }
     }
+    pub fn store(&self, conn: &mut PgConnection) -> Result<(), diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
 
-    pub fn from_json(json: &str) -> Result<Self, serde_json::Error> {
-        serde_json::from_str(json)
+        diesel::insert_into(articles)
+            .values(self)
+            .on_conflict(id)
+            .do_update()
+            .set((
+                collection_id.eq(self.collection_id),
+                title.eq(&self.title),
+                slug.eq(&self.slug),
+                html_content.eq(&self.html_content),
+                markdown_content.eq(&self.markdown_content),
+                version.eq(self.version),
+                last_edited_by.eq(&self.last_edited_by),
+                updated_at.eq(self.updated_at),
+                helpscout_collection_id.eq(&self.helpscout_collection_id),
+                helpscout_article_id.eq(&self.helpscout_article_id),
+            ))
+            .execute(conn)?;
+
+        Ok(())
     }
 }
 
