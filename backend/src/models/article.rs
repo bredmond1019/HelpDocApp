@@ -69,13 +69,74 @@ impl Article {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ArticleJson {
+#[derive(Debug, Deserialize)]
+pub struct ArticleResponse {
+    pub article_data: ArticleData,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArticleData {
+    pub page: i32,
+    pub pages: i32,
+    pub count: i32,
+    pub article_refs: Vec<ArticleRef>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArticleRef {
     pub id: String,
+    pub number: i32,
     #[serde(rename = "collectionId")]
     pub collection_id: String,
-    pub title: String,
+    pub status: String,
+    #[serde(rename = "hasDraft")]
+    pub has_draft: bool,
+    pub name: String,
+    #[serde(rename = "publicUrl")]
+    pub public_url: String,
+    pub popularity: f64,
+    #[serde(rename = "viewCount")]
+    pub view_count: i32,
+    #[serde(rename = "createdBy")]
+    pub created_by: i32,
+    #[serde(rename = "updatedBy")]
+    pub updated_by: Option<i32>,
+    #[serde(rename = "createdAt")]
+    pub created_at: String,
+    #[serde(rename = "updatedAt")]
+    pub updated_at: Option<String>,
+    #[serde(rename = "lastPublishedAt")]
+    pub last_published_at: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArticleFullResponse {
+    pub article: ArticleFull,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ArticleFull {
+    pub id: String,
+    pub number: i32,
+    #[serde(rename = "collectionId")]
+    pub collection_id: String,
     pub slug: String,
+    pub status: String,
+    #[serde(rename = "hasDraft")]
+    pub has_draft: bool,
+    pub name: String,
+    pub text: String,
+    pub categories: Vec<String>,
+    pub related: Vec<String>,
+    #[serde(rename = "publicUrl")]
+    pub public_url: String,
+    pub popularity: f64,
+    #[serde(rename = "viewCount")]
+    pub view_count: i32,
+    #[serde(rename = "createdBy")]
+    pub created_by: i32,
+    #[serde(rename = "updatedBy")]
+    pub updated_by: i32,
     #[serde(rename = "createdAt")]
     pub created_at: String,
     #[serde(rename = "updatedAt")]

@@ -1,11 +1,15 @@
 // File: src/data_processing/fetcher.rs
 
+use anyhow::Result;
+use reqwest;
+use serde_json::{from_value, Value};
 use std::env;
 
-use crate::models::{Article, Collection};
-use anyhow::{anyhow, Result};
-use reqwest;
-use serde_json::Value;
+use crate::models::{
+    article::{ArticleFull, ArticleFullResponse, ArticleRef, ArticleResponse},
+    collection::{CollectionItem, CollectionResponse},
+    Article, Collection,
+};
 
 pub struct ApiClient {
     client: reqwest::Client,
@@ -37,15 +41,16 @@ impl ApiClient {
         Ok(response)
     }
 
-    pub async fn list_collections(&self) -> Result<Vec<Collection>> {
+    pub async fn get_list_collections(&self) -> Result<Vec<Collection>> {
         let data = self.get("/v1/collections").await?;
-        let pages = data["collections"]["pages"]
-            .as_i64()
-            .expect("Invalid pages data") as usize;
+        let collection_response: CollectionResponse = from_value(data)?;
+        let collection_data = collection_response.collection_data;
+
         let mut collections = Vec::new();
 
-        collections.extend(parse_collections(data)?);
+        collections.extend(parse_collections(collection_data.collections)?);
 
+        // let pages = collection_data.pages;
         // for page in 1..=pages {
         //     let data = self.get(&format!("/v1/collections?page={}", page)).await?;
         //     collections.extend(parse_collections(data)?);
@@ -55,23 +60,26 @@ impl ApiClient {
 
     pub async fn get_collection(&self, id: &str) -> Result<Collection> {
         let data = self.get(&format!("/v1/collections/{}", id)).await?;
-        parse_collection(&data)
+        let collection_item: CollectionItem = from_value(data)?;
+        parse_collection(&collection_item)
     }
 
-    pub async fn list_articles(&self, helpscout_collection_id: &str) -> Result<Vec<Article>> {
+    pub async fn get_list_articles(&self, collection: &Collection) -> Result<Vec<ArticleRef>> {
         let data = self
             .get(&format!(
                 "/v1/collections/{}/articles",
-                helpscout_collection_id
+                collection.helpscout_collection_id
             ))
             .await?;
-        let pages = data["articles"]["pages"]
-            .as_i64()
-            .expect("Invalid pages data") as usize;
-        let mut articles = Vec::new();
 
-        articles.extend(parse_articles(data)?);
+        let api_response: ArticleResponse = from_value(data)?;
+        let article_data = api_response.article_data;
 
+        let mut articles_refs: Vec<ArticleRef> = Vec::new();
+
+        articles_refs.extend(article_data.article_refs);
+
+        // let pages = article_data.pages;
         // for page in 1..=pages {
         //     let data = self
         //         .get(&format!(
@@ -81,69 +89,38 @@ impl ApiClient {
         //         .await?;
         //     articles.extend(parse_articles(data)?);
         // }
-        Ok(articles)
+        Ok(articles_refs)
     }
 
-    pub async fn get_article(&self, id: &str) -> Result<Article> {
+    pub async fn get_article(&self, id: &str, collection: &Collection) -> Result<Article> {
         let data = self.get(&format!("/v1/articles/{}", id)).await?;
-        parse_article(&data)
+        let api_response: ArticleFullResponse = from_value(data)?;
+        let article = api_response.article;
+        parse_article(&article, collection)
     }
 }
 
-fn parse_collections(data: Value) -> Result<Vec<Collection>> {
-    data["collections"]["items"]
-        .as_array()
-        .ok_or_else(|| anyhow!("Invalid collections data"))?
-        .iter()
-        .map(parse_collection)
-        .collect()
+fn parse_collections(collections: Vec<CollectionItem>) -> Result<Vec<Collection>> {
+    collections.iter().map(parse_collection).collect()
 }
 
-fn parse_articles(data: Value) -> Result<Vec<Article>> {
-    let collectionId = data["articles"]["collectionId"]
-        .as_str()
-        .ok_or_else(|| anyhow!("Invalid collection id"))?;
-    data["articles"]["items"]
-        .as_array()
-        .ok_or_else(|| anyhow!("Invalid articles data"))?
-        .iter()
-        .map(|article| parse_article(article, collectionId))
-        .collect()
-}
-
-fn parse_collection(data: &Value) -> Result<Collection> {
+fn parse_collection(collection: &CollectionItem) -> Result<Collection> {
     Ok(Collection::new(
-        data["id"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid collection id"))?
-            .to_string(),
-        data["name"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid collection name"))?
-            .to_string(),
-        data["description"].as_str().map(|s| s.to_string()),
-        data["slug"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid collection slug"))?
-            .to_string(),
+        collection.id.clone(),
+        collection.name.clone(),
+        collection.description.clone(),
+        collection.slug.clone(),
     ))
 }
 
-fn parse_article(data: &Value, collection_id: &str) -> Result<Article> {
-    Ok(Article::new(
-        collection_id,
-        data["title"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid article title"))?
-            .to_string(),
-        data["slug"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid article slug"))?
-            .to_string(),
-        data["html_content"].as_str().map(|s| s.to_string()),
-        data["collection_id"]
-            .as_str()
-            .ok_or_else(|| anyhow!("Invalid collection id"))?
-            .to_string(),
-    ))
+fn parse_article(helpscout_article: &ArticleFull, collection: &Collection) -> Result<Article> {
+    let article = Article::new(
+        collection.id,
+        helpscout_article.collection_id.clone(),
+        helpscout_article.id.clone(),
+        helpscout_article.name.clone(),
+        helpscout_article.slug.clone(),
+        Some(helpscout_article.text.clone()),
+    );
+    Ok(article)
 }

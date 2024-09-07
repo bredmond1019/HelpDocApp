@@ -27,7 +27,7 @@ impl SyncProcessor {
     }
 
     pub async fn sync_all(&self) -> Result<()> {
-        let collections = self.api_client.list_collections().await?;
+        let collections = self.api_client.get_list_collections().await?;
 
         for collection in collections {
             self.process_collection(&collection).await?;
@@ -41,16 +41,13 @@ impl SyncProcessor {
 
         collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
 
-        let articles = self
-            .api_client
-            .list_articles(&collection.id.to_string())
-            .await?;
+        let article_refs = self.api_client.get_list_articles(collection).await?;
         let mut processed_articles = Vec::new();
 
-        for article_ref in articles {
+        for article_ref in article_refs {
             let full_article = self
                 .api_client
-                .get_article(&article_ref.id.to_string())
+                .get_article(&article_ref.id.to_string(), collection)
                 .await?;
             let processed_article = self.process_article(full_article).await?;
             processed_articles.push(processed_article);
@@ -61,7 +58,11 @@ impl SyncProcessor {
             .await
             .map_err(|e| anyhow::anyhow!("Failed to generate embeddings: {}", e))?;
 
-        // TODO: Store embeddings in the database if needed
+        embeddings.iter().for_each(|embedding| {
+            embedding
+                .store(&mut self.db_pool.get().expect("Failed to get DB connection"))
+                .expect("Failed to store embedding");
+        });
 
         Ok(())
     }
