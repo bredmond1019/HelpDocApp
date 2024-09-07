@@ -1,6 +1,4 @@
-use crate::data_processing::{
-    fetcher::ApiClient, generate_embeddings, html_to_markdown, store_in_postgres,
-};
+use crate::data_processing::{fetcher::ApiClient, generate_embeddings, html_to_markdown};
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::models::{Article, Collection};
@@ -29,7 +27,7 @@ impl SyncProcessor {
     }
 
     pub async fn sync_all(&self) -> Result<()> {
-        let collections = self.api_client.list_collections(None).await?;
+        let collections = self.api_client.list_collections().await?;
 
         for collection in collections {
             self.process_collection(&collection).await?;
@@ -41,12 +39,11 @@ impl SyncProcessor {
     async fn process_collection(&self, collection: &Collection) -> Result<()> {
         println!("Processing collection: {}", collection.name);
 
-        // Store the collection in the database
-        store_in_postgres(&self.db_pool, collection, &[]).await?;
+        collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
 
         let articles = self
             .api_client
-            .list_articles(&collection.id.to_string(), None)
+            .list_articles(&collection.id.to_string())
             .await?;
         let mut processed_articles = Vec::new();
 
@@ -58,9 +55,6 @@ impl SyncProcessor {
             let processed_article = self.process_article(full_article).await?;
             processed_articles.push(processed_article);
         }
-
-        // Store all articles for this collection
-        store_in_postgres(&self.db_pool, collection, &processed_articles).await?;
 
         // Generate and store embeddings
         let embeddings = generate_embeddings(&self.vector_db, &processed_articles)
@@ -79,6 +73,8 @@ impl SyncProcessor {
         if let Some(html_content) = &article.html_content {
             article.markdown_content = Some(html_to_markdown(html_content));
         }
+
+        article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
 
         Ok(article)
     }

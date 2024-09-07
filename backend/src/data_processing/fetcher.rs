@@ -37,10 +37,20 @@ impl ApiClient {
         Ok(response)
     }
 
-    pub async fn list_collections(&self, page: Option<i32>) -> Result<Vec<Collection>> {
-        let page_param = page.map(|p| format!("&page={}", p)).unwrap_or_default();
-        let data = self.get(&format!("/v1/collections?{}", page_param)).await?;
-        parse_collections(data)
+    pub async fn list_collections(&self) -> Result<Vec<Collection>> {
+        let data = self.get("/v1/collections").await?;
+        let pages = data["collections"]["pages"]
+            .as_i64()
+            .expect("Invalid pages data") as usize;
+        let mut collections = Vec::new();
+
+        collections.extend(parse_collections(data)?);
+
+        // for page in 1..=pages {
+        //     let data = self.get(&format!("/v1/collections?page={}", page)).await?;
+        //     collections.extend(parse_collections(data)?);
+        // }
+        Ok(collections)
     }
 
     pub async fn get_collection(&self, id: &str) -> Result<Collection> {
@@ -48,19 +58,30 @@ impl ApiClient {
         parse_collection(&data)
     }
 
-    pub async fn list_articles(
-        &self,
-        collection_id: &str,
-        page: Option<i32>,
-    ) -> Result<Vec<Article>> {
-        let page_param = page.map(|p| format!("&page={}", p)).unwrap_or_default();
+    pub async fn list_articles(&self, helpscout_collection_id: &str) -> Result<Vec<Article>> {
         let data = self
             .get(&format!(
-                "/v1/collections/{}/articles?{}",
-                collection_id, page_param
+                "/v1/collections/{}/articles",
+                helpscout_collection_id
             ))
             .await?;
-        parse_articles(data)
+        let pages = data["articles"]["pages"]
+            .as_i64()
+            .expect("Invalid pages data") as usize;
+        let mut articles = Vec::new();
+
+        articles.extend(parse_articles(data)?);
+
+        // for page in 1..=pages {
+        //     let data = self
+        //         .get(&format!(
+        //             "/v1/collections/{}/articles?page={}",
+        //             helpscout_collection_id, page
+        //         ))
+        //         .await?;
+        //     articles.extend(parse_articles(data)?);
+        // }
+        Ok(articles)
     }
 
     pub async fn get_article(&self, id: &str) -> Result<Article> {
@@ -108,9 +129,9 @@ fn parse_collection(data: &Value) -> Result<Collection> {
     ))
 }
 
-fn parse_article(data: &Value, collectionId: &str) -> Result<Article> {
+fn parse_article(data: &Value, collection_id: &str) -> Result<Article> {
     Ok(Article::new(
-        collectionId,
+        collection_id,
         data["title"]
             .as_str()
             .ok_or_else(|| anyhow!("Invalid article title"))?

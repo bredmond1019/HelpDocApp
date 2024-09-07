@@ -48,11 +48,16 @@ diesel::table! {
     }
 }
 
+diesel::table! {
+    embeddings (id) {
+        id -> Uuid,
+        article_id -> Uuid,
+        embedding_vector -> Array<Float4>,
+    }
+}
+
 diesel::joinable!(articles -> collections (collection_id));
 diesel::joinable!(content_versions -> articles (article_id));
+diesel::joinable!(embeddings -> articles (article_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    articles,
-    collections,
-    content_versions,
-);
+diesel::allow_tables_to_appear_in_same_query!(articles, collections, content_versions, embeddings,);
