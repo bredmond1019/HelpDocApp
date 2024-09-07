@@ -60,7 +60,7 @@ impl From<CollectionItem> for Collection {
 
 #[derive(Debug, Deserialize)]
 pub struct CollectionResponse {
-    pub collection_data: CollectionsData,
+    pub collections: CollectionsData,
 }
 
 #[derive(Debug, Deserialize)]
@@ -68,7 +68,7 @@ pub struct CollectionsData {
     pub page: i32,
     pub pages: i32,
     pub count: i32,
-    pub collections: Vec<CollectionItem>,
+    pub items: Vec<CollectionItem>,
 }
 
 #[derive(Debug, Deserialize)]

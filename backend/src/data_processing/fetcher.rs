@@ -46,11 +46,11 @@ impl ApiClient {
     pub async fn get_list_collections(&self) -> Result<Vec<Collection>> {
         let data = self.get("/v1/collections").await?;
         let collection_response: CollectionResponse = from_value(data)?;
-        let collection_data = collection_response.collection_data;
+        let collection_data = collection_response.collections;
 
         let mut collections = Vec::new();
 
-        collections.extend(parse_collections(collection_data.collections)?);
+        collections.extend(parse_collections(collection_data.items)?);
 
         // let pages = collection_data.pages;
         // for page in 1..=pages {
@@ -62,7 +62,7 @@ impl ApiClient {
 
     pub async fn get_collection(&self, id: &str) -> Result<Collection> {
         let data = self.get(&format!("/v1/collections/{}", id)).await?;
-        let collection_item: CollectionItem = from_value(data)?;
+        let collection_item: CollectionItem = from_value(data["collection"].clone())?;
         parse_collection(&collection_item)
     }
 
@@ -75,11 +75,11 @@ impl ApiClient {
             .await?;
 
         let api_response: ArticleResponse = from_value(data)?;
-        let article_data = api_response.article_data;
+        let article_data = api_response.articles;
 
         let mut articles_refs: Vec<ArticleRef> = Vec::new();
 
-        articles_refs.extend(article_data.article_refs);
+        articles_refs.extend(article_data.items);
 
         // let pages = article_data.pages;
         // for page in 1..=pages {

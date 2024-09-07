@@ -3,18 +3,19 @@ use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::models::{Article, Collection};
 use anyhow::Result;
+use qdrant_client::qdrant::UpsertPointsBuilder;
 use std::sync::Arc;
 
 pub struct SyncProcessor {
     api_client: ApiClient,
     db_pool: Arc<DbPool>,
-    vector_db: Arc<qdrant_client::Qdrant>,
+    vector_db_client: Arc<qdrant_client::Qdrant>,
 }
 
 impl SyncProcessor {
     pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
         let api_client = ApiClient::new(None, None).map_err(|e| anyhow::anyhow!("{}", e))?;
-        let vector_db = Arc::new(
+        let vector_db_client = Arc::new(
             init_vector_db()
                 .await
                 .map_err(|e| anyhow::anyhow!("{}", e))?,
@@ -22,7 +23,7 @@ impl SyncProcessor {
         Ok(Self {
             api_client,
             db_pool,
-            vector_db,
+            vector_db_client,
         })
     }
 
@@ -54,9 +55,15 @@ impl SyncProcessor {
         }
 
         // Generate and store embeddings
-        let embeddings = generate_embeddings(&self.vector_db, &processed_articles)
+        let embeddings_and_points = generate_embeddings(processed_articles.clone())
             .await
             .map_err(|e| anyhow::anyhow!("Failed to generate embeddings: {}", e))?;
+
+        let (embeddings, points) = embeddings_and_points;
+
+        self.vector_db_client
+            .upsert_points(UpsertPointsBuilder::new("article_embeddings", points))
+            .await?;
 
         embeddings.iter().for_each(|embedding| {
             embedding

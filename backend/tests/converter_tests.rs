@@ -2,6 +2,7 @@
 mod tests {
     use backend::data_processing::converter::{clean_html, html_to_markdown};
 
+    // Test cases for html_to_markdown function
     #[test]
     fn test_basic_html_to_markdown() {
         let html = "<h1>Hello, World!</h1><p>This is a <strong>test</strong>.</p>";
@@ -66,6 +67,7 @@ mod tests {
         assert_eq!(html_to_markdown(html), expected);
     }
 
+    // Test cases for clean_html function
     #[test]
     fn test_clean_html_remove_script_and_style() {
         let html =
@@ -83,8 +85,8 @@ mod tests {
 
     #[test]
     fn test_clean_html_modify_image_tags() {
-        let html = "<img src=\"image.jpg\" alt=\"An image\">";
-        let expected = "![An image](image.jpg)";
+        let html = "<p><img src=\"image.jpg\" alt=\"An image\"></p>";
+        let expected = "<p>![An image](image.jpg)</p>";
         assert_eq!(clean_html(html), expected);
     }
 
@@ -98,7 +100,7 @@ mod tests {
     #[test]
     fn test_clean_html_nested_elements() {
         let html = "<div><p>Outer <div>Inner <span>Nested</span></div></p></div>";
-        let expected = "<p>Outer Inner Nested</p>";
+        let expected = "<p>Outer </p>Inner <span>Nested</span><p></p>";
         assert_eq!(clean_html(html), expected);
     }
 

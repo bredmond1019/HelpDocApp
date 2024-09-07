@@ -18,7 +18,7 @@ pub fn clean_html(html: &str) -> String {
     let mut cleaned_html = fragment
         .root_element()
         .select(&script_style_selector)
-        .fold(fragment.root_element().html(), |acc, element| {
+        .fold(fragment.root_element().inner_html(), |acc, element| {
             acc.replace(&element.html(), "")
         });
 
@@ -45,5 +45,5 @@ pub fn clean_html(html: &str) -> String {
         cleaned_html = cleaned_html.replace(&pre.html(), &format!("<pre>{}</pre>", preserved));
     }
 
-    cleaned_html
+    cleaned_html.trim().to_string()
 }

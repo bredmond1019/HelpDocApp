@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, Queryable, Selectable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::articles)]
 pub struct Article {
     pub id: Uuid,
@@ -71,7 +71,7 @@ impl Article {
 
 #[derive(Debug, Deserialize)]
 pub struct ArticleResponse {
-    pub article_data: ArticleData,
+    pub articles: ArticleData,
 }
 
 #[derive(Debug, Deserialize)]
@@ -79,7 +79,7 @@ pub struct ArticleData {
     pub page: i32,
     pub pages: i32,
     pub count: i32,
-    pub article_refs: Vec<ArticleRef>,
+    pub items: Vec<ArticleRef>,
 }
 
 #[derive(Debug, Deserialize)]
