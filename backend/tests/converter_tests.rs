@@ -1,8 +1,6 @@
-use backend::data_processing::converter::html_to_markdown;
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use backend::data_processing::converter::{clean_html, html_to_markdown};
 
     #[test]
     fn test_basic_html_to_markdown() {
@@ -66,5 +64,48 @@ mod tests {
         let html = "<table><tr><th>Header 1</th><th>Header 2</th></tr><tr><td>Cell 1</td><td>Cell 2</td></tr></table>";
         let expected = "|Header 1|Header 2|\n|--------|--------|\n| Cell 1 | Cell 2 |";
         assert_eq!(html_to_markdown(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_remove_script_and_style() {
+        let html =
+            "<script>alert('test');</script><style>body { color: red; }</style><p>Content</p>";
+        let expected = "<p>Content</p>";
+        assert_eq!(clean_html(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_convert_div_to_contents() {
+        let html = "<div><p>This is a paragraph</p></div>";
+        let expected = "<p>This is a paragraph</p>";
+        assert_eq!(clean_html(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_modify_image_tags() {
+        let html = "<img src=\"image.jpg\" alt=\"An image\">";
+        let expected = "![An image](image.jpg)";
+        assert_eq!(clean_html(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_preserve_whitespace_in_pre() {
+        let html = "<pre>Line 1\nLine 2\n  Indented</pre>";
+        let expected = "<pre>Line 1&#10;Line 2&#10;  Indented</pre>";
+        assert_eq!(clean_html(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_nested_elements() {
+        let html = "<div><p>Outer <div>Inner <span>Nested</span></div></p></div>";
+        let expected = "<p>Outer Inner Nested</p>";
+        assert_eq!(clean_html(html), expected);
+    }
+
+    #[test]
+    fn test_clean_html_multiple_modifications() {
+        let html = "<div><script>alert('test');</script><p>Content</p><img src=\"image.jpg\" alt=\"An image\"><pre>Code\n  Block</pre></div>";
+        let expected = "<p>Content</p>![An image](image.jpg)<pre>Code&#10;  Block</pre>";
+        assert_eq!(clean_html(html), expected);
     }
 }

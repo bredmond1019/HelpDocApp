@@ -5,7 +5,7 @@ pub fn html_to_markdown(html: &str) -> String {
     html2md::parse_html(&cleaned_html)
 }
 
-fn clean_html(html: &str) -> String {
+pub fn clean_html(html: &str) -> String {
     let fragment = Html::parse_fragment(html);
 
     // Create selectors for elements we want to remove or modify

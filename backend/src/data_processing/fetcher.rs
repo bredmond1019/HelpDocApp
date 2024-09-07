@@ -18,9 +18,11 @@ pub struct ApiClient {
 }
 
 impl ApiClient {
-    pub fn new() -> Result<Self> {
-        let base_url = env::var("API_BASE_URL").expect("API_BASE_URL must be set");
-        let api_key = env::var("API_KEY").expect("API_KEY must be set");
+    pub fn new(base_url: Option<String>, api_key: Option<String>) -> Result<Self> {
+        let base_url =
+            base_url.unwrap_or(env::var("API_BASE_URL").expect("API_BASE_URL must be set"));
+        let api_key = api_key.unwrap_or(env::var("API_KEY").expect("API_KEY must be set"));
+
         Ok(Self {
             client: reqwest::Client::new(),
             base_url,

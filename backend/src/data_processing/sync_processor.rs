@@ -13,7 +13,7 @@ pub struct SyncProcessor {
 
 impl SyncProcessor {
     pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
-        let api_client = ApiClient::new().map_err(|e| anyhow::anyhow!("{}", e))?;
+        let api_client = ApiClient::new(None, None).map_err(|e| anyhow::anyhow!("{}", e))?;
         let vector_db = Arc::new(
             init_vector_db()
                 .await
@@ -45,11 +45,11 @@ impl SyncProcessor {
         let mut processed_articles = Vec::new();
 
         for article_ref in article_refs {
-            let full_article = self
+            let article = self
                 .api_client
                 .get_article(&article_ref.id.to_string(), collection)
                 .await?;
-            let processed_article = self.process_article(full_article).await?;
+            let processed_article = self.process_article(article).await?;
             processed_articles.push(processed_article);
         }
 
