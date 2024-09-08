@@ -1,14 +1,14 @@
 // File: src/data_processing/mod.rs
 
-pub mod converter;
+pub mod api_client;
+pub mod convert_html;
 pub mod data_processor;
-pub mod fetcher;
 pub mod generate_embedding;
 
-pub use converter::html_to_markdown;
+pub use convert_html::html_to_markdown;
 pub use generate_embedding::{generate_embeddings, store_embedding};
 
-use crate::data_processor::fetcher::ApiClient;
+use crate::data_processor::api_client::ApiClient;
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::jobs::Job;

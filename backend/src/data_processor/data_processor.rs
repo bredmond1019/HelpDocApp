@@ -1,4 +1,4 @@
-use crate::data_processor::{fetcher::ApiClient, html_to_markdown};
+use crate::data_processor::{api_client::ApiClient, html_to_markdown};
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::jobs::Job;
