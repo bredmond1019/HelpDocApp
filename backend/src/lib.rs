@@ -1,4 +1,4 @@
-pub mod data_processing;
+pub mod data_processor;
 pub mod db;
 pub mod errors;
 pub mod jobs;

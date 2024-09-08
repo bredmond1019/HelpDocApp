@@ -1,15 +1,13 @@
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
-use backend::data_processing::data_processor;
 use dotenv::dotenv;
-use std::{env, sync::Arc};
+use std::sync::Arc;
 
 use backend::db::DbPool;
-use backend::jobs::enqueue;
 use backend::jobs::JobQueue;
 use backend::routes;
-use backend::{data_processing::data_processor::DataProcessor, db};
+use backend::{data_processor::data_processor::DataProcessor, db};
 
 use log::{error, info};
 use log4rs;

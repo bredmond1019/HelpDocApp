@@ -4,7 +4,7 @@ use tokio::sync::mpsc;
 use tokio::sync::Mutex as TokioMutex;
 use tokio::time::sleep;
 
-use crate::{data_processing::data_processor::DataProcessor, jobs::JobStatus};
+use crate::{data_processor::data_processor::DataProcessor, jobs::JobStatus};
 
 use super::{Job, JobQueue};
 
@@ -32,7 +32,7 @@ impl JobQueue {
                                 .await
                                 .expect("Failed to process job"); // TODO: Handle this better
 
-                            Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
+                            Self::update_job_status(&job_statuses, job_id, JobStatus::Running);
                             info!("Starting sync job: {}", job_id);
 
                             match result {
@@ -40,7 +40,7 @@ impl JobQueue {
                                     info!("Sync job completed successfully: {}", job_id);
                                     Self::update_job_status(
                                         &job_statuses,
-                                        &job_id,
+                                        job_id,
                                         JobStatus::Completed,
                                     );
                                 }
@@ -49,7 +49,7 @@ impl JobQueue {
                                     error!("{}", error_msg);
                                     Self::update_job_status(
                                         &job_statuses,
-                                        &job_id,
+                                        job_id,
                                         JobStatus::Failed(error_msg),
                                     );
                                 }

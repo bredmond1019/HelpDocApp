@@ -6,7 +6,7 @@ mod tests {
     use serde_json::json;
     use tokio;
 
-    use backend::data_processing::fetcher::ApiClient;
+    use backend::data_processor::fetcher::ApiClient;
     use backend::models::Collection;
 
     #[tokio::test]

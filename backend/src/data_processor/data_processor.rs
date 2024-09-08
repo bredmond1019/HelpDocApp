@@ -1,14 +1,13 @@
-use crate::data_processing::{fetcher::ApiClient, html_to_markdown};
+use crate::data_processor::{fetcher::ApiClient, html_to_markdown};
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::jobs::Job;
-use crate::models::{Article, ArticleRef, Collection, Embedding};
+use crate::models::{Article, ArticleRef, Collection};
 
 use anyhow::Result;
-use qdrant_client::qdrant::PointStruct;
 use std::sync::Arc;
 
-use super::generate_embedding::{generate_embeddings, store_embeddings};
+use super::generate_embedding::{generate_embeddings, store_embedding};
 
 pub struct DataProcessor {
     pub api_client: ApiClient,
@@ -85,14 +84,13 @@ impl DataProcessor {
         Ok(())
     }
 
-    pub async fn generate_article_embeddings(&self, articles: &Vec<Article>) -> Result<()> {
-        let embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>) =
-            generate_embeddings(&articles)
-                .await
-                .expect("Failed to generate embeddings");
+    pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
+        let embedding_and_point = generate_embeddings(article.clone())
+            .await
+            .expect("Failed to generate embeddings");
 
-        store_embeddings(
-            embeddings_and_points,
+        store_embedding(
+            embedding_and_point,
             self.vector_db_client.clone(),
             self.db_pool.clone(),
         )

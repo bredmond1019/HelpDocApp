@@ -4,10 +4,10 @@ use uuid::Uuid;
 use super::{Job, JobInfo, JobQueue, JobStatus};
 
 impl JobQueue {
-    pub async fn enqueue_job(&self, job: Job) -> Result<String, anyhow::Error> {
-        let id = Uuid::new_v4().to_string();
+    pub async fn enqueue_job(&self, job: Job) -> Result<Uuid, anyhow::Error> {
+        let id = Uuid::new_v4();
         let job_info = JobInfo {
-            id: id.clone(),
+            id,
             status: JobStatus::Queued,
             created_at: Utc::now(),
             updated_at: Utc::now(),

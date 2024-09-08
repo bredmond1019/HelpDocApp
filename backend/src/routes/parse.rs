@@ -1,12 +1,8 @@
-use crate::{
-    data_processing::data_processor::DataProcessor,
-    data_processing::fetcher::ApiClient,
-    errors::SyncError,
-    jobs::{Job, JobQueue},
-};
+use crate::{data_processor::data_processor::DataProcessor, errors::SyncError, jobs::JobQueue};
 use actix_web::{post, web::Data, HttpResponse};
 use serde_json::json;
 use std::sync::Arc;
+use uuid::Uuid;
 
 #[post("/parse")]
 pub async fn parse_data(
@@ -28,7 +24,7 @@ pub async fn parse_data(
 async fn start_job_queue(
     job_queue: Data<Arc<JobQueue>>,
     data_processor: Data<Arc<DataProcessor>>,
-) -> Result<Vec<String>, SyncError> {
+) -> Result<Vec<Uuid>, SyncError> {
     let collections = data_processor
         .api_client
         .get_list_collections()

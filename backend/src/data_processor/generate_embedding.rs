@@ -8,6 +8,7 @@ use rust_bert::pipelines::sentence_embeddings::{
 use std::collections::HashMap;
 use std::{cell::RefCell, sync::Arc};
 use tokio::task;
+use uuid::Uuid;
 
 use crate::db::DbPool;
 use crate::models::{Article, Embedding};
@@ -31,21 +32,8 @@ fn get_or_initialize_model() -> &'static SentenceEmbeddingsModel {
     })
 }
 
-pub async fn generate_article_embeddings(
-    articles: &Vec<Article>,
-    vector_db_client: Arc<qdrant_client::Qdrant>,
-    db_pool: Arc<DbPool>,
-) -> Result<()> {
-    let embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>) = generate_embeddings(articles)
-        .await
-        .expect("Failed to generate embeddings");
-
-    store_embeddings(embeddings_and_points, vector_db_client, db_pool).await?;
-    Ok(())
-}
-
 pub async fn generate_embeddings(
-    article: &Article,
+    article: Article,
 ) -> Result<(Embedding, PointStruct), Box<dyn std::error::Error + Send + Sync>> {
     let embedding_and_point = task::spawn_blocking(move || {
         let model = get_or_initialize_model();
@@ -66,7 +54,7 @@ pub async fn generate_embeddings(
         };
 
         let embedding = Embedding {
-            id: article.id,
+            id: Uuid::new_v4(),
             article_id: article.id,
             embedding_vector: embedding_vec,
         };
@@ -78,22 +66,20 @@ pub async fn generate_embeddings(
     Ok(embedding_and_point)
 }
 
-pub async fn store_embeddings(
-    embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>),
+pub async fn store_embedding(
+    embedding_and_point: (Embedding, PointStruct),
     vector_db_client: Arc<qdrant_client::Qdrant>,
     db_pool: Arc<DbPool>,
 ) -> Result<()> {
-    let (embeddings, points) = embeddings_and_points;
+    let (embedding, point) = embedding_and_point;
 
     vector_db_client
-        .upsert_points(UpsertPointsBuilder::new("article_embeddings", points))
+        .upsert_points(UpsertPointsBuilder::new("article_embeddings", vec![point]))
         .await?;
 
-    embeddings.iter().for_each(|embedding| {
-        embedding
-            .store(&mut db_pool.get().expect("Failed to get DB connection"))
-            .expect("Failed to store embedding");
-    });
+    embedding
+        .store(&mut db_pool.get().expect("Failed to get DB connection"))
+        .expect("Failed to store embedding");
 
     Ok(())
 }

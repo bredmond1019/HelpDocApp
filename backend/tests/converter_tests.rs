@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use backend::data_processing::converter::{clean_html, html_to_markdown};
+    use backend::data_processor::converter::{clean_html, html_to_markdown};
 
     // Test cases for html_to_markdown function
     #[test]
