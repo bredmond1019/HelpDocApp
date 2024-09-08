@@ -1,11 +1,12 @@
 use actix_web::web;
 
-pub mod sync;
+pub mod job;
+pub mod parse;
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(sync::sync_handler);
-    cfg.service(sync::get_collections);
-    cfg.service(index);
+    cfg.service(parse::parse_data);
+    cfg.service(parse::get_collections);
+    cfg.service(job::get_job_status);
 }
 
 use actix_web::{get, HttpResponse, Responder};

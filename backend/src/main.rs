@@ -7,7 +7,7 @@ use std::{env, sync::Arc};
 use backend::db::DbPool;
 use backend::jobs::JobQueue;
 use backend::routes;
-use backend::{data_processing::sync_processor::SyncProcessor, db};
+use backend::{data_processing::data_processor::SyncProcessor, db};
 
 use log::{error, info};
 use log4rs;

@@ -1,5 +1,5 @@
-use crate::data_processing::sync_processor::SyncProcessor;
-use crate::models::{ArticleRef, Collection};
+use crate::data_processing::data_processor::SyncProcessor;
+use crate::models::{article::ArticleRef, Collection};
 use anyhow::Result;
 use chrono::Utc;
 use log::{error, info};
@@ -74,13 +74,29 @@ impl JobQueue {
                     let job = shared_receiver.lock().await.recv().await;
 
                     match job {
-                        Some(Job::SyncCollection(collection)) => {
-                            let job_id = collection.id.to_string();
+                        Some(job) => {
+                            let (job_id, sync_result) = match job {
+                                Job::SyncCollection(collection) => {
+                                    let job_id = collection.id.to_string();
+                                    (job_id, sync_processor.sync_collection(&collection).await)
+                                }
+                                Job::SyncArticle(article_ref, collection) => {
+                                    let job_id = article_ref.id.to_string();
+                                    (
+                                        job_id,
+                                        sync_processor
+                                            .sync_article(&article_ref, &collection)
+                                            .await,
+                                    )
+                                }
+                            };
+
                             Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
-                            info!("Starting sync collection job: {}", job_id);
-                            match sync_processor.sync_collection(&collection).await {
+                            info!("Starting sync job: {}", job_id);
+
+                            match sync_result {
                                 Ok(_) => {
-                                    info!("Sync collection job completed successfully: {}", job_id);
+                                    info!("Sync job completed successfully: {}", job_id);
                                     Self::update_job_status(
                                         &job_statuses,
                                         &job_id,
@@ -88,31 +104,7 @@ impl JobQueue {
                                     );
                                 }
                                 Err(e) => {
-                                    let error_msg = format!("Sync collection job failed: {}", e);
-                                    error!("{}", error_msg);
-                                    Self::update_job_status(
-                                        &job_statuses,
-                                        &job_id,
-                                        JobStatus::Failed(error_msg),
-                                    );
-                                }
-                            }
-                        }
-                        Some(Job::SyncArticle(article_ref, collection)) => {
-                            let job_id = article_ref.id.to_string();
-                            Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
-                            info!("Starting sync article job: {}", job_id);
-                            match sync_processor.sync_article(&article_ref, &collection).await {
-                                Ok(_) => {
-                                    info!("Sync article job completed successfully: {}", job_id);
-                                    Self::update_job_status(
-                                        &job_statuses,
-                                        &job_id,
-                                        JobStatus::Completed,
-                                    );
-                                }
-                                Err(e) => {
-                                    let error_msg = format!("Sync article job failed: {}", e);
+                                    let error_msg = format!("Sync job failed: {}", e);
                                     error!("{}", error_msg);
                                     Self::update_job_status(
                                         &job_statuses,
@@ -130,27 +122,36 @@ impl JobQueue {
         }
     }
 
-    pub async fn enqueue_sync_collection_job(&self, collection: Collection) -> Result<String> {
-        let job_id = collection.id.to_string();
+    async fn enqueue_job<T>(&self, job: Job, id: String) -> Result<String> {
         let job_info = JobInfo {
-            id: job_id.clone(),
+            id: id.clone(),
             status: JobStatus::Queued,
             created_at: Utc::now(),
             updated_at: Utc::now(),
         };
 
-        let mut statuses = self
-            .job_statuses
-            .lock()
-            .expect("Failed to lock job statuses");
-        statuses.push(job_info);
+        {
+            let mut statuses = self
+                .job_statuses
+                .lock()
+                .expect("Failed to lock job statuses");
+            statuses.push(job_info);
+        }
 
         self.sender
-            .send(Job::SyncCollection(collection))
+            .send(job)
             .await
-            .map_err(|e| anyhow::anyhow!("Failed to enqueue sync collection job: {}", e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to enqueue job: {}", e))?;
 
-        Ok(job_id)
+        Ok(id)
+    }
+
+    pub async fn enqueue_sync_collection_job(&self, collection: Collection) -> Result<String> {
+        self.enqueue_job::<Collection>(
+            Job::SyncCollection(collection.clone()),
+            collection.id.to_string(),
+        )
+        .await
     }
 
     pub async fn enqueue_sync_article_job(
@@ -158,26 +159,11 @@ impl JobQueue {
         article_ref: ArticleRef,
         collection: Collection,
     ) -> Result<String> {
-        let job_id = article_ref.id.to_string();
-        let job_info = JobInfo {
-            id: job_id.clone(),
-            status: JobStatus::Queued,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        };
-
-        let mut statuses = self
-            .job_statuses
-            .lock()
-            .expect("Failed to lock job statuses");
-        statuses.push(job_info);
-
-        self.sender
-            .send(Job::SyncArticle(article_ref, collection))
-            .await
-            .map_err(|e| anyhow::anyhow!("Failed to enqueue sync article job: {}", e))?;
-
-        Ok(job_id)
+        self.enqueue_job::<ArticleRef>(
+            Job::SyncArticle(article_ref.clone(), collection),
+            article_ref.id.to_string(),
+        )
+        .await
     }
 
     pub fn get_job_status(&self, job_id: &str) -> Option<JobStatus> {

@@ -7,13 +7,13 @@ use crate::models::{Article, Collection};
 use anyhow::Result;
 use std::sync::Arc;
 
-pub struct SyncProcessor {
+pub struct DataProcessor {
     pub api_client: ApiClient,
     db_pool: Arc<DbPool>,
     vector_db_client: Arc<qdrant_client::Qdrant>,
 }
 
-impl SyncProcessor {
+impl DataProcessor {
     pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
         let api_client = ApiClient::new(None, None).map_err(|e| anyhow::anyhow!("{}", e))?;
         let vector_db_client = Arc::new(

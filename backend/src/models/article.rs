@@ -82,7 +82,7 @@ pub struct ArticleData {
     pub items: Vec<ArticleRef>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ArticleRef {
     pub id: String,
     pub number: i32,
