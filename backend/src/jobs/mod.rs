@@ -9,6 +9,9 @@ use tokio::sync::mpsc;
 use tokio::sync::Mutex as TokioMutex;
 use tokio::time::{sleep, Duration};
 
+mod enqueue;
+mod spawn;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum JobStatus {
     Queued,
@@ -55,115 +58,6 @@ impl JobQueue {
         job_queue.spawn_workers(receiver, sync_processor);
 
         job_queue
-    }
-
-    fn spawn_workers(&self, receiver: mpsc::Receiver<Job>, sync_processor: Arc<SyncProcessor>) {
-        let job_statuses = self.job_statuses.clone();
-        let rate_limit = self.rate_limit;
-
-        // Create a single shared receiver
-        let shared_receiver = Arc::new(TokioMutex::new(receiver));
-
-        for _ in 0..self.num_workers {
-            let job_statuses = job_statuses.clone();
-            let sync_processor = sync_processor.clone();
-            let shared_receiver = shared_receiver.clone();
-
-            tokio::spawn(async move {
-                loop {
-                    let job = shared_receiver.lock().await.recv().await;
-
-                    match job {
-                        Some(job) => {
-                            let (job_id, sync_result) = match job {
-                                Job::SyncCollection(collection) => {
-                                    let job_id = collection.id.to_string();
-                                    (job_id, sync_processor.sync_collection(&collection).await)
-                                }
-                                Job::SyncArticle(article_ref, collection) => {
-                                    let job_id = article_ref.id.to_string();
-                                    (
-                                        job_id,
-                                        sync_processor
-                                            .sync_article(&article_ref, &collection)
-                                            .await,
-                                    )
-                                }
-                            };
-
-                            Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
-                            info!("Starting sync job: {}", job_id);
-
-                            match sync_result {
-                                Ok(_) => {
-                                    info!("Sync job completed successfully: {}", job_id);
-                                    Self::update_job_status(
-                                        &job_statuses,
-                                        &job_id,
-                                        JobStatus::Completed,
-                                    );
-                                }
-                                Err(e) => {
-                                    let error_msg = format!("Sync job failed: {}", e);
-                                    error!("{}", error_msg);
-                                    Self::update_job_status(
-                                        &job_statuses,
-                                        &job_id,
-                                        JobStatus::Failed(error_msg),
-                                    );
-                                }
-                            }
-                        }
-                        None => break, // Channel closed, exit the loop
-                    }
-                    sleep(rate_limit).await;
-                }
-            });
-        }
-    }
-
-    async fn enqueue_job<T>(&self, job: Job, id: String) -> Result<String> {
-        let job_info = JobInfo {
-            id: id.clone(),
-            status: JobStatus::Queued,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
-        };
-
-        {
-            let mut statuses = self
-                .job_statuses
-                .lock()
-                .expect("Failed to lock job statuses");
-            statuses.push(job_info);
-        }
-
-        self.sender
-            .send(job)
-            .await
-            .map_err(|e| anyhow::anyhow!("Failed to enqueue job: {}", e))?;
-
-        Ok(id)
-    }
-
-    pub async fn enqueue_sync_collection_job(&self, collection: Collection) -> Result<String> {
-        self.enqueue_job::<Collection>(
-            Job::SyncCollection(collection.clone()),
-            collection.id.to_string(),
-        )
-        .await
-    }
-
-    pub async fn enqueue_sync_article_job(
-        &self,
-        article_ref: ArticleRef,
-        collection: Collection,
-    ) -> Result<String> {
-        self.enqueue_job::<ArticleRef>(
-            Job::SyncArticle(article_ref.clone(), collection),
-            article_ref.id.to_string(),
-        )
-        .await
     }
 
     pub fn get_job_status(&self, job_id: &str) -> Option<JobStatus> {
