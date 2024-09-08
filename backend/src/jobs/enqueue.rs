@@ -1,40 +1,11 @@
-use std::fmt::Debug;
-
 use chrono::Utc;
-
-use crate::models::{article::ArticleRef, Collection};
+use uuid::Uuid;
 
 use super::{Job, JobInfo, JobQueue, JobStatus};
 
 impl JobQueue {
-    pub async fn enqueue_sync_collection_job(
-        &self,
-        collection: Collection,
-    ) -> Result<String, anyhow::Error> {
-        self.enqueue_job::<Collection>(
-            Job::SyncCollection(collection.clone()),
-            collection.id.to_string(),
-        )
-        .await
-    }
-
-    pub async fn enqueue_sync_article_job(
-        &self,
-        article_ref: ArticleRef,
-        collection: Collection,
-    ) -> Result<String, anyhow::Error> {
-        self.enqueue_job::<(ArticleRef, Collection)>(
-            Job::SyncArticle(article_ref.clone(), collection),
-            article_ref.id.to_string(),
-        )
-        .await
-    }
-
-    async fn enqueue_job<T: Clone + Debug>(
-        &self,
-        job: Job,
-        id: String,
-    ) -> Result<String, anyhow::Error> {
+    pub async fn enqueue_job(&self, job: Job) -> Result<String, anyhow::Error> {
+        let id = Uuid::new_v4().to_string();
         let job_info = JobInfo {
             id: id.clone(),
             status: JobStatus::Queued,

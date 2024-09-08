@@ -13,13 +13,11 @@ pub enum SyncError {
     },
     #[error("Failed to enqueue job: {0}")]
     JobEnqueueError(anyhow::Error),
+    #[error("Failed to prepare jobs for collection {collection_id}: {error}")]
+    JobPreparationError {
+        collection_id: String,
+        error: anyhow::Error,
+    },
     #[error("Other error: {0}")]
     Other(#[from] anyhow::Error),
 }
-
-// This implementation is no longer needed as it's covered by the #[from] attributes above
-// impl From<anyhow::Error> for SyncError {
-//     fn from(error: anyhow::Error) -> Self {
-//         SyncError::Other(error)
-//     }
-// }

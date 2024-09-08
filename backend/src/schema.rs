@@ -10,13 +10,13 @@ diesel::table! {
         slug -> Varchar,
         html_content -> Nullable<Text>,
         markdown_content -> Nullable<Text>,
-        version -> Nullable<Int4>,
+        version -> Int4,
         #[max_length = 255]
         last_edited_by -> Nullable<Varchar>,
         #[max_length = 255]
         helpscout_collection_id -> Varchar,
-        created_at -> Nullable<Timestamptz>,
-        updated_at -> Nullable<Timestamptz>,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
         helpscout_article_id -> Nullable<Varchar>,
     }
 }
@@ -31,8 +31,8 @@ diesel::table! {
         slug -> Varchar,
         #[max_length = 255]
         helpscout_collection_id -> Varchar,
-        created_at -> Nullable<Timestamptz>,
-        updated_at -> Nullable<Timestamptz>,
+        created_at -> Timestamptz,
+        updated_at -> Timestamptz,
     }
 }
 
@@ -44,7 +44,7 @@ diesel::table! {
         markdown_content -> Nullable<Text>,
         #[max_length = 255]
         edited_by -> Nullable<Varchar>,
-        created_at -> Nullable<Timestamptz>,
+        created_at -> Timestamptz,
     }
 }
 
@@ -52,7 +52,7 @@ diesel::table! {
     embeddings (id) {
         id -> Uuid,
         article_id -> Uuid,
-        embedding_vector -> Array<Float4>,
+        embedding_vector -> Array<Nullable<Float4>>,
     }
 }
 
@@ -60,4 +60,9 @@ diesel::joinable!(articles -> collections (collection_id));
 diesel::joinable!(content_versions -> articles (article_id));
 diesel::joinable!(embeddings -> articles (article_id));
 
-diesel::allow_tables_to_appear_in_same_query!(articles, collections, content_versions, embeddings,);
+diesel::allow_tables_to_appear_in_same_query!(
+    articles,
+    collections,
+    content_versions,
+    embeddings,
+);

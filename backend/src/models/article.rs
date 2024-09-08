@@ -8,23 +8,23 @@ use uuid::Uuid;
 pub struct Article {
     pub id: Uuid,
     pub collection_id: Uuid,
-    pub helpscout_collection_id: String,
-    pub helpscout_article_id: String,
     pub title: String,
     pub slug: String,
     pub html_content: Option<String>,
     pub markdown_content: Option<String>,
     pub version: i32,
     pub last_edited_by: Option<String>,
+    pub helpscout_collection_id: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub helpscout_article_id: Option<String>,
 }
 
 impl Article {
     pub fn new(
         collection_id: Uuid,
         helpscout_collection_id: String,
-        helpscout_article_id: String,
+        helpscout_article_id: Option<String>,
         title: String,
         slug: String,
         html_content: Option<String>,
@@ -44,6 +44,7 @@ impl Article {
             updated_at: Utc::now(),
         }
     }
+
     pub fn store(&self, conn: &mut PgConnection) -> Result<(), diesel::result::Error> {
         use crate::schema::articles::dsl::*;
 
@@ -63,6 +64,29 @@ impl Article {
                 helpscout_collection_id.eq(&self.helpscout_collection_id),
                 helpscout_article_id.eq(&self.helpscout_article_id),
             ))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
+    pub fn get_by_id(
+        conn: &mut PgConnection,
+        article_id: Uuid,
+    ) -> Result<Option<Article>, diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
+
+        articles.find(article_id).first(conn).optional()
+    }
+
+    pub fn update_markdown_content(
+        &self,
+        conn: &mut PgConnection,
+        markdown: String,
+    ) -> Result<(), diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
+
+        diesel::update(articles.find(self.id))
+            .set(markdown_content.eq(markdown))
             .execute(conn)?;
 
         Ok(())

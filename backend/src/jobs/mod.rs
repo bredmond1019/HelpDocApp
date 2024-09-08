@@ -1,14 +1,15 @@
 use crate::data_processing::data_processor::DataProcessor;
+use crate::models::Article;
 use crate::models::{article::ArticleRef, Collection};
+
 use anyhow::Result;
 use chrono::Utc;
-use log::{error, info};
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
-use tokio::sync::Mutex as TokioMutex;
-use tokio::time::{sleep, Duration};
+use tokio::time::Duration;
 
 pub mod enqueue;
 pub mod worker;
@@ -38,7 +39,11 @@ pub struct JobQueue {
 
 pub enum Job {
     SyncCollection(Collection),
+    StoreCollection(Collection),
     SyncArticle(ArticleRef, Collection),
+    StoreArticle(Article),
+    ConvertHtmlToMarkdown(Article),
+    GenerateEmbeddings(Article),
 }
 
 impl Job {
@@ -48,15 +53,32 @@ impl Job {
     ) -> Result<(String, Result<(), anyhow::Error>), anyhow::Error> {
         match self {
             Job::SyncCollection(collection) => {
-                info!("Starting sync job: {}", collection.id);
                 let job_id = collection.id.to_string();
-                let result = processor.sync_collection(&collection).await;
+                let result = processor.prepare_sync_collection(collection).await;
+                Ok((job_id, result.map(|_| ())))
+            }
+            Job::StoreCollection(collection) => {
+                let job_id = collection.id.to_string();
+                let result = processor.sync_collection(collection).await;
                 Ok((job_id, result))
             }
             Job::SyncArticle(article_ref, collection) => {
                 let job_id = article_ref.id.to_string();
                 let result = processor.sync_article(article_ref, collection).await;
+                Ok((job_id, result.map(|_| ())))
+            }
+            Job::StoreArticle(article) => {
+                let job_id = article.id.to_string();
+                let result = processor.store_article(article).await;
                 Ok((job_id, result))
+            }
+            Job::ConvertHtmlToMarkdown(article) => {
+                let result = processor.convert_html_to_markdown(article).await;
+                Ok((article.id.to_string(), result))
+            }
+            Job::GenerateEmbeddings(article) => {
+                let result = processor.generate_article_embeddings(article.clone()).await;
+                Ok((article.id.to_string(), result))
             }
         }
     }

@@ -48,7 +48,7 @@ impl ApiClient {
         let collection_response: CollectionResponse = from_value(data)?;
         let collection_data = collection_response.collections;
 
-        let mut collections = Vec::new();
+        let mut collections: Vec<Collection> = Vec::new();
 
         collections.extend(parse_collections(collection_data.items)?);
 
@@ -119,7 +119,7 @@ fn parse_article(helpscout_article: &ArticleFull, collection: &Collection) -> Re
     let article = Article::new(
         collection.id,
         helpscout_article.collection_id.clone(),
-        helpscout_article.id.clone(),
+        Some(helpscout_article.id.clone()),
         helpscout_article.name.clone(),
         helpscout_article.slug.clone(),
         Some(helpscout_article.text.clone()),

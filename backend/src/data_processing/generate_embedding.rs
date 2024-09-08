@@ -32,7 +32,7 @@ fn get_or_initialize_model() -> &'static SentenceEmbeddingsModel {
 }
 
 pub async fn generate_article_embeddings(
-    articles: Vec<Article>,
+    articles: &Vec<Article>,
     vector_db_client: Arc<qdrant_client::Qdrant>,
     db_pool: Arc<DbPool>,
 ) -> Result<()> {
@@ -45,42 +45,37 @@ pub async fn generate_article_embeddings(
 }
 
 pub async fn generate_embeddings(
-    articles: Vec<Article>,
-) -> Result<(Vec<Embedding>, Vec<PointStruct>), Box<dyn std::error::Error + Send + Sync>> {
-    let embeddings_and_points = task::spawn_blocking(move || {
+    article: &Article,
+) -> Result<(Embedding, PointStruct), Box<dyn std::error::Error + Send + Sync>> {
+    let embedding_and_point = task::spawn_blocking(move || {
         let model = get_or_initialize_model();
-        let mut embeddings = Vec::new();
-        let mut points = Vec::new();
+        let title = article.title.clone();
+        let embedding = model.encode(&[&title]).expect("Failed to encode article");
+        let embedding_vec: Vec<f32> = embedding[0].clone().into();
 
-        for article in articles.iter() {
-            let title = article.title.clone();
-            let embedding = model.encode(&[&title]).expect("Failed to encode article");
-            let embedding_vec: Vec<f32> = embedding[0].clone().into();
+        let mut payload = HashMap::new();
+        payload.insert(
+            "article_id".to_string(),
+            QdrantValue::from(article.id.to_string()),
+        );
 
-            let mut payload = HashMap::new();
-            payload.insert(
-                "article_id".to_string(),
-                QdrantValue::from(article.id.to_string()),
-            );
+        let point = PointStruct {
+            id: Some(PointId::from(article.id.to_string())),
+            payload,
+            vectors: Some(Vectors::from(embedding_vec.clone())),
+        };
 
-            let point = PointStruct {
-                id: Some(PointId::from(article.id.to_string())),
-                payload,
-                vectors: Some(Vectors::from(embedding_vec.clone())),
-            };
+        let embedding = Embedding {
+            id: article.id,
+            article_id: article.id,
+            embedding_vector: embedding_vec,
+        };
 
-            points.push(point);
-            embeddings.push(Embedding {
-                id: article.id,
-                article_id: article.id,
-                embedding_vector: embedding_vec,
-            });
-        }
-        (embeddings, points)
+        (embedding, point)
     })
     .await?;
 
-    Ok(embeddings_and_points)
+    Ok(embedding_and_point)
 }
 
 pub async fn store_embeddings(

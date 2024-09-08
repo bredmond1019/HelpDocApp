@@ -6,4 +6,4 @@ pub mod fetcher;
 pub mod generate_embedding;
 
 pub use converter::html_to_markdown;
-pub use generate_embedding::generate_embeddings;
+pub use generate_embedding::{generate_embeddings, store_embeddings};

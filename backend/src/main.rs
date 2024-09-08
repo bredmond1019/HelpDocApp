@@ -6,6 +6,7 @@ use dotenv::dotenv;
 use std::{env, sync::Arc};
 
 use backend::db::DbPool;
+use backend::jobs::enqueue;
 use backend::jobs::JobQueue;
 use backend::routes;
 use backend::{data_processing::data_processor::DataProcessor, db};

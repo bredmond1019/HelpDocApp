@@ -1,11 +1,19 @@
-use crate::{data_processing::fetcher::ApiClient, errors::SyncError, jobs::JobQueue};
+use crate::{
+    data_processing::data_processor::DataProcessor,
+    data_processing::fetcher::ApiClient,
+    errors::SyncError,
+    jobs::{Job, JobQueue},
+};
 use actix_web::{post, web::Data, HttpResponse};
 use serde_json::json;
 use std::sync::Arc;
 
 #[post("/parse")]
-pub async fn parse_data(job_queue: Data<Arc<JobQueue>>) -> HttpResponse {
-    match start_job_queue(job_queue).await {
+pub async fn parse_data(
+    job_queue: Data<Arc<JobQueue>>,
+    data_processor: Data<Arc<DataProcessor>>,
+) -> HttpResponse {
+    match start_job_queue(job_queue, data_processor).await {
         Ok(job_ids) => HttpResponse::Ok().json(json!({ "job_ids": job_ids })),
         Err(e) => {
             log::error!("Sync error: {:?}", e);
@@ -17,9 +25,12 @@ pub async fn parse_data(job_queue: Data<Arc<JobQueue>>) -> HttpResponse {
     }
 }
 
-async fn start_job_queue(job_queue: Data<Arc<JobQueue>>) -> Result<Vec<String>, SyncError> {
-    let api_client = ApiClient::new(None, None).map_err(SyncError::ApiClientError)?;
-    let collections = api_client
+async fn start_job_queue(
+    job_queue: Data<Arc<JobQueue>>,
+    data_processor: Data<Arc<DataProcessor>>,
+) -> Result<Vec<String>, SyncError> {
+    let collections = data_processor
+        .api_client
         .get_list_collections()
         .await
         .map_err(SyncError::CollectionFetchError)?;
@@ -27,26 +38,18 @@ async fn start_job_queue(job_queue: Data<Arc<JobQueue>>) -> Result<Vec<String>, 
     let mut job_ids = Vec::new();
 
     for collection in collections {
-        job_ids.push(
-            job_queue
-                .enqueue_sync_collection_job(collection.clone())
-                .await
-                .map_err(SyncError::JobEnqueueError)?,
-        );
-
-        let article_refs = ApiClient::new(None, None)
-            .map_err(SyncError::ApiClientError)?
-            .get_list_articles(&collection)
+        let sync_jobs = data_processor
+            .prepare_sync_collection(&collection)
             .await
-            .map_err(|e| SyncError::ArticleFetchError {
+            .map_err(|e| SyncError::JobPreparationError {
                 collection_id: collection.id.to_string(),
-                error: e.into(),
+                error: e,
             })?;
 
-        for article_ref in article_refs {
+        for job in sync_jobs {
             job_ids.push(
                 job_queue
-                    .enqueue_sync_article_job(article_ref, collection.clone())
+                    .enqueue_job(job)
                     .await
                     .map_err(SyncError::JobEnqueueError)?,
             );

@@ -1,11 +1,14 @@
-use crate::data_processing::generate_embedding::generate_article_embeddings;
 use crate::data_processing::{fetcher::ApiClient, html_to_markdown};
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
-use crate::models::article::ArticleRef;
-use crate::models::{Article, Collection};
+use crate::jobs::Job;
+use crate::models::{Article, ArticleRef, Collection, Embedding};
+
 use anyhow::Result;
+use qdrant_client::qdrant::PointStruct;
 use std::sync::Arc;
+
+use super::generate_embedding::{generate_embeddings, store_embeddings};
 
 pub struct DataProcessor {
     pub api_client: ApiClient,
@@ -28,13 +31,19 @@ impl DataProcessor {
         })
     }
 
-    pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
-        println!("Processing collection: {}", collection.name);
-
-        collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
+    pub async fn prepare_sync_collection(&self, collection: &Collection) -> Result<Vec<Job>> {
+        let mut jobs = vec![Job::StoreCollection(collection.clone())];
 
         let article_refs = self.api_client.get_list_articles(collection).await?;
+        for article_ref in article_refs {
+            jobs.push(Job::SyncArticle(article_ref, collection.clone()));
+        }
 
+        Ok(jobs)
+    }
+
+    pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
+        collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(())
     }
 
@@ -42,34 +51,52 @@ impl DataProcessor {
         &self,
         article_ref: &ArticleRef,
         collection: &Collection,
-    ) -> Result<()> {
+    ) -> Result<Vec<Job>> {
         let article = self
             .api_client
             .get_article(&article_ref.id.to_string(), collection)
             .await?;
-        let processed_article = self.process_article(article).await?;
 
-        // Generate and store embeddings
-        generate_article_embeddings(
-            vec![processed_article],
+        let jobs = vec![
+            Job::StoreArticle(article.clone()),
+            Job::ConvertHtmlToMarkdown(article.clone()),
+            Job::GenerateEmbeddings(article.clone()),
+        ];
+
+        Ok(jobs)
+    }
+
+    pub async fn store_article(&self, article: &Article) -> Result<()> {
+        article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
+        Ok(())
+    }
+
+    pub async fn convert_html_to_markdown(&self, article: &Article) -> Result<()> {
+        let markdown = html_to_markdown(
+            article
+                .html_content
+                .as_ref()
+                .ok_or(anyhow::anyhow!("HTML content not found"))?,
+        );
+        article.update_markdown_content(
+            &mut self.db_pool.get().expect("Failed to get DB connection"),
+            markdown,
+        )?;
+        Ok(())
+    }
+
+    pub async fn generate_article_embeddings(&self, articles: &Vec<Article>) -> Result<()> {
+        let embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>) =
+            generate_embeddings(&articles)
+                .await
+                .expect("Failed to generate embeddings");
+
+        store_embeddings(
+            embeddings_and_points,
             self.vector_db_client.clone(),
             self.db_pool.clone(),
         )
         .await?;
-
         Ok(())
-    }
-
-    async fn process_article(&self, mut article: Article) -> Result<Article> {
-        println!("Processing article: {}", article.title);
-
-        // Convert HTML content to Markdown
-        if let Some(html_content) = &article.html_content {
-            article.markdown_content = Some(html_to_markdown(html_content));
-        }
-
-        article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
-
-        Ok(article)
     }
 }
