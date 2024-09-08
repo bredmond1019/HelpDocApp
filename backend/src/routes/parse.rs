@@ -34,7 +34,7 @@ async fn start_job_queue(
     let mut job_ids = Vec::new();
 
     for collection in collections {
-        let sync_jobs = data_processor
+        let jobs = data_processor
             .prepare_sync_collection(&collection)
             .await
             .map_err(|e| SyncError::JobPreparationError {
@@ -42,7 +42,7 @@ async fn start_job_queue(
                 error: e,
             })?;
 
-        for job in sync_jobs {
+        for job in jobs {
             job_ids.push(
                 job_queue
                     .enqueue_job(job)

@@ -1,7 +1,9 @@
 use chrono::Utc;
 use uuid::Uuid;
 
-use super::{Job, JobInfo, JobQueue, JobStatus};
+use crate::models::{JobInfo, JobStatus};
+
+use super::{Job, JobQueue};
 
 impl JobQueue {
     pub async fn enqueue_job(&self, job: Job) -> Result<Uuid, anyhow::Error> {
