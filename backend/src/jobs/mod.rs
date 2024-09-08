@@ -4,13 +4,14 @@ use anyhow::Result;
 use chrono::Utc;
 use log::{error, info};
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 use tokio::sync::Mutex as TokioMutex;
 use tokio::time::{sleep, Duration};
 
-mod enqueue;
-mod worker;
+pub mod enqueue;
+pub mod worker;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum JobStatus {
@@ -35,17 +36,27 @@ pub struct JobQueue {
     rate_limit: Duration,
 }
 
-enum Job {
+pub enum Job {
     SyncCollection(Collection),
     SyncArticle(ArticleRef, Collection),
 }
 
 impl Job {
-    async fn process(&self, processor: &DataProcessor) -> Result<(), anyhow::Error> {
+    async fn process(
+        &self,
+        processor: &DataProcessor,
+    ) -> Result<(String, Result<(), anyhow::Error>), anyhow::Error> {
         match self {
-            Job::SyncCollection(collection) => processor.sync_collection(collection).await,
+            Job::SyncCollection(collection) => {
+                info!("Starting sync job: {}", collection.id);
+                let job_id = collection.id.to_string();
+                let result = processor.sync_collection(&collection).await;
+                Ok((job_id, result))
+            }
             Job::SyncArticle(article_ref, collection) => {
-                processor.sync_article(article_ref, collection).await
+                let job_id = article_ref.id.to_string();
+                let result = processor.sync_article(article_ref, collection).await;
+                Ok((job_id, result))
             }
         }
     }
@@ -53,8 +64,16 @@ impl Job {
 
 impl JobQueue {
     pub fn new(sync_processor: Arc<DataProcessor>) -> Self {
-        let num_workers = 4;
-        let rate_limit = Duration::from_millis(500);
+        let num_workers = env::var("JOB_QUEUE_WORKERS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(4);
+
+        let rate_limit = env::var("JOB_QUEUE_RATE_LIMIT_MS")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .map(Duration::from_millis)
+            .unwrap_or(Duration::from_millis(500));
 
         let (sender, receiver) = mpsc::channel(32);
         let job_statuses = Arc::new(Mutex::new(Vec::new()));

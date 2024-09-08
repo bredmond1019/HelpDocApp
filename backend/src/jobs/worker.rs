@@ -27,26 +27,15 @@ impl JobQueue {
 
                     match job {
                         Some(job) => {
-                            let (job_id, sync_result) = match job {
-                                Job::SyncCollection(collection) => {
-                                    let job_id = collection.id.to_string();
-                                    (job_id, data_processor.sync_collection(&collection).await)
-                                }
-                                Job::SyncArticle(article_ref, collection) => {
-                                    let job_id = article_ref.id.to_string();
-                                    (
-                                        job_id,
-                                        data_processor
-                                            .sync_article(&article_ref, &collection)
-                                            .await,
-                                    )
-                                }
-                            };
+                            let (job_id, result) = job
+                                .process(&data_processor)
+                                .await
+                                .expect("Failed to process job"); // TODO: Handle this better
 
                             Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
                             info!("Starting sync job: {}", job_id);
 
-                            match sync_result {
+                            match result {
                                 Ok(_) => {
                                     info!("Sync job completed successfully: {}", job_id);
                                     Self::update_job_status(
@@ -68,51 +57,6 @@ impl JobQueue {
                         }
                         None => break, // Channel closed, exit the loop
                     }
-                    sleep(rate_limit).await;
-                }
-            });
-        }
-    }
-
-    fn spawn_workers(&self, mut receiver: mpsc::Receiver<Job>, data_processor: Arc<DataProcessor>) {
-        let job_statuses = Arc::clone(&self.job_statuses);
-        let rate_limit = self.rate_limit;
-
-        for _ in 0..self.num_workers {
-            let job_statuses = Arc::clone(&job_statuses);
-            let data_processor = Arc::clone(&data_processor);
-
-            tokio::spawn(async move {
-                while let Some(job) = receiver.recv().await {
-                    // Process the job based on its type
-                    let result = job.process(&data_processor).await;
-
-                    // Update job status based on the result
-                    let status = match result {
-                        Ok(_) => JobStatus::Completed,
-                        Err(e) => JobStatus::Failed(e.to_string()),
-                    };
-
-                    Self::update_job_status(&job_statuses, &job_id, JobStatus::Running);
-                    info!("Starting sync job: {}", job_id);
-
-                    match sync_result {
-                        Ok(_) => {
-                            info!("Sync job completed successfully: {}", job_id);
-                            Self::update_job_status(&job_statuses, &job_id, JobStatus::Completed);
-                        }
-                        Err(e) => {
-                            let error_msg = format!("Sync job failed: {}", e);
-                            error!("{}", error_msg);
-                            Self::update_job_status(
-                                &job_statuses,
-                                &job_id,
-                                JobStatus::Failed(error_msg),
-                            );
-                        }
-                    }
-
-                    // Apply rate limiting
                     sleep(rate_limit).await;
                 }
             });

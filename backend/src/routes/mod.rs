@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use actix_web::web;
 
 pub mod job;
@@ -11,14 +13,16 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
 
 use actix_web::{get, HttpResponse, Responder};
 
+use crate::data_processing::data_processor::DataProcessor;
+
 #[get("/")]
 async fn index() -> impl Responder {
     HttpResponse::Ok().body("Welcome to the backend API. It's working!")
 }
 
 #[get("/collections")]
-async fn get_collections(sync_processor: web::Data<Arc<SyncProcessor>>) -> impl Responder {
-    match sync_processor.api_client.get_list_collections().await {
+async fn get_collections(data_processor: web::Data<Arc<DataProcessor>>) -> impl Responder {
+    match data_processor.api_client.get_list_collections().await {
         Ok(collections) => HttpResponse::Ok().json(collections),
         Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
     }
