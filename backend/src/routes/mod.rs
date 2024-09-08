@@ -1,8 +1,16 @@
 use actix_web::web;
-use sync::sync_handler;
 
 pub mod sync;
 
-pub fn sync_route() -> actix_web::Scope {
-    web::scope("/api").service(sync_handler)
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(sync::sync_handler);
+    cfg.service(sync::get_collections);
+    cfg.service(index);
+}
+
+use actix_web::{get, HttpResponse, Responder};
+
+#[get("/")]
+async fn index() -> impl Responder {
+    HttpResponse::Ok().body("Welcome to the backend API. It's working!")
 }

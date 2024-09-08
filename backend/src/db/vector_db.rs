@@ -22,7 +22,7 @@ pub async fn init_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>> {
             collection_name: "article_embeddings".to_string(),
             vectors_config: Some(VectorsConfig {
                 config: Some(Config::Params(VectorParams {
-                    size: 768, // Adjust this based on your embedding model
+                    size: 384, // Adjust this based on your embedding model
                     distance: Distance::Cosine.into(),
                     ..Default::default()
                 })),
@@ -51,7 +51,7 @@ pub async fn init_test_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>>
             collection_name: "testing".to_string(),
             vectors_config: Some(VectorsConfig {
                 config: Some(Config::Params(VectorParams {
-                    size: 768, // Adjust this based on your embedding model
+                    size: 384, // Adjust this based on your embedding model
                     distance: Distance::Cosine.into(),
                     ..Default::default()
                 })),

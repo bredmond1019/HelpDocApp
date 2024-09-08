@@ -19,10 +19,9 @@ pub struct ApiClient {
 
 impl ApiClient {
     pub fn new(base_url: Option<String>, api_key: Option<String>) -> Result<Self> {
+        let api_key = api_key.unwrap_or(env::var("API_KEY").expect("API_KEY must be set"));
         let base_url =
             base_url.unwrap_or(env::var("API_BASE_URL").expect("API_BASE_URL must be set"));
-        let api_key = api_key.unwrap_or(env::var("API_KEY").expect("API_KEY must be set"));
-
         Ok(Self {
             client: reqwest::Client::new(),
             base_url,
@@ -32,10 +31,11 @@ impl ApiClient {
 
     async fn get(&self, endpoint: &str) -> Result<Value> {
         let url = format!("{}{}", self.base_url, endpoint);
+
         let response = self
             .client
             .get(&url)
-            .header("Authorization", format!("Bearer {}", self.api_key))
+            .basic_auth(self.api_key.clone(), Some("DUMMY_PASSWORD"))
             .send()
             .await?
             .json()

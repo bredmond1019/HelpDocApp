@@ -7,7 +7,7 @@ use qdrant_client::qdrant::UpsertPointsBuilder;
 use std::sync::Arc;
 
 pub struct SyncProcessor {
-    api_client: ApiClient,
+    pub api_client: ApiClient,
     db_pool: Arc<DbPool>,
     vector_db_client: Arc<qdrant_client::Qdrant>,
 }
