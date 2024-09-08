@@ -664,6 +664,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tch",
+ "thiserror",
  "tokio",
  "tonic",
  "torch-sys",

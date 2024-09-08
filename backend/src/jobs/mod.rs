@@ -1,4 +1,4 @@
-use crate::data_processing::data_processor::SyncProcessor;
+use crate::data_processing::data_processor::DataProcessor;
 use crate::models::{article::ArticleRef, Collection};
 use anyhow::Result;
 use chrono::Utc;
@@ -10,7 +10,7 @@ use tokio::sync::Mutex as TokioMutex;
 use tokio::time::{sleep, Duration};
 
 mod enqueue;
-mod spawn;
+mod worker;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum JobStatus {
@@ -40,12 +40,22 @@ enum Job {
     SyncArticle(ArticleRef, Collection),
 }
 
+impl Job {
+    async fn process(&self, processor: &DataProcessor) -> Result<(), anyhow::Error> {
+        match self {
+            Job::SyncCollection(collection) => processor.sync_collection(collection).await,
+            Job::SyncArticle(article_ref, collection) => {
+                processor.sync_article(article_ref, collection).await
+            }
+        }
+    }
+}
+
 impl JobQueue {
-    pub fn new(
-        sync_processor: Arc<SyncProcessor>,
-        num_workers: usize,
-        rate_limit: Duration,
-    ) -> Self {
+    pub fn new(sync_processor: Arc<DataProcessor>) -> Self {
+        let num_workers = 4;
+        let rate_limit = Duration::from_millis(500);
+
         let (sender, receiver) = mpsc::channel(32);
         let job_statuses = Arc::new(Mutex::new(Vec::new()));
         let job_queue = Self {

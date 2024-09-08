@@ -24,11 +24,6 @@ async fn main() -> std::io::Result<()> {
     }
 
     info!("Starting application");
-    info!("API_KEY: {:?}", env::var("API_KEY"));
-    info!("DATABASE_URL: {:?}", env::var("DATABASE_URL"));
-    info!("QDRANT_URL: {:?}", env::var("QDRANT_URL"));
-    info!("RUST_LOG: {:?}", env::var("RUST_LOG"));
-    info!("RUST_BACKTRACE: {:?}", env::var("RUST_BACKTRACE"));
 
     let pool: DbPool = db::init_pool();
 

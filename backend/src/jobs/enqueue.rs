@@ -1,7 +1,11 @@
-use super::JobStatus;
+use chrono::Utc;
+
+use crate::models::{article::ArticleRef, Collection};
+
+use super::{Job, JobInfo, JobQueue, JobStatus};
 
 impl JobQueue {
-    async fn enqueue_job<T>(&self, job: Job, id: String) -> Result<String> {
+    async fn enqueue_job<T>(&self, job: Job, id: String) -> Result<String, anyhow::Error> {
         let job_info = JobInfo {
             id: id.clone(),
             status: JobStatus::Queued,
@@ -25,8 +29,11 @@ impl JobQueue {
         Ok(id)
     }
 
-    pub async fn enqueue_sync_collection_job(&self, collection: Collection) -> Result<String> {
-        self.enqueue_job::<Collection>(
+    pub async fn enqueue_sync_collection_job(
+        &self,
+        collection: Collection,
+    ) -> Result<String, anyhow::Error> {
+        self.enqueue_job(
             Job::SyncCollection(collection.clone()),
             collection.id.to_string(),
         )
@@ -37,8 +44,8 @@ impl JobQueue {
         &self,
         article_ref: ArticleRef,
         collection: Collection,
-    ) -> Result<String> {
-        self.enqueue_job::<ArticleRef>(
+    ) -> Result<String, anyhow::Error> {
+        self.enqueue_job(
             Job::SyncArticle(article_ref.clone(), collection),
             article_ref.id.to_string(),
         )
