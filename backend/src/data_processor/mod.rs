@@ -2,7 +2,6 @@
 
 pub mod api_client;
 pub mod convert_html;
-pub mod data_processor;
 pub mod generate_embedding;
 
 pub use convert_html::html_to_markdown;

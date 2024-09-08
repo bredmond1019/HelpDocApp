@@ -1,4 +1,4 @@
-use crate::data_processor::data_processor::DataProcessor;
+use crate::data_processor::DataProcessor;
 use crate::models::{JobInfo, JobStatus};
 
 use chrono::Utc;

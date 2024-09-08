@@ -1,4 +1,4 @@
-use crate::data_processor::data_processor::DataProcessor;
+use crate::data_processor::DataProcessor;
 use crate::models::Article;
 use crate::models::{article::ArticleRef, Collection};
 

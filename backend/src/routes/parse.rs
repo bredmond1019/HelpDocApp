@@ -1,4 +1,4 @@
-use crate::{data_processor::data_processor::DataProcessor, errors::SyncError, jobs::JobQueue};
+use crate::{data_processor::DataProcessor, errors::SyncError, jobs::JobQueue};
 use actix_web::{post, web::Data, HttpResponse};
 use serde_json::json;
 use std::sync::Arc;

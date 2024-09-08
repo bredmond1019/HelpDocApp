@@ -4,7 +4,7 @@ use tokio::sync::mpsc;
 use tokio::sync::Mutex as TokioMutex;
 use tokio::time::sleep;
 
-use crate::data_processor::data_processor::DataProcessor;
+use crate::data_processor::DataProcessor;
 use crate::models::JobStatus;
 
 use super::{Job, JobQueue};

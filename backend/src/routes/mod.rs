@@ -13,7 +13,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
 
 use actix_web::{get, HttpResponse, Responder};
 
-use crate::data_processor::data_processor::DataProcessor;
+use crate::data_processor::DataProcessor;
 
 #[get("/")]
 async fn index() -> impl Responder {
