@@ -23,14 +23,6 @@ mod tests {
             "test-article-1".to_string(),
             Some("<p>Test content 1</p>".to_string()),
         );
-        let article2 = Article::new(
-            Uuid::new_v4(),
-            "helpscout_collection_id_2".to_string(),
-            Some("helpscout_article_id_2".to_string()),
-            "Test Article 2".to_string(),
-            "test-article-2".to_string(),
-            Some("<p>Test content 2</p>".to_string()),
-        );
 
         // Call the function under test
         let result = generate_embeddings(article.clone()).await;

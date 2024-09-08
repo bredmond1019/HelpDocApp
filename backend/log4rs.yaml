@@ -10,4 +10,17 @@ appenders:
     kind: file
     path: "log/application.log"
     encoder:
-      pattern: "{d(%Y-%m-%d 
+      pattern: "{d(%Y-%m-%d %H:%M:%S)} - {l} - {m}\n"
+
+root:
+  level: info
+  appenders:
+    - stdout
+    - file
+
+loggers:
+  app::backend:
+    level: debug
+
+  actix_web:
+    level: info
