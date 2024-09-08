@@ -1,12 +1,15 @@
 use anyhow::Result;
-use qdrant_client::qdrant::{PointId, PointStruct, Value as QdrantValue, Vectors};
+use qdrant_client::qdrant::{
+    PointId, PointStruct, UpsertPointsBuilder, Value as QdrantValue, Vectors,
+};
 use rust_bert::pipelines::sentence_embeddings::{
     SentenceEmbeddingsBuilder, SentenceEmbeddingsModel, SentenceEmbeddingsModelType,
 };
-use std::cell::RefCell;
 use std::collections::HashMap;
+use std::{cell::RefCell, sync::Arc};
 use tokio::task;
 
+use crate::db::DbPool;
 use crate::models::{Article, Embedding};
 
 thread_local! {
@@ -26,6 +29,19 @@ fn get_or_initialize_model() -> &'static SentenceEmbeddingsModel {
         // This is safe because we never remove the model once it's set
         unsafe { &*(model.as_ref().unwrap() as *const SentenceEmbeddingsModel) }
     })
+}
+
+pub async fn generate_article_embeddings(
+    articles: Vec<Article>,
+    vector_db_client: Arc<qdrant_client::Qdrant>,
+    db_pool: Arc<DbPool>,
+) -> Result<()> {
+    let embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>) = generate_embeddings(articles)
+        .await
+        .expect("Failed to generate embeddings");
+
+    store_embeddings(embeddings_and_points, vector_db_client, db_pool).await?;
+    Ok(())
 }
 
 pub async fn generate_embeddings(
@@ -65,4 +81,24 @@ pub async fn generate_embeddings(
     .await?;
 
     Ok(embeddings_and_points)
+}
+
+pub async fn store_embeddings(
+    embeddings_and_points: (Vec<Embedding>, Vec<PointStruct>),
+    vector_db_client: Arc<qdrant_client::Qdrant>,
+    db_pool: Arc<DbPool>,
+) -> Result<()> {
+    let (embeddings, points) = embeddings_and_points;
+
+    vector_db_client
+        .upsert_points(UpsertPointsBuilder::new("article_embeddings", points))
+        .await?;
+
+    embeddings.iter().for_each(|embedding| {
+        embedding
+            .store(&mut db_pool.get().expect("Failed to get DB connection"))
+            .expect("Failed to store embedding");
+    });
+
+    Ok(())
 }
