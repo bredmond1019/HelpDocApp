@@ -35,8 +35,9 @@ impl Collection {
 
     pub fn store(&self, conn: &mut PgConnection) -> Result<(), diesel::result::Error> {
         use crate::schema::collections::dsl::*;
+        use diesel::result::Error;
 
-        diesel::insert_into(collections)
+        match diesel::insert_into(collections)
             .values(self)
             .on_conflict(id)
             .do_update()
@@ -46,9 +47,19 @@ impl Collection {
                 slug.eq(&self.slug),
                 updated_at.eq(self.updated_at),
             ))
-            .execute(conn)?;
-
-        Ok(())
+            .execute(conn)
+        {
+            Ok(_) => Ok(()),
+            Err(Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, info)) => {
+                if info.constraint_name() == Some("collections_slug_key") {
+                    println!("Skipping insert due to duplicate slug: {}", self.slug);
+                    Ok(())
+                } else {
+                    Err(Error::DatabaseError(diesel::result::DatabaseErrorKind::UniqueViolation, info))
+                }
+            }
+            Err(e) => Err(e),
+        }
     }
 }
 

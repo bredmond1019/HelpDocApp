@@ -1,6 +1,7 @@
 // File: src/data_processing/fetcher.rs
 
 use anyhow::Result;
+use log::info;
 use reqwest;
 use serde_json::{from_value, Value};
 use std::env;
@@ -46,7 +47,11 @@ impl ApiClient {
     pub async fn get_list_collections(&self) -> Result<Vec<Collection>> {
         let data = self.get("/v1/collections").await?;
         let collection_response: CollectionResponse = from_value(data)?;
+        info!("API Response | List Collections: {:?}", collection_response.collections.items.len());
+        println!("API Response | List Collections: {:?}", collection_response.collections.items.len());
         let collection_data = collection_response.collections;
+        info!("Found {:?} collections", collection_data.items.len());
+        println!("Found {:?} collections", collection_data.items.len());
 
         let mut collections: Vec<Collection> = Vec::new();
 
@@ -63,6 +68,8 @@ impl ApiClient {
     pub async fn get_collection(&self, id: &str) -> Result<Collection> {
         let data = self.get(&format!("/v1/collections/{}", id)).await?;
         let collection_item: CollectionItem = from_value(data["collection"].clone())?;
+        info!("API Response | Get Collection: {:?}", collection_item.id);
+        println!("API Response | Get Collection: {:?}", collection_item.id);
         parse_collection(&collection_item)
     }
 
@@ -73,9 +80,12 @@ impl ApiClient {
                 collection.helpscout_collection_id
             ))
             .await?;
-
         let api_response: ArticleResponse = from_value(data)?;
+        info!("API Response | List Articles: {:?}", api_response.articles.items.len());
+        println!("API Response | List Articles: {:?}", api_response.articles.items.len());
         let article_data = api_response.articles;
+        info!("Found {:?} articles in collection: {:?}", article_data.items.len(), collection.slug);
+        println!("Found {:?} articles in collection: {:?}", article_data.items.len(), collection.slug);
 
         let mut articles_refs: Vec<ArticleRef> = Vec::new();
 
@@ -97,7 +107,12 @@ impl ApiClient {
     pub async fn get_article(&self, id: &str, collection: &Collection) -> Result<Article> {
         let data = self.get(&format!("/v1/articles/{}", id)).await?;
         let api_response: ArticleFullResponse = from_value(data)?;
+        info!("API Response | Get Article: {:?}", api_response.article.id);
+        println!("API Response | Get Article: {:?}", api_response.article.id);
         let article = api_response.article;
+        info!("Found article: ID:{:?}, Title: {:?}", article.id, article.name);
+        println!("Found article: ID:{:?}, Title: {:?}", article.id, article.name);
+
         parse_article(&article, collection)
     }
 }

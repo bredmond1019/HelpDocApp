@@ -5,9 +5,11 @@ use qdrant_client::qdrant::{
     vectors_config::Config, CreateCollection, Distance, VectorParams, VectorsConfig,
 };
 use qdrant_client::Qdrant;
+use std::env;
 
 pub async fn init_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>> {
-    let config = QdrantConfig::from_url("http://localhost:6334");
+    let qdrant_url = env::var("QDRANT_URL").expect("QDRANT_URL not set");
+    let config = QdrantConfig::from_url(&qdrant_url);
     let client = Qdrant::new(config)?;
 
     // Check if the collection already exists
@@ -40,7 +42,8 @@ pub async fn init_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>> {
 }
 
 pub async fn init_test_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>> {
-    let config = QdrantConfig::from_url("http://localhost:6334");
+    let qdrant_url = env::var("QDRANT_URL").unwrap_or_else(|_| "http://localhost:6334".to_string());
+    let config = QdrantConfig::from_url(&qdrant_url);
     let client = Qdrant::new(config)?;
 
     // Check if the collection already exists

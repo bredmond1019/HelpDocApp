@@ -3,7 +3,7 @@ use std::sync::Arc;
 use actix_web::{get, web, HttpResponse, Responder};
 use uuid::Uuid;
 
-use crate::jobs::JobQueue;
+use crate::job::JobQueue;
 
 #[get("/job/{job_id}/status")]
 pub async fn get_job_status(

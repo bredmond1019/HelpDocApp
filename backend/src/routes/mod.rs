@@ -6,6 +6,7 @@ pub mod job;
 pub mod parse;
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(index);  // Add this line
     cfg.service(parse::parse_data);
     cfg.service(get_collections);
     cfg.service(job::get_job_status);
@@ -16,7 +17,7 @@ use actix_web::{get, HttpResponse, Responder};
 use crate::data_processor::DataProcessor;
 
 #[get("/")]
-async fn index() -> impl Responder {
+pub async fn index() -> impl Responder {
     HttpResponse::Ok().body("Welcome to the backend API. It's working!")
 }
 

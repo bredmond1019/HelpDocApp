@@ -1,0 +1,696 @@
+2024-09-08 19:50:48 - INFO - Logger initialized successfully
+2024-09-08 19:50:48 - INFO - Starting application
+2024-09-08 19:50:50 - INFO - Logger initialized successfully
+2024-09-08 19:50:50 - INFO - Starting application
+2024-09-08 19:50:52 - INFO - Logger initialized successfully
+2024-09-08 19:50:52 - INFO - Starting application
+2024-09-08 21:00:31 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0" 0.002237
+2024-09-08 21:00:31 - INFO - 127.0.0.1 "GET /favicon.ico HTTP/1.1" 404 0 "http://localhost:3000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0" 0.000225
+2024-09-08 21:04:46 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:130.0) Gecko/20100101 Firefox/130.0" 0.000887
+2024-09-08 21:06:54 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000702
+2024-09-08 21:07:16 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000443
+2024-09-08 21:07:20 - ERROR - stream error: request parse error: invalid Header provided
+2024-09-08 21:07:25 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000488
+2024-09-08 21:07:48 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.001349
+2024-09-08 21:07:49 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000258
+2024-09-08 21:07:51 - INFO - 127.0.0.1 "GET / HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000266
+2024-09-08 21:09:58 - INFO - 127.0.0.1 "GET / HTTP/1.1" 200 41 "-" "insomnia/9.3.3" 0.002107
+2024-09-08 21:14:34 - INFO - 127.0.0.1 "GET /parse HTTP/1.1" 404 0 "-" "insomnia/9.3.3" 0.000334
+2024-09-08 21:14:56 - ERROR - Sync error: CollectionFetchError(missing field `collections`
+
+Stack backtrace:
+   0: std::backtrace_rs::backtrace::libunwind::trace
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/../../backtrace/src/backtrace/libunwind.rs:116:5
+   1: std::backtrace_rs::backtrace::trace_unsynchronized
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+   2: std::backtrace::Backtrace::create
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/backtrace.rs:331:13
+   3: anyhow::error::<impl core::convert::From<E> for anyhow::Error>::from
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/anyhow-1.0.87/src/backtrace.rs:27:14
+   4: <core::result::Result<T,F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible,E>>>::from_residual
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/result.rs:1989:27
+   5: backend::data_processor::api_client::ApiClient::get_list_collections::{{closure}}
+             at ./src/data_processor/api_client.rs:48:55
+   6: backend::routes::parse::start_job_queue::{{closure}}
+             at ./src/routes/parse.rs:31:10
+   7: <backend::routes::parse::parse_data as actix_web::service::HttpServiceFactory>::register::parse_data::{{closure}}
+             at ./src/routes/parse.rs:12:54
+   8: actix_web::handler::handler_service::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/handler.rs:113:22
+   9: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  10: <actix_web::resource::Resource<T> as actix_web::service::HttpServiceFactory>::register::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/resource.rs:452:28
+  11: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  12: <actix_web::middleware::logger::LoggerResponse<S,B> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/middleware/logger.rs:361:32
+  13: <actix_cors::middleware::CorsMiddleware<S> as actix_service::Service<actix_web::service::ServiceRequest>>::call::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-cors-0.7.0/src/middleware.rs:239:27
+  14: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  15: <actix_service::map_err::MapErrFuture<A,Req,F,E> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-service-2.0.2/src/map_err.rs:99:9
+  16: actix_http::h1::dispatcher::InnerDispatcher<T,S,B,X,U>::poll_response
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/h1/dispatcher.rs:466:27
+  17: <actix_http::h1::dispatcher::Dispatcher<T,S,B,X,U> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/h1/dispatcher.rs:1128:43
+  18: <actix_http::service::HttpServiceHandlerResponse<T,S,B,X,U> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/service.rs:1052:45
+  19: <actix_service::and_then::AndThenServiceResponse<A,B,Req> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-service-2.0.2/src/and_then.rs:114:37
+  20: <actix_server::service::StreamService<S,I> as actix_service::Service<(actix_server::worker::WorkerCounterGuard,actix_server::socket::MioStream)>>::call::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-server-2.5.0/src/service.rs:75:31
+  21: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  22: tokio::runtime::task::core::Core<T,S>::poll::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/core.rs:331:17
+  23: tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/loom/std/unsafe_cell.rs:16:9
+  24: tokio::runtime::task::core::Core<T,S>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/core.rs:320:13
+  25: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:500:19
+  26: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/panic/unwind_safe.rs:272:9
+  27: std::panicking::try::do_call
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:557:40
+  28: ___rust_try
+  29: std::panicking::try
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:521:19
+  30: std::panic::catch_unwind
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panic.rs:350:14
+  31: tokio::runtime::task::harness::poll_future
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:488:18
+  32: tokio::runtime::task::harness::Harness<T,S>::poll_inner
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:209:27
+  33: tokio::runtime::task::harness::Harness<T,S>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:154:15
+  34: tokio::runtime::task::raw::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/raw.rs:271:5
+  35: tokio::runtime::task::raw::RawTask::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/raw.rs:201:18
+  36: tokio::runtime::task::LocalNotified<S>::run
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/mod.rs:436:9
+  37: tokio::task::local::LocalSet::tick::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:693:63
+  38: tokio::runtime::coop::with_budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:107:5
+  39: tokio::runtime::coop::budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:73:5
+  40: tokio::task::local::LocalSet::tick
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:693:31
+  41: <tokio::task::local::RunUntil<T> as core::future::future::Future>::poll::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:999:16
+  42: tokio::task::local::LocalSet::with::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:747:13
+  43: std::thread::local::LocalKey<T>::try_with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:283:12
+  44: std::thread::local::LocalKey<T>::with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:260:9
+  45: tokio::task::local::LocalSet::with
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:745:9
+  46: <tokio::task::local::RunUntil<T> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:985:9
+  47: tokio::task::local::LocalSet::run_until::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:639:19
+  48: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  49: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:696:57
+  50: tokio::runtime::coop::with_budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:107:5
+  51: tokio::runtime::coop::budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:73:5
+  52: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:696:25
+  53: tokio::runtime::scheduler::current_thread::Context::enter
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:423:19
+  54: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:695:36
+  55: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:774:68
+  56: tokio::runtime::context::scoped::Scoped<T>::set
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context/scoped.rs:40:9
+  57: tokio::runtime::context::set_scheduler::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context.rs:180:26
+  58: std::thread::local::LocalKey<T>::try_with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:283:12
+  59: std::thread::local::LocalKey<T>::with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:260:9
+  60: tokio::runtime::context::set_scheduler
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context.rs:180:9
+  61: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:774:27
+  62: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:683:19
+  63: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:191:28
+  64: tokio::runtime::context::runtime::enter_runtime
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context/runtime.rs:65:16
+  65: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:179:9
+  66: tokio::runtime::runtime::Runtime::block_on_inner
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/runtime.rs:361:47
+  67: tokio::runtime::runtime::Runtime::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/runtime.rs:335:13
+  68: tokio::task::local::LocalSet::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:596:9
+  69: actix_rt::runtime::Runtime::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-rt-2.10.0/src/runtime.rs:138:9
+  70: actix_rt::arbiter::Arbiter::with_tokio_rt::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-rt-2.10.0/src/arbiter.rs:143:21
+  71: std::sys::backtrace::__rust_begin_short_backtrace
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/sys/backtrace.rs:152:18
+  72: std::thread::Builder::spawn_unchecked_::{{closure}}::{{closure}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/mod.rs:538:17
+  73: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/panic/unwind_safe.rs:272:9
+  74: std::panicking::try::do_call
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:557:40
+  75: ___rust_try
+  76: std::panicking::try
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:521:19
+  77: std::panic::catch_unwind
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panic.rs:350:14
+  78: std::thread::Builder::spawn_unchecked_::{{closure}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/mod.rs:537:30
+  79: core::ops::function::FnOnce::call_once{{vtable.shim}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/ops/function.rs:250:5
+  80: <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/alloc/src/boxed.rs:2070:9
+  81: <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/alloc/src/boxed.rs:2070:9
+  82: std::sys::pal::unix::thread::Thread::new::thread_start
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/sys/pal/unix/thread.rs:108:17
+  83: __pthread_joiner_wake)
+2024-09-08 21:14:56 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 500 15254 "-" "insomnia/9.3.3" 0.763123
+2024-09-09 09:36:46 - ERROR - Sync error: CollectionFetchError(missing field `collections`
+
+Stack backtrace:
+   0: std::backtrace_rs::backtrace::libunwind::trace
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/../../backtrace/src/backtrace/libunwind.rs:116:5
+   1: std::backtrace_rs::backtrace::trace_unsynchronized
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/../../backtrace/src/backtrace/mod.rs:66:5
+   2: std::backtrace::Backtrace::create
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/backtrace.rs:331:13
+   3: anyhow::error::<impl core::convert::From<E> for anyhow::Error>::from
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/anyhow-1.0.87/src/backtrace.rs:27:14
+   4: <core::result::Result<T,F> as core::ops::try_trait::FromResidual<core::result::Result<core::convert::Infallible,E>>>::from_residual
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/result.rs:1989:27
+   5: backend::data_processor::api_client::ApiClient::get_list_collections::{{closure}}
+             at ./src/data_processor/api_client.rs:49:55
+   6: backend::routes::parse::start_job_queue::{{closure}}
+             at ./src/routes/parse.rs:31:10
+   7: <backend::routes::parse::parse_data as actix_web::service::HttpServiceFactory>::register::parse_data::{{closure}}
+             at ./src/routes/parse.rs:12:54
+   8: actix_web::handler::handler_service::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/handler.rs:113:22
+   9: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  10: <actix_web::resource::Resource<T> as actix_web::service::HttpServiceFactory>::register::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/resource.rs:452:28
+  11: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  12: <actix_web::middleware::logger::LoggerResponse<S,B> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-web-4.9.0/src/middleware/logger.rs:361:32
+  13: <actix_cors::middleware::CorsMiddleware<S> as actix_service::Service<actix_web::service::ServiceRequest>>::call::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-cors-0.7.0/src/middleware.rs:239:27
+  14: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  15: <actix_service::map_err::MapErrFuture<A,Req,F,E> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-service-2.0.2/src/map_err.rs:99:9
+  16: actix_http::h1::dispatcher::InnerDispatcher<T,S,B,X,U>::poll_response
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/h1/dispatcher.rs:466:27
+  17: <actix_http::h1::dispatcher::Dispatcher<T,S,B,X,U> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/h1/dispatcher.rs:1128:43
+  18: <actix_http::service::HttpServiceHandlerResponse<T,S,B,X,U> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-http-3.9.0/src/service.rs:1052:45
+  19: <actix_service::and_then::AndThenServiceResponse<A,B,Req> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-service-2.0.2/src/and_then.rs:114:37
+  20: <actix_server::service::StreamService<S,I> as actix_service::Service<(actix_server::worker::WorkerCounterGuard,actix_server::socket::MioStream)>>::call::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-server-2.5.0/src/service.rs:75:31
+  21: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  22: tokio::runtime::task::core::Core<T,S>::poll::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/core.rs:331:17
+  23: tokio::loom::std::unsafe_cell::UnsafeCell<T>::with_mut
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/loom/std/unsafe_cell.rs:16:9
+  24: tokio::runtime::task::core::Core<T,S>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/core.rs:320:13
+  25: tokio::runtime::task::harness::poll_future::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:500:19
+  26: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/panic/unwind_safe.rs:272:9
+  27: std::panicking::try::do_call
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:557:40
+  28: ___rust_try
+  29: std::panicking::try
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:521:19
+  30: std::panic::catch_unwind
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panic.rs:350:14
+  31: tokio::runtime::task::harness::poll_future
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:488:18
+  32: tokio::runtime::task::harness::Harness<T,S>::poll_inner
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:209:27
+  33: tokio::runtime::task::harness::Harness<T,S>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/harness.rs:154:15
+  34: tokio::runtime::task::raw::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/raw.rs:271:5
+  35: tokio::runtime::task::raw::RawTask::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/raw.rs:201:18
+  36: tokio::runtime::task::LocalNotified<S>::run
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/task/mod.rs:436:9
+  37: tokio::task::local::LocalSet::tick::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:693:63
+  38: tokio::runtime::coop::with_budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:107:5
+  39: tokio::runtime::coop::budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:73:5
+  40: tokio::task::local::LocalSet::tick
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:693:31
+  41: <tokio::task::local::RunUntil<T> as core::future::future::Future>::poll::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:999:16
+  42: tokio::task::local::LocalSet::with::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:747:13
+  43: std::thread::local::LocalKey<T>::try_with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:283:12
+  44: std::thread::local::LocalKey<T>::with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:260:9
+  45: tokio::task::local::LocalSet::with
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:745:9
+  46: <tokio::task::local::RunUntil<T> as core::future::future::Future>::poll
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:985:9
+  47: tokio::task::local::LocalSet::run_until::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:639:19
+  48: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/future/future.rs:123:9
+  49: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:696:57
+  50: tokio::runtime::coop::with_budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:107:5
+  51: tokio::runtime::coop::budget
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/coop.rs:73:5
+  52: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:696:25
+  53: tokio::runtime::scheduler::current_thread::Context::enter
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:423:19
+  54: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:695:36
+  55: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:774:68
+  56: tokio::runtime::context::scoped::Scoped<T>::set
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context/scoped.rs:40:9
+  57: tokio::runtime::context::set_scheduler::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context.rs:180:26
+  58: std::thread::local::LocalKey<T>::try_with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:283:12
+  59: std::thread::local::LocalKey<T>::with
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/local.rs:260:9
+  60: tokio::runtime::context::set_scheduler
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context.rs:180:9
+  61: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:774:27
+  62: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:683:19
+  63: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:191:28
+  64: tokio::runtime::context::runtime::enter_runtime
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/context/runtime.rs:65:16
+  65: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/scheduler/current_thread/mod.rs:179:9
+  66: tokio::runtime::runtime::Runtime::block_on_inner
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/runtime.rs:361:47
+  67: tokio::runtime::runtime::Runtime::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/runtime/runtime.rs:335:13
+  68: tokio::task::local::LocalSet::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/tokio-1.40.0/src/task/local.rs:596:9
+  69: actix_rt::runtime::Runtime::block_on
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-rt-2.10.0/src/runtime.rs:138:9
+  70: actix_rt::arbiter::Arbiter::with_tokio_rt::{{closure}}
+             at /Users/brandon/.cargo/registry/src/index.crates.io-6f17d22bba15001f/actix-rt-2.10.0/src/arbiter.rs:143:21
+  71: std::sys::backtrace::__rust_begin_short_backtrace
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/sys/backtrace.rs:152:18
+  72: std::thread::Builder::spawn_unchecked_::{{closure}}::{{closure}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/mod.rs:538:17
+  73: <core::panic::unwind_safe::AssertUnwindSafe<F> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/panic/unwind_safe.rs:272:9
+  74: std::panicking::try::do_call
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:557:40
+  75: ___rust_try
+  76: std::panicking::try
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panicking.rs:521:19
+  77: std::panic::catch_unwind
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/panic.rs:350:14
+  78: std::thread::Builder::spawn_unchecked_::{{closure}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/thread/mod.rs:537:30
+  79: core::ops::function::FnOnce::call_once{{vtable.shim}}
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/core/src/ops/function.rs:250:5
+  80: <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/alloc/src/boxed.rs:2070:9
+  81: <alloc::boxed::Box<F,A> as core::ops::function::FnOnce<Args>>::call_once
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/alloc/src/boxed.rs:2070:9
+  82: std::sys::pal::unix::thread::Thread::new::thread_start
+             at /rustc/eeb90cda1969383f56a2637cbd3037bdf598841c/library/std/src/sys/pal/unix/thread.rs:108:17
+  83: __pthread_joiner_wake)
+2024-09-09 09:36:46 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 500 15254 "-" "insomnia/9.3.3" 0.964721
+2024-09-09 09:38:57 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:38:57 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:05 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:05 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:06 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:07 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:09 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:10 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:10 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:10 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:10 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:12 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:12 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:13 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:14 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:14 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:21 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:24 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:26 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:27 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:29 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:46 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:47 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:49 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:51 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:52 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:52 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:52 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 200 14638 "-" "insomnia/9.3.3" 58.491119
+2024-09-09 09:39:52 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:54 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:56 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:56 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:58 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:39:58 - ERROR - Sync job failed: missing field `related`
+2024-09-09 09:53:34 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.002450
+2024-09-09 09:53:35 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:53:38 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:53:46 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:53:55 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:53:57 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:54:01 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:54:08 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:54:16 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:54:25 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 09:54:33 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:09 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001300
+2024-09-09 10:08:10 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:13 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:21 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:29 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:31 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:36 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:08:43 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:16:35 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.002512
+2024-09-09 10:16:37 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:16:39 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:16:47 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:16:56 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:16:58 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:17:03 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:17:09 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:17:17 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:17:26 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:17:35 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:22:00 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001175
+2024-09-09 10:22:01 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:22:04 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:22:12 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:25:52 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.000928
+2024-09-09 10:25:54 - ERROR - Sync job failed: duplicate key value violates unique constraint "collections_slug_key"
+2024-09-09 10:32:38 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.002576
+2024-09-09 10:34:49 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001426
+2024-09-09 10:35:39 - ERROR - Sync job failed: error sending request for url (https://docsapi.helpscout.net/v1/articles/5bd4b24b04286356f0a524c1)
+2024-09-09 11:03:58 - INFO - Logger initialized successfully
+2024-09-09 11:03:58 - INFO - Starting application
+2024-09-09 11:03:58 - INFO - Starting worker
+2024-09-09 11:03:58 - INFO - Starting worker
+2024-09-09 11:03:58 - INFO - Starting worker
+2024-09-09 11:03:58 - INFO - Starting worker
+2024-09-09 11:03:58 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:03:58 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:03:58 - INFO - starting 8 workers
+2024-09-09 11:03:58 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:03:58 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:04:41 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001839
+2024-09-09 11:04:42 - INFO - API Response | List Collections: 10
+2024-09-09 11:04:42 - INFO - Found 10 collections
+2024-09-09 11:04:42 - INFO - Preparing to sync collection: ID:bb9ccef7-1552-41b7-94c6-d160ede5e88b, Slug: "account-set-up"
+2024-09-09 11:04:42 - INFO - API Response | List Articles: 12
+2024-09-09 11:04:42 - INFO - Found 12 articles in collection: "account-set-up"
+2024-09-09 11:04:42 - INFO - Preparing to sync collection: ID:9f8234dc-7036-435c-83d9-4d2bc6e91ac4, Slug: "setup"
+2024-09-09 11:04:42 - INFO - Storing collection: ID:bb9ccef7-1552-41b7-94c6-d160ede5e88b, Slug: "account-set-up"
+2024-09-09 11:04:42 - INFO - Starting sync job: c6b774d4-08a6-427b-8e90-1270c7494157
+2024-09-09 11:04:42 - INFO - Sync job completed successfully: c6b774d4-08a6-427b-8e90-1270c7494157
+2024-09-09 11:04:43 - INFO - API Response | List Articles: 50
+2024-09-09 11:04:43 - INFO - Found 50 articles in collection: "setup"
+2024-09-09 11:04:43 - INFO - API Response | Get Article: "5d4819ee2c7d3a330e3c1609"
+2024-09-09 11:04:43 - INFO - Found article: ID:"5d4819ee2c7d3a330e3c1609", Title: "Deactivate your client account"
+2024-09-09 11:04:43 - INFO - Starting Jobs for article: ID:b422ceb8-ecce-4c91-a123-8261032e4eb1, Title: "Deactivate your client account"
+2024-09-09 11:04:43 - INFO - API Response | Get Article: "5bd666032c7d3a01757a8170"
+2024-09-09 11:04:43 - INFO - Found article: ID:"5bd666032c7d3a01757a8170", Title: "Healthie iOS and Android Apps"
+2024-09-09 11:04:43 - INFO - Starting Jobs for article: ID:0d838282-bcc1-43bd-82e4-145a936a865e, Title: "Healthie iOS and Android Apps"
+2024-09-09 11:04:43 - INFO - API Response | Get Article: "5bd6672b2c7d3a01757a8179"
+2024-09-09 11:04:43 - INFO - Found article: ID:"5bd6672b2c7d3a01757a8179", Title: "Activate your client account"
+2024-09-09 11:04:43 - INFO - Starting Jobs for article: ID:74fe687f-24e9-44e9-a982-0b7997a88dd7, Title: "Activate your client account"
+2024-09-09 11:04:43 - INFO - API Response | Get Article: "5bd6664104286356f0a5292f"
+2024-09-09 11:04:43 - INFO - Found article: ID:"5bd6664104286356f0a5292f", Title: "About Healthie"
+2024-09-09 11:04:43 - INFO - Starting Jobs for article: ID:152ff988-04a7-464a-b216-a175f71f8d23, Title: "About Healthie"
+2024-09-09 11:05:44 - INFO - SIGINT received; starting forced shutdown
+2024-09-09 11:05:44 - INFO - accept thread stopped
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:05:44 - INFO - shutting down idle worker
+2024-09-09 11:21:03 - INFO - Logger initialized successfully
+2024-09-09 11:21:03 - INFO - Starting application
+2024-09-09 11:21:03 - INFO - Starting worker
+2024-09-09 11:21:03 - INFO - Starting worker
+2024-09-09 11:21:03 - INFO - Starting worker
+2024-09-09 11:21:03 - INFO - Starting worker
+2024-09-09 11:21:03 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:21:03 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:21:03 - INFO - starting 8 workers
+2024-09-09 11:21:03 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:21:03 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:21:43 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:21:47 - INFO - Logger initialized successfully
+2024-09-09 11:21:47 - INFO - Starting application
+2024-09-09 11:21:48 - INFO - Starting worker
+2024-09-09 11:21:48 - INFO - Starting worker
+2024-09-09 11:21:48 - INFO - Starting worker
+2024-09-09 11:21:48 - INFO - Starting worker
+2024-09-09 11:21:48 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:21:48 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:21:48 - INFO - starting 8 workers
+2024-09-09 11:21:48 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:21:48 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:21:53 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:21:58 - INFO - Logger initialized successfully
+2024-09-09 11:21:58 - INFO - Starting application
+2024-09-09 11:21:58 - INFO - Starting worker
+2024-09-09 11:21:58 - INFO - Starting worker
+2024-09-09 11:21:58 - INFO - Starting worker
+2024-09-09 11:21:58 - INFO - Starting worker
+2024-09-09 11:21:58 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:21:58 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:21:58 - INFO - starting 8 workers
+2024-09-09 11:21:58 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:21:58 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:22:08 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001987
+2024-09-09 11:22:09 - INFO - API Response | List Collections: 10
+2024-09-09 11:22:09 - INFO - Found 10 collections
+2024-09-09 11:22:09 - INFO - Preparing to sync collection: ID:f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, Slug: "account-set-up"
+2024-09-09 11:22:10 - INFO - API Response | List Articles: 12
+2024-09-09 11:22:10 - INFO - Found 12 articles in collection: "account-set-up"
+2024-09-09 11:22:10 - INFO - Starting to process job: StoreCollection(Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: c8946acb-19ed-4080-aa63-948472e611d2)
+2024-09-09 11:22:10 - INFO - Preparing to sync collection: ID:17bb9110-ba1e-4d1f-94f3-0995cfacc4d1, Slug: "setup"
+2024-09-09 11:22:10 - INFO - Processing StoreCollection for collection: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd
+2024-09-09 11:22:10 - INFO - Storing collection: ID:f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, Slug: "account-set-up"
+2024-09-09 11:22:10 - INFO - StoreCollection completed for collection: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd
+2024-09-09 11:22:10 - INFO - Finished processing job: StoreCollection(Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: c8946acb-19ed-4080-aa63-948472e611d2)
+2024-09-09 11:22:10 - INFO - Starting sync job: c8946acb-19ed-4080-aa63-948472e611d2
+2024-09-09 11:22:10 - INFO - Sync job completed successfully: c8946acb-19ed-4080-aa63-948472e611d2
+2024-09-09 11:22:10 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd666032c7d3a01757a8170", number: 211, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Healthie iOS and Android Apps", public_url: "https://clienthelp.gethealthie.com/article/211-getting-started-with-healthie-mobile-app", popularity: 5.0, view_count: 9839, created_by: 317667, updated_by: Some(771888), created_at: "2018-10-29T01:44:35Z", updated_at: Some("2024-08-12T17:58:34Z"), last_published_at: "2024-08-12T17:58:34Z" }, Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: b91e082f-36b7-40a3-b317-a37e8a352d80)
+2024-09-09 11:22:10 - INFO - Processing SyncArticle for article: 5bd666032c7d3a01757a8170
+2024-09-09 11:22:10 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd6672b2c7d3a01757a8179", number: 217, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Activate your client account", public_url: "https://clienthelp.gethealthie.com/article/217-welcome-e-mail-from-provider", popularity: 3.3, view_count: 6488, created_by: 317667, updated_by: Some(718959), created_at: "2018-10-29T01:49:31Z", updated_at: Some("2023-06-28T20:05:38Z"), last_published_at: "2023-06-28T20:05:38Z" }, Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: b8217a2f-cebd-46b1-aa0e-8907f763c8b6)
+2024-09-09 11:22:10 - INFO - Processing SyncArticle for article: 5bd6672b2c7d3a01757a8179
+2024-09-09 11:22:10 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5d4819ee2c7d3a330e3c1609", number: 380, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Deactivate your client account", public_url: "https://clienthelp.gethealthie.com/article/380-deactivate-client-account", popularity: 2.4, view_count: 4705, created_by: 317667, updated_by: Some(718959), created_at: "2019-08-05T11:58:38Z", updated_at: Some("2023-06-12T17:32:16Z"), last_published_at: "2023-06-12T17:32:16Z" }, Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: 4ec3fa5f-0da5-4fdf-a0a9-81ef8e8d2eaa)
+2024-09-09 11:22:10 - INFO - Processing SyncArticle for article: 5d4819ee2c7d3a330e3c1609
+2024-09-09 11:22:10 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd6664104286356f0a5292f", number: 213, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "About Healthie", public_url: "https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform", popularity: 2.1, view_count: 4162, created_by: 317667, updated_by: Some(360818), created_at: "2018-10-29T01:45:37Z", updated_at: Some("2024-02-13T15:25:28Z"), last_published_at: "2024-02-13T15:25:28Z" }, Collection { id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:22:09.844378Z, updated_at: 2024-09-09T14:22:09.844379Z }) (ID: 09e0d861-4563-4881-b0f7-0787c7a663b7)
+2024-09-09 11:22:10 - INFO - Processing SyncArticle for article: 5bd6664104286356f0a5292f
+2024-09-09 11:22:10 - INFO - API Response | List Articles: 50
+2024-09-09 11:22:10 - INFO - Found 50 articles in collection: "setup"
+2024-09-09 11:22:10 - INFO - API Response | Get Article: "5bd6672b2c7d3a01757a8179"
+2024-09-09 11:22:10 - INFO - Found article: ID:"5bd6672b2c7d3a01757a8179", Title: "Activate your client account"
+2024-09-09 11:22:10 - INFO - Starting Jobs for article: ID:635d4c09-53a7-4537-a44b-482dd5d80860, Title: "Activate your client account"
+2024-09-09 11:22:10 - INFO - Enqueueing new job from SyncArticle: StoreArticle(Article { id: 635d4c09-53a7-4537-a44b-482dd5d80860, collection_id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, title: "Activate your client account", slug: "welcome-e-mail-from-provider", html_content: Some("<p data-children-count=\"0\">\n\t Before you begin working with your provider, it is important that you activate and set up your Healthie account. This way, you can access all of the information your provider has shared with you through the platform and leverage features to support you on your journey.</p><section class=\"callout-blue\" data-children-count=\"0\"><h4>IN THIS ARTICLE:</h4><ul>\n\t\n<li><a href=\"#Section1\">Set up your Healthie Account</a></li>\t\n<li><a href=\"#Section2\">No email or link expired?</a></li>\t\n<li><a href=\"#Section3\">Change your email address or password</a></li>\t\n<li><a href=\"#Section4\">Optimize the performance of Healthie</a></li>\t\n<li><a href=\"#Section5\">Log out of your account</a></li></ul></section><hr role=\"separator\"><h2 data-children-count=\"0\">Set up your Healthie Account</h2><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/649c8be41f9ba00c2bcf9699/file-J7KkvfRlmL.png\" style=\"width: 100%; max-width: 100%; \" /></p><p data-children-count=\"0\">\n\t To activate your client account, click on an e-mail from your provider that you should receive in your inbox. The subject line will ask you&nbsp;to accept your provider's invite to Healthie. You will receive this invite if you:</p><ul data-children-count=\"0\">\n\t\n<li>Book an appointment from your provider's website or social media</li>\t\n<li>Are invited to the Healthie platform directly from your provider's Healthie account&nbsp;</li></ul><p data-children-count=\"0\">\n\t In this e-mail, you will see a button to \"<b>Accept Invite</b>\" and set up your account. Click on this link, and you'll be asked to set up your password to access the system. Your username is the e-mail address where you received the Healthie invite.&nbsp;</p><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/649c8c6074f970393a8b0818/file-427pH8M5Ej.png\" style=\"width: 88.11%; max-width: 100%; \" /></p><p data-children-count=\"0\">\n\t After setting up your e-mail and password, you'll have access to the Healthie client portal and the resources that your provider has shared with you. You may be asked to fill out some forms, view documents, book an appointment, and message with your provider.&nbsp; <img src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/60ca13a29e87cb3d01244421/file-u6wY2hYjs2.png\" style=\"width: 562px;\"></p><hr role=\"separator\"><h2 data-children-count=\"0\"><b style=\"background-color: initial;\">No Email or Link Expired?</b></h2><p data-children-count=\"0\">\n\t <b style=\"background-color: initial;\">If you do not see an e-mail in your inbox, or this link has expired, you may:&nbsp;</b></p><ul data-children-count=\"0\">\n\t\n<li>Check your Spam folder OR&nbsp;</li>\t\n<li><a href=\"https://gethealthie.com/users/password/forgot\">Reset your password</a> to trigger an e-mail to your personal inbox OR</li>\t\n<li>Check other e-mail address inboxes that you have, to confirm that you are in the e-mail inbox that you provided to your provider OR</li>\t\n<li>E-mail your provider directly to request that they re-send your invite link</li></ul><p data-children-count=\"0\">\n\t<strong>The Healthie mobile app and web platform cannot be used without being linked to a healthcare provider. </strong>You must be working with a healthcare provider that uses Healthie at their practice in order to create a client account within Healthie.</p><p data-children-count=\"0\">\n\t <b>Note:&nbsp;</b>If you are using a work-related or university e-mail address, occasionally, restrictions and privacy settings will prevent Healthie e-mails from reaching your inbox. In this instance, please reach out to your email system administrator to enable e-mails from <em>gethealthie.com</em>.&nbsp;</p><hr role=\"separator\"><h2 data-children-count=\"0\"><strong>Change your Email Address or Password</strong></h2><ul data-children-count=\"0\">\n\t\n<li><strong>Email address:</strong> If you would like to change the e-mail address that you use to log into Healthie, you will need to reach out to your provider (<a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\" target=\"_blank\">such as via Chat</a>). They will be able to change the email address that you use to log in to your Healthie client account. Please note that you are not able to change your email address independently of your provider.</li>\t\n<li><strong>Password</strong>: You can reset your password <a href=\"https://secure.gethealthie.com/users/password/forgot\" target=\"_blank\">here</a>. Here is some additional information on the <a href=\"https://clienthelp.gethealthie.com/article/215-reset-change-password\" target=\"_blank\">reset password process</a>.&nbsp; &nbsp;</li></ul><hr role=\"separator\"><h2 data-children-count=\"0\"> <strong>Optimize the performance of Healthie&nbsp;</strong></h2><p data-children-count=\"0\">\n\t We recommend ensuring that your computer has sufficient memory in order to operate Healthie. If you are experiencing any lagging in page loading, we recommend closing any unnecessary tabs and applications that may be taking internal server space on your computer, and possibly even restarting your computer / mobile device to force close programs that may be running in the background.&nbsp;</p><hr role=\"separator\"><h2 data-children-count=\"0\">Log out of your account</h2><p data-children-count=\"0\">\n\t <strong>From the mobile app: </strong>To log out of your account from the mobile app, navigate to the main menu, and click \"Sign Out.\" When you sign out, no data or information will be lost, and you will be able to log in and pick up where you left off.&nbsp;</p><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/649c8ed4b71911316e40006d/file-Vx8lFVH13z.jpg\" style=\"max-width: 100%; \" /></p><p data-children-count=\"0\">\n\t <strong>From the web platform: </strong>To log out of your account from the web platform, navigate to the main menu (on the top right), and&nbsp;click \"Sign Out.\" When you sign out, no data or information will be lost, and you will be able to log in and pick up where you left off.</p><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/649c8e8174f970393a8b081c/file-ZV6s5Nsvws.png\" style=\"max-width: 100%; \" /></p><hr role=\"separator\"><h2>Needing to reach your provider?</h2><p>If you would like to reach your provider, we recommend that you <a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\">Message your Provider via Chat</a>. Within your account, navigate to\u{a0}<b>Chat</b> &gt; <b>Active</b>.\u{a0}</p><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/649c824ecfd7fe604a7fe2e2/file-Or87jUUI2e.png\" style=\"max-width: 100%; \" /></p>"), markdown_content: None, version: 0, last_edited_by: None, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", created_at: 2024-09-09T14:22:10.727446Z, updated_at: 2024-09-09T14:22:10.727446Z, helpscout_article_id: Some("5bd6672b2c7d3a01757a8179") })
+2024-09-09 11:22:10 - INFO - API Response | Get Article: "5bd666032c7d3a01757a8170"
+2024-09-09 11:22:10 - INFO - Found article: ID:"5bd666032c7d3a01757a8170", Title: "Healthie iOS and Android Apps"
+2024-09-09 11:22:10 - INFO - Starting Jobs for article: ID:a77f58bc-b3b1-424c-ab3a-1b9cd9daaa2e, Title: "Healthie iOS and Android Apps"
+2024-09-09 11:22:10 - INFO - Enqueueing new job from SyncArticle: StoreArticle(Article { id: a77f58bc-b3b1-424c-ab3a-1b9cd9daaa2e, collection_id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, title: "Healthie iOS and Android Apps", slug: "getting-started-with-healthie-mobile-app", html_content: Some("<p>Your Patient Portal can be accessed via a technology platform called Healthie. </p><p>Healthie is available on a computer (you can sign in\u{a0}<a href=\"https://gethealthie.com/users/sign_in\">here</a>) and through the companion mobile apps (<a href=\"https://itunes.apple.com/us/app/healthie-keeping-dietitians/id1112029170?mt=8&amp;ign-mpt=uo%3D4\">iOS app</a>\u{a0}and\u{a0}<a href=\"https://play.google.com/store/apps/details?id=com.healthie.app.healthie&amp;hl=en&amp;utm_source=global_co&amp;utm_medium=prtnr&amp;utm_content=Mar2515&amp;utm_campaign=PartBadge&amp;pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1\">Android app</a>).\u{a0}If downloading the mobile app, please make sure you see the logo depicted below to ensure you&#39;re downloading the correct app. \u{a0}</p><p>Accessing your Patient Portal from the mobile app makes it easy for you to stay in contact with your provider and benefit from the resources that they have offered you.\u{a0}</p><div class=\"callout-blue\"><h3>IN THIS ARTICLE</h3><ul><li><a href=\"#Logging-into-Your-Patient-Portal-ioUUq\" target=\"_blank\">Logging into Your Patient Portal</a> </li><li><a href=\"#Download-or-Update-the-Healthie-Mobile-App-b9LMH\" target=\"_blank\">Download (or Update) the Healthie Mobile App </a></li><li><a href=\"#Features-of-Your-Patient-Portal--mzOIb\" target=\"_blank\">Features of Your Patient Portal</a></li><li><a href=\"#FAQs-Mobile-App-6_lsR\" target=\"_blank\">FAQs: Mobile App</a></li><li><a href=\"#Need-to-Reach-Your-Provider-pCEn1\" target=\"_blank\">Reach Your Provider</a></li></ul></div><hr role=\"separator\"><h2 id=\"Logging-into-Your-Patient-Portal-ioUUq\">Logging into Your Patient Portal</h2><p>You can log into your Patient Portal from either the\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/245-accessing-a-one-on-one-video-session-with-your-provider#Join-a-Video-Call-from-the-Web-Browser-P2e1P\">web browser</a>\u{a0}or\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/245-accessing-a-one-on-one-video-session-with-your-provider#Join-a-Video-Call-from-the-Mobile-App--bJwlK\">mobile app</a>. This can be done after you&#39;ve set up your client account (you should have received an email invitation from your provider, learn more\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/217-welcome-e-mail-from-provider\">here</a>).</p><ul><li>Link to access your Patient Portal from the web browser:\u{a0}<a href=\"https://secure.gethealthie.com/users/sign_in\">https://secure.gethealthie.com/users/sign_in</a></li><li>Link to download the patient mobile app for\u{a0}<a href=\"https://play.google.com/store/apps/details?id=com.healthie.app.healthie&amp;hl=en&amp;utm_source=global_co&amp;utm_medium=prtnr&amp;utm_content=Mar2515&amp;utm_campaign=PartBadge&amp;pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1&amp;pli=1\">Android</a>\u{a0}and for\u{a0}<a href=\"https://apps.apple.com/us/app/healthie-keeping-dietitians/id1112029170?ign-mpt=uo%3D4\">iOS (Apple)</a>\u{a0}devices</li></ul><div class=\"callout-red\"><p><i>If you are having issues\u{a0}</i><a href=\"https://gethealthie.com/users/sign_in\"><i>logging into your account</i></a><i>, follow the instructions\u{a0}</i><a href=\"https://clienthelp.gethealthie.com/article/215-reset-change-password\"><i>here</i></a><i>\u{a0}to reset your password. Your username is your email address on file. </i></p></div><p>If you would like to connect with your provider directly (ie. to cancel, reschedule, or confirm your appointment) we recommend\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\" target=\"_blank\">messaging your provider via Chat</a>\u{a0}or at the contact they provided you.</p><hr role=\"separator\"><h2 id=\"Download-or-Update-the-Healthie-Mobile-App-b9LMH\">Download (or Update) the Healthie Mobile App</h2><ul><li>iOS App can be downloaded for Apple devices <a href=\"https://apps.apple.com/us/app/healthie-keeping-dietitians/id1112029170?ign-mpt=uo%3D4\"><b>here</b></a><b>. </b></li><li>Android App can be downloaded <a href=\"https://play.google.com/store/apps/details?id=com.healthie.app.healthie&amp;hl=en&amp;utm_source=global_co&amp;utm_medium=prtnr&amp;utm_content=Mar2515&amp;utm_campaign=PartBadge&amp;pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1\"><b>here</b></a><b>. </b></li></ul><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/65d75b2053788e77b07d41bf/file-ksDUQcZEig.png\" style=\"width: 342px; max-width: 100%; \" /></p><div class=\"callout-blue\"><p>Healthie is in the process of updating our app store icon. You can refresh the app by going to the app store and checking for updates. If you have automatic update settings enabled for the device, this update may have been done automatically, and you&#39;ll notice the new icon as shown above. </p></div><hr role=\"separator\"><h2 id=\"Features-of-Your-Patient-Portal--mzOIb\">Features of Your Patient Portal </h2><p>Your provider may customize your Patient Portal for their business, and even individually for you. Some functionality you may notice in your account includes: </p><ul><li>Food &amp; lifestyle tracking </li><li>Chat with your provider </li><li>Your upcoming appointments </li><li>Option to <a href=\"https://clienthelp.gethealthie.com/article/245-accessing-a-one-on-one-video-session-with-your-provider\">join video calls</a> if scheduled</li><li>Documents that you have uploaded (or your client has shared) </li><li>Packages of services to purchase</li><li>Forms to complete online </li><li>Invoices to pay, and a history of any charges for your account</li><li>Goals to complete </li><li>Lab results</li><li><a href=\"https://clienthelp.gethealthie.com/article/989-view-health-records\">Your health records</a></li><li>Educational programs to complete </li><li>Sync your wearable devices (may be disabled by your provider) </li><li>Log metrics (may be disabled by your provider) </li></ul><br><p>By default, some features are only available when logged into your account from the web browser (example of Patient Portal when logged in from a computer below) </p><p><img  src=\"https://s3.amazonaws.com/helpscout.net/docs/assets/5bbe96a22c7d3a04dd5b8761/images/6482220e969cec658daaf547/file-7HgNo0M4r9.png\" style=\"width: 100%; max-width: 100%; \" /></p><hr role=\"separator\"><h2 id=\"FAQs-Mobile-App-6_lsR\">FAQs: Mobile App</h2><p><strong>If I delete and re-install the app, will I lose information and previous entries that I have logged?</strong></p><p>It can sometimes be helpful to delete and re-install an app in order to ensure that you are on the latest version.\u{a0}If you delete and re-install the mobile app, you will NOT lose any information and/or previous entries that you have already logged.\u{a0}</p><p><strong>I am having issues downloading the mobile app. What should I do?\u{a0}</strong></p><p>The most common reason why you are finding difficulty downloading the mobile app is that you have a low amount of memory available on your device, and you will need to make more space on your device to successfully download the mobile app. We recommend checking the local memory on your device, and confirming that there is sufficient memory remaining.\u{a0}</p><p>How can I ensure I&#39;m on the latest version of the app? </p><p>If you have automatic updates enabled for your device within your settings, your apps should automatically update when a new release is available. However, you can always confirm this by navigating to the app store, and hitting the &quot;Update&quot; option if one is available (otherwise you&#39;ll see the button read &quot;Open&quot; if you&#39;re on the latest version). </p><hr role=\"separator\"><h2 id=\"Need-to-Reach-Your-Provider-pCEn1\">Need to Reach Your Provider?</h2><p>If you would like to reach your provider, we recommend that you\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\">Message Your Provider via Chat</a>. Within your account, navigate to\u{a0}Chat &gt; New Chat Message.\u{a0}</p><p>It is possible that your provider is not currently using Chat as a form of communication with patients. In the event that you cannot access your account, or locate Chat, please reach out to your provider through another means they have provided (ie. office email or phone number).</p><div class=\"callout-red\"><p>Healthie is a technology platform and not directly involved with patient care. We are unable to direct any requests or messages on behalf of a patient to their care provider. We apologize for the inconvenience.</p></div>"), markdown_content: None, version: 0, last_edited_by: None, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", created_at: 2024-09-09T14:22:10.769917Z, updated_at: 2024-09-09T14:22:10.769918Z, helpscout_article_id: Some("5bd666032c7d3a01757a8170") })
+2024-09-09 11:22:10 - INFO - API Response | Get Article: "5d4819ee2c7d3a330e3c1609"
+2024-09-09 11:22:10 - INFO - Found article: ID:"5d4819ee2c7d3a330e3c1609", Title: "Deactivate your client account"
+2024-09-09 11:22:10 - INFO - Starting Jobs for article: ID:c4d1f01b-c7ab-4b87-ba1d-2e3ed37e6364, Title: "Deactivate your client account"
+2024-09-09 11:22:10 - INFO - Enqueueing new job from SyncArticle: StoreArticle(Article { id: c4d1f01b-c7ab-4b87-ba1d-2e3ed37e6364, collection_id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, title: "Deactivate your client account", slug: "deactivate-client-account", html_content: Some("<p>There may be instances in which you are looking to deactivate your account as the client of a provider on Healthie. For example, this may occur if:</p><ul><li>You have a new provider</li><li>You are no longer working with a provider</li></ul><p>In this instance, please <a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\" target=\"_blank\">message your provider through chat</a>, and they will know to archive your account. Providers will help with accessing account information, personal information, and financial information depending on their business and legal policies.\u{a0}</p><hr role=\"separator\"><h2>Permanently Delete Your Account\u{a0}</h2><p>Under <a href=\"https://www.hhs.gov/hipaa/for-professionals/security/laws-regulations/index.html\">HIPAA Privacy Laws</a>, medical records are required to be saved for 6+ years (can be longer depending on the state/profession or insurance payer that the provider is contracted with). As such, Healthie is unable to delete your medical records, even at your request.\u{a0}</p><p>Healthie is an EHR, much like the one your other doctors, hospitals, or clinics may use. As such, there is no way for you to directly delete or deactivate your client account and health records.\u{a0} </p><p>We apologize for the inconvenience, but health privacy laws preclude us from taking further action (even on your behalf).</p><p><strong>Some additional steps you can take to minimize your data on file, and prevent notifications:\u{a0}</strong></p><ul><li>Request that your provider delete the payment card on file for your account if appropriate\u{a0}</li><li><a href=\"https://clienthelp.gethealthie.com/article/232-push-notifications-on-healthie-mobile-app\" target=\"_blank\">Configure e-mail and push notifications</a> for your account\u{a0}to disable notifications. </li><li>Ask your provider to remove you from any Programs you are enrolled in. You can locate these Programs <a href=\"https://clienthelp.gethealthie.com/article/453-introduction-programs#Section2\" target=\"_blank\">here</a>. \u{a0}</li><li>Ask your provider to <a href=\"https://help.gethealthie.com/article/159-archiving-and-unarchiving-clients#Section1\" target=\"_blank\">archive your account</a>. After this, you will still be able to log in to your Healthie Client Portal, view completed Forms, documents, and post-session notes, view Program content for programs you are currently enrolled in, and view and participate in <b>existing</b> Community Chats you are included in. </li></ul>"), markdown_content: None, version: 0, last_edited_by: None, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", created_at: 2024-09-09T14:22:10.771520Z, updated_at: 2024-09-09T14:22:10.771521Z, helpscout_article_id: Some("5d4819ee2c7d3a330e3c1609") })
+2024-09-09 11:22:10 - INFO - API Response | Get Article: "5bd6664104286356f0a5292f"
+2024-09-09 11:22:10 - INFO - Found article: ID:"5bd6664104286356f0a5292f", Title: "About Healthie"
+2024-09-09 11:22:10 - INFO - Starting Jobs for article: ID:a46cdccf-a4bf-4e7d-8c58-14864cdd617e, Title: "About Healthie"
+2024-09-09 11:22:10 - INFO - Enqueueing new job from SyncArticle: StoreArticle(Article { id: a46cdccf-a4bf-4e7d-8c58-14864cdd617e, collection_id: f2b87aaa-16fd-49b2-97e7-59952fb8d2fd, title: "About Healthie", slug: "about-the-healthie-platform", html_content: Some("<p>Welcome to Healthie, a platform that makes it easy for you to connect with your provider in one secure place and remotely.\u{a0}On this platform, you&#39;ll be able to track your food &amp; lifestyle, health progress, achievement towards goals, and even meet with your healthcare provider virtually, if that’s within your care plan. Plus, you can securely message with your provider with questions.\u{a0}</p><div class=\"callout-blue\"><h4>IN THIS ARTICLE:</h4><ul><li><a href=\"https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform#Section1\">Benefits</a></li><li><a href=\"https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform#Section2\">Security</a></li><li><a href=\"https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform#Section3\">Accessibility</a></li><li><a href=\"https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform#Section4\">Getting started</a></li></ul></div><hr role=\"separator\"><h2><strong>Benefits</strong></h2><p>You can\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/217-welcome-e-mail-from-provider\" target=\"_blank\">access your secure Healthie account</a>\u{a0}from all of the devices that you use - your computer, tablet, and even from the Healthie mobile app.\u{a0}Healthie provides a modern, and secure way for you to work with your healthcare provider.\u{a0}</p><p>Your provider uses this platform as one secure portal to conduct care. All of your provider&#39;s documents, references, and resources are in one place, so your provider can stay better connected to you over a longer period of time.\u{a0}\u{a0}Healthie is designed to help providers manage their schedule, take care of billing, and communicate with you, so that you can receive better care.\u{a0}</p><br><p>Healthie is free for you to use. Your provider may elect to offer packages as you utilize the platform with them. Please coordinate with your provider directly to learn more about pricing for services.\u{a0}</p><ul><li>Communicate with your provider through secure chat and video call</li><li>Track your food and other health metrics</li><li>Track your physical activity, and even sync your Fitbit, Apple Health, or Google Fit accounts</li><li>Understand progress towards your health goals</li><li>Complete intake forms and sign documents online</li><li>Manage the process of working with your provider including book sessions and pay for services</li><li>And much more</li></ul><p>Please note, that each provider\u{a0}is able to tailor your experience with Healthie. Some of the features mentioned above may not be available to you, depending on the services you&#39;ll be receiving from your healthcare provider. Please reach out to your provider directly (<a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\" target=\"_blank\">via Chat</a>) to discuss your care and experience with Healthie.\u{a0}</p><hr role=\"separator\"><h2><strong>Security</strong></h2><p>Protecting your data and ensuring your privacy is of utmost importance to us.\u{a0}</p><p>Healthie makes sure to protect your personal health information\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/210-account-privacy\" target=\"_blank\">using the highest standards available</a>. This platform is HIPAA-compliant and\u{a0}uses secure socket layers to ensure data security and industry-leading cryptography. Videoconferencing is conducted over an encrypted network, and meetings are not recorded. Most importantly, only you and your provider will have access to information that you post and store on Healthie, and your pictures, notes, and comments are protected and will never be published without your explicit written consent.</p><hr role=\"separator\"><h2><strong>Accessibility</strong></h2><p>Healthie is available on a computer (you can sign in\u{a0}<a href=\"https://gethealthie.com/users/sign_in\">here</a>) and through the mobile apps (<a href=\"https://itunes.apple.com/us/app/healthie-keeping-dietitians/id1112029170?mt=8&amp;ign-mpt=uo%3D4\">iOS app</a>\u{a0}and\u{a0}<a href=\"https://play.google.com/store/apps/details?id=com.healthie.app.healthie&amp;hl=en&amp;utm_source=global_co&amp;utm_medium=prtnr&amp;utm_content=Mar2515&amp;utm_campaign=PartBadge&amp;pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1\">Android app</a>\u{a0}links).\u{a0}</p><p>Healthie uses your e-mail address as the username, and as part of getting started, you are asked to set a password. You can\u{a0}<a href=\"https://gethealthie.com/users/password/forgot\">reset your password here</a>.\u{a0}</p><hr role=\"separator\"><h2><strong>Getting started</strong></h2><p>To get started with Healthie, you must be working with a healthcare provider that uses Healthie. They will send you an invite link, which you’ll receive via\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/217-welcome-e-mail-from-provider\" target=\"_blank\">email</a>\u{a0}(Subject line: Accept your Provider&#39;s Invite to Healthie). If you haven’t received one, be sure to ask your healthcare provider.\u{a0}</p><p>In this e-mail, you will see a button to set up your account. Click on this link, and you&#39;ll be asked to set up your password to access the system.\u{a0}</p><p>After setting up your username and password, you&#39;ll have access to your Patient Portal, and the resources that your provider has shared with you. You may be asked to fill out some forms, view documents, book an appointment, and message with your provider.\u{a0}</p><p>You can access your Healthie account from the web, or you can download the\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/211-getting-started-with-healthie-mobile-app\">Healthie mobile app</a>.</p><hr role=\"separator\"><h2>Needing to reach your provider?</h2><p>If you would like to reach your provider, we recommend that you\u{a0}<a href=\"https://clienthelp.gethealthie.com/article/237-message-your-provider-through-chat\" target=\"_blank\">Message your Provider via Chat</a>. Within your account, navigate to\u{a0}<strong>Chat &gt; New Chat Message.</strong>\u{a0}</p>"), markdown_content: None, version: 0, last_edited_by: None, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", created_at: 2024-09-09T14:22:10.837761Z, updated_at: 2024-09-09T14:22:10.837762Z, helpscout_article_id: Some("5bd6664104286356f0a5292f") })
+2024-09-09 11:24:52 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:26:01 - INFO - Logger initialized successfully
+2024-09-09 11:26:01 - INFO - Starting application
+2024-09-09 11:26:01 - INFO - Starting worker
+2024-09-09 11:26:01 - INFO - Starting worker
+2024-09-09 11:26:01 - INFO - Starting worker
+2024-09-09 11:26:01 - INFO - Starting worker
+2024-09-09 11:26:01 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:26:01 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:26:01 - INFO - starting 8 workers
+2024-09-09 11:26:01 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:26:01 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:28:57 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:29:02 - INFO - Logger initialized successfully
+2024-09-09 11:29:02 - INFO - Starting application
+2024-09-09 11:29:02 - INFO - Starting worker
+2024-09-09 11:29:02 - INFO - Starting worker
+2024-09-09 11:29:02 - INFO - Starting worker
+2024-09-09 11:29:02 - INFO - Starting worker
+2024-09-09 11:29:02 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:29:02 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:29:02 - INFO - starting 8 workers
+2024-09-09 11:29:02 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:29:02 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:30:35 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.001435
+2024-09-09 11:30:36 - INFO - API Response | List Collections: 10
+2024-09-09 11:30:36 - INFO - Found 10 collections
+2024-09-09 11:30:36 - INFO - Preparing to sync collection: ID:f0818f44-142c-4ea8-b4f6-37911d797250, Slug: "account-set-up"
+2024-09-09 11:30:36 - INFO - API Response | List Articles: 12
+2024-09-09 11:30:36 - INFO - Found 12 articles in collection: "account-set-up"
+2024-09-09 11:30:36 - INFO - Starting to process job: StoreCollection(Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: 4ac09bc3-7370-464e-9faa-d1c1081dc5a4)
+2024-09-09 11:30:36 - INFO - Preparing to sync collection: ID:5fdbf830-71bd-4f54-886f-ce6c6dd70f34, Slug: "setup"
+2024-09-09 11:30:36 - INFO - Processing StoreCollection for collection: f0818f44-142c-4ea8-b4f6-37911d797250
+2024-09-09 11:30:36 - INFO - Storing collection: ID:f0818f44-142c-4ea8-b4f6-37911d797250, Slug: "account-set-up"
+2024-09-09 11:30:36 - INFO - StoreCollection completed for collection: f0818f44-142c-4ea8-b4f6-37911d797250
+2024-09-09 11:30:36 - INFO - Finished processing job: StoreCollection(Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: 4ac09bc3-7370-464e-9faa-d1c1081dc5a4)
+2024-09-09 11:30:36 - INFO - Starting sync job: 4ac09bc3-7370-464e-9faa-d1c1081dc5a4
+2024-09-09 11:30:36 - INFO - Sync job completed successfully: 4ac09bc3-7370-464e-9faa-d1c1081dc5a4
+2024-09-09 11:30:36 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd666032c7d3a01757a8170", number: 211, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Healthie iOS and Android Apps", public_url: "https://clienthelp.gethealthie.com/article/211-getting-started-with-healthie-mobile-app", popularity: 5.0, view_count: 9839, created_by: 317667, updated_by: Some(771888), created_at: "2018-10-29T01:44:35Z", updated_at: Some("2024-08-12T17:58:34Z"), last_published_at: "2024-08-12T17:58:34Z" }, Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: e488987c-ef2a-4291-a631-67f0bc4b7b0a)
+2024-09-09 11:30:36 - INFO - Processing SyncArticle for article: 5bd666032c7d3a01757a8170
+2024-09-09 11:30:36 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd6672b2c7d3a01757a8179", number: 217, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Activate your client account", public_url: "https://clienthelp.gethealthie.com/article/217-welcome-e-mail-from-provider", popularity: 3.3, view_count: 6488, created_by: 317667, updated_by: Some(718959), created_at: "2018-10-29T01:49:31Z", updated_at: Some("2023-06-28T20:05:38Z"), last_published_at: "2023-06-28T20:05:38Z" }, Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: dffad641-11ab-4b66-9f98-be6c1ee8ca07)
+2024-09-09 11:30:36 - INFO - Processing SyncArticle for article: 5bd6672b2c7d3a01757a8179
+2024-09-09 11:30:36 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5d4819ee2c7d3a330e3c1609", number: 380, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "Deactivate your client account", public_url: "https://clienthelp.gethealthie.com/article/380-deactivate-client-account", popularity: 2.4, view_count: 4705, created_by: 317667, updated_by: Some(718959), created_at: "2019-08-05T11:58:38Z", updated_at: Some("2023-06-12T17:32:16Z"), last_published_at: "2023-06-12T17:32:16Z" }, Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: b594914a-5f8e-4aa8-adcb-e707ac90e92e)
+2024-09-09 11:30:36 - INFO - Processing SyncArticle for article: 5d4819ee2c7d3a330e3c1609
+2024-09-09 11:30:36 - INFO - Starting to process job: SyncArticle(ArticleRef { id: "5bd6664104286356f0a5292f", number: 213, collection_id: "5bd6658f2c7d3a01757a816a", status: "published", has_draft: false, name: "About Healthie", public_url: "https://clienthelp.gethealthie.com/article/213-about-the-healthie-platform", popularity: 2.1, view_count: 4162, created_by: 317667, updated_by: Some(360818), created_at: "2018-10-29T01:45:37Z", updated_at: Some("2024-02-13T15:25:28Z"), last_published_at: "2024-02-13T15:25:28Z" }, Collection { id: f0818f44-142c-4ea8-b4f6-37911d797250, helpscout_collection_id: "5bd6658f2c7d3a01757a816a", name: "Account Set Up", description: Some("Learn how to set up your Client Portal"), slug: "account-set-up", created_at: 2024-09-09T14:30:36.189996Z, updated_at: 2024-09-09T14:30:36.189997Z }) (ID: 6029c898-fb0a-4ef9-ba4a-5bc59725b5f8)
+2024-09-09 11:30:36 - INFO - Processing SyncArticle for article: 5bd6664104286356f0a5292f
+2024-09-09 11:30:36 - INFO - API Response | List Articles: 50
+2024-09-09 11:30:36 - INFO - Found 50 articles in collection: "setup"
+2024-09-09 11:30:37 - INFO - API Response | Get Article: "5d4819ee2c7d3a330e3c1609"
+2024-09-09 11:30:37 - INFO - Found article: ID:"5d4819ee2c7d3a330e3c1609", Title: "Deactivate your client account"
+2024-09-09 11:30:37 - INFO - Starting Jobs for article: ID:75f49b3a-9a5f-4c68-8b7b-84a3876520d7, Title: "Deactivate your client account"
+2024-09-09 11:30:37 - INFO - Jobs Total: 3
+2024-09-09 11:30:37 - INFO - Enqueueing new job from SyncArticle: TypeId(0xe4c378905a2155ad03725f80ef252f86)
+2024-09-09 11:30:37 - INFO - API Response | Get Article: "5bd666032c7d3a01757a8170"
+2024-09-09 11:30:37 - INFO - Found article: ID:"5bd666032c7d3a01757a8170", Title: "Healthie iOS and Android Apps"
+2024-09-09 11:30:37 - INFO - Starting Jobs for article: ID:8ba7424a-2711-4ab4-bbbe-44ea8add809a, Title: "Healthie iOS and Android Apps"
+2024-09-09 11:30:37 - INFO - Jobs Total: 3
+2024-09-09 11:30:37 - INFO - Enqueueing new job from SyncArticle: TypeId(0xe4c378905a2155ad03725f80ef252f86)
+2024-09-09 11:30:37 - INFO - API Response | Get Article: "5bd6672b2c7d3a01757a8179"
+2024-09-09 11:30:37 - INFO - Found article: ID:"5bd6672b2c7d3a01757a8179", Title: "Activate your client account"
+2024-09-09 11:30:37 - INFO - Starting Jobs for article: ID:c6b1a3e9-a250-4f55-a717-95cbb08d0d72, Title: "Activate your client account"
+2024-09-09 11:30:37 - INFO - Jobs Total: 3
+2024-09-09 11:30:37 - INFO - Enqueueing new job from SyncArticle: TypeId(0xe4c378905a2155ad03725f80ef252f86)
+2024-09-09 11:30:37 - INFO - API Response | Get Article: "5bd6664104286356f0a5292f"
+2024-09-09 11:30:37 - INFO - Found article: ID:"5bd6664104286356f0a5292f", Title: "About Healthie"
+2024-09-09 11:30:37 - INFO - Starting Jobs for article: ID:72fc35e0-1d6c-4526-9621-a2f84c092062, Title: "About Healthie"
+2024-09-09 11:30:37 - INFO - Jobs Total: 3
+2024-09-09 11:30:37 - INFO - Enqueueing new job from SyncArticle: TypeId(0xe4c378905a2155ad03725f80ef252f86)
+2024-09-09 11:36:29 - INFO - Logger initialized successfully
+2024-09-09 11:36:29 - INFO - Starting application
+2024-09-09 11:36:29 - INFO - Starting worker
+2024-09-09 11:36:29 - INFO - Starting worker
+2024-09-09 11:36:29 - INFO - Starting worker
+2024-09-09 11:36:29 - INFO - Starting worker
+2024-09-09 11:36:29 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:36:29 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:36:29 - INFO - starting 8 workers
+2024-09-09 11:36:29 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:36:29 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:40:54 - INFO - Logger initialized successfully
+2024-09-09 11:40:54 - INFO - Starting application
+2024-09-09 11:40:54 - INFO - Starting worker
+2024-09-09 11:40:54 - INFO - Starting worker
+2024-09-09 11:40:54 - INFO - Starting worker
+2024-09-09 11:40:54 - INFO - Starting worker
+2024-09-09 11:40:54 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:40:54 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:40:54 - INFO - starting 8 workers
+2024-09-09 11:40:54 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:40:54 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:41:04 - INFO - 127.0.0.1 "POST /parse HTTP/1.1" 202 66 "-" "insomnia/9.3.3" 0.000763
+2024-09-09 11:41:05 - INFO - API Response | List Collections: 10
+2024-09-09 11:41:05 - INFO - Found 10 collections
+2024-09-09 11:41:05 - INFO - Preparing to sync collection: ID:9735d3e4-0f3e-40f7-8e4a-fd2dd592824c, Slug: "account-set-up"
+2024-09-09 11:41:05 - INFO - API Response | List Articles: 12
+2024-09-09 11:41:05 - INFO - Found 12 articles in collection: "account-set-up"
+2024-09-09 11:41:05 - INFO - Preparing to sync collection: ID:1a69a6dc-f48d-4b31-905e-32526de13e31, Slug: "setup"
+2024-09-09 11:41:06 - INFO - API Response | List Articles: 50
+2024-09-09 11:41:06 - INFO - Found 50 articles in collection: "setup"
+2024-09-09 11:43:51 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:47:39 - INFO - Logger initialized successfully
+2024-09-09 11:47:39 - INFO - Starting application
+2024-09-09 11:47:39 - INFO - Starting worker
+2024-09-09 11:47:39 - INFO - Starting worker
+2024-09-09 11:47:39 - INFO - Starting worker
+2024-09-09 11:47:39 - INFO - Starting worker
+2024-09-09 11:47:39 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:47:39 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:47:39 - INFO - starting 8 workers
+2024-09-09 11:47:39 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:47:39 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:51:25 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 11:51:27 - INFO - Logger initialized successfully
+2024-09-09 11:51:27 - INFO - Starting application
+2024-09-09 11:51:27 - INFO - Starting worker
+2024-09-09 11:51:27 - INFO - Starting worker
+2024-09-09 11:51:27 - INFO - Starting worker
+2024-09-09 11:51:27 - INFO - Starting worker
+2024-09-09 11:51:27 - INFO - Job queue initialized with 4 workers
+2024-09-09 11:51:27 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 11:51:27 - INFO - starting 8 workers
+2024-09-09 11:51:27 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 11:51:27 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 11:59:03 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 12:00:42 - INFO - Logger initialized successfully
+2024-09-09 12:00:42 - INFO - Starting application
+2024-09-09 12:00:42 - INFO - Starting worker
+2024-09-09 12:00:42 - INFO - Starting worker
+2024-09-09 12:00:42 - INFO - Starting worker
+2024-09-09 12:00:42 - INFO - Starting worker
+2024-09-09 12:00:42 - INFO - Job queue initialized with 4 workers
+2024-09-09 12:00:42 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 12:00:42 - INFO - starting 8 workers
+2024-09-09 12:00:42 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 12:00:42 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000
+2024-09-09 12:01:33 - INFO - SIGTERM received; starting graceful shutdown
+2024-09-09 12:01:44 - INFO - Logger initialized successfully
+2024-09-09 12:01:44 - INFO - Starting application
+2024-09-09 12:01:44 - INFO - Starting worker
+2024-09-09 12:01:44 - INFO - Starting worker
+2024-09-09 12:01:44 - INFO - Starting worker
+2024-09-09 12:01:44 - INFO - Starting worker
+2024-09-09 12:01:44 - INFO - Job queue initialized with 4 workers
+2024-09-09 12:01:44 - INFO - Server listening on 127.0.0.1:3000
+2024-09-09 12:01:44 - INFO - starting 8 workers
+2024-09-09 12:01:44 - INFO - Actix runtime found; starting in Actix runtime
+2024-09-09 12:01:44 - INFO - starting service: "actix-web-service-127.0.0.1:3000", workers: 8, listening on: 127.0.0.1:3000

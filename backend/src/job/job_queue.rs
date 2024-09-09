@@ -8,8 +8,11 @@ use tokio::sync::mpsc;
 use tokio::time::Duration;
 use uuid::Uuid;
 
+use log::info;
+
 use super::Job;
 
+#[derive(Clone)]
 pub struct JobQueue {
     pub sender: mpsc::Sender<Job>,
     pub job_statuses: Arc<Mutex<Vec<JobInfo>>>,
@@ -41,6 +44,9 @@ impl JobQueue {
 
         job_queue.spawn_workers(receiver, sync_processor);
 
+        info!("Job queue initialized with {} workers", num_workers);
+        println!("Job queue initialized with {} workers", num_workers);
+
         job_queue
     }
 
@@ -63,5 +69,9 @@ impl JobQueue {
             job.status = status;
             job.updated_at = Utc::now();
         }
+    }
+
+    pub fn queue_size(&self) -> usize {
+        self.sender.capacity() - self.sender.max_capacity()
     }
 }

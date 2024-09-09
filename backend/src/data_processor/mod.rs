@@ -6,11 +6,12 @@ pub mod generate_embedding;
 
 pub use convert_html::html_to_markdown;
 pub use generate_embedding::{generate_embeddings, store_embedding};
+use log::info;
 
 use crate::data_processor::api_client::ApiClient;
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
-use crate::jobs::Job;
+use crate::job::Job;
 use crate::models::{Article, ArticleRef, Collection};
 
 use anyhow::Result;
@@ -38,6 +39,9 @@ impl DataProcessor {
     }
 
     pub async fn prepare_sync_collection(&self, collection: &Collection) -> Result<Vec<Job>> {
+        info!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
+        println!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
+
         let mut jobs = vec![Job::StoreCollection(collection.clone())];
 
         let article_refs = self.api_client.get_list_articles(collection).await?;
@@ -49,6 +53,8 @@ impl DataProcessor {
     }
 
     pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
+        info!("Storing collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
+        println!("Storing collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
         collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(())
     }
@@ -63,6 +69,9 @@ impl DataProcessor {
             .get_article(&article_ref.id.to_string(), collection)
             .await?;
 
+        info!("Starting Jobs for article: ID:{:?}, Title: {:?}", article.id, article.title);
+        println!("Starting Jobs for article: ID:{:?}, Title: {:?}", article.id, article.title);
+
         let jobs = vec![
             Job::StoreArticle(article.clone()),
             Job::ConvertHtmlToMarkdown(article.clone()),
@@ -73,11 +82,15 @@ impl DataProcessor {
     }
 
     pub async fn store_article(&self, article: &Article) -> Result<()> {
+        info!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
+        println!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
         article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(())
     }
 
     pub async fn convert_html_to_markdown(&self, article: &Article) -> Result<()> {
+        info!("Converting HTML to Markdown for article: ID:{:?}, Title: {:?}", article.id, article.title);
+        println!("Converting HTML to Markdown for article: ID:{:?}, Title: {:?}", article.id, article.title);
         let markdown = html_to_markdown(
             article
                 .html_content
@@ -92,6 +105,9 @@ impl DataProcessor {
     }
 
     pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
+        info!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
+        println!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
+
         let embedding_and_point = generate_embeddings(article.clone())
             .await
             .expect("Failed to generate embeddings");

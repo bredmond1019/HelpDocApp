@@ -2,10 +2,11 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
+use std::env;
 use std::sync::Arc;
 
 use backend::db::DbPool;
-use backend::jobs::JobQueue;
+use backend::job::JobQueue;
 use backend::routes;
 use backend::{data_processor::DataProcessor, db};
 
@@ -16,6 +17,9 @@ use log4rs;
 async fn main() -> std::io::Result<()> {
     // Load environment variables
     dotenv().ok();
+    env::set_var("RUST_LOG", "info");
+    env::set_var("RUST_BACKTRACE", "1");
+
 
     // Initialize logger
     match log4rs::init_file("log4rs.yaml", Default::default()) {
@@ -37,6 +41,7 @@ async fn main() -> std::io::Result<()> {
 
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
+    println!("Server listening on 127.0.0.1:3000");
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))

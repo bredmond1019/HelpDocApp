@@ -93,12 +93,12 @@ impl Article {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ArticleResponse {
     pub articles: ArticleData,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ArticleData {
     pub page: i32,
     pub pages: i32,
@@ -133,12 +133,12 @@ pub struct ArticleRef {
     pub last_published_at: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ArticleFullResponse {
     pub article: ArticleFull,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct ArticleFull {
     pub id: String,
     pub number: i32,
@@ -151,7 +151,7 @@ pub struct ArticleFull {
     pub name: String,
     pub text: String,
     pub categories: Vec<String>,
-    pub related: Vec<String>,
+    pub related: Option<Vec<String>>,
     #[serde(rename = "publicUrl")]
     pub public_url: String,
     pub popularity: f64,
