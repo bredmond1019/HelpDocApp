@@ -38,18 +38,20 @@ impl DataProcessor {
         })
     }
 
-    pub async fn prepare_sync_collection(&self, collection: &Collection) -> Result<Vec<Job>> {
+    pub async fn prepare_sync_collection(&self, collection: &Collection) -> Result<(), anyhow::Error> {
         info!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
         println!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
 
-        let mut jobs = vec![Job::StoreCollection(collection.clone())];
+        // let mut jobs = vec![Job::StoreCollection(collection.clone())];
 
         let article_refs = self.api_client.get_list_articles(collection).await?;
         for article_ref in article_refs {
-            jobs.push(Job::SyncArticle(article_ref, collection.clone()));
+            // jobs.push(Job::SyncArticle(article_ref, collection.clone()));
+            self.sync_article(&article_ref, &collection).await?;
         }
 
-        Ok(jobs)
+        Ok(())
+        // Ok(jobs)
     }
 
     pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
@@ -63,29 +65,28 @@ impl DataProcessor {
         &self,
         article_ref: &ArticleRef,
         collection: &Collection,
-    ) -> Result<Vec<Job>> {
+    ) -> Result<()> {
         let article = self
             .api_client
             .get_article(&article_ref.id.to_string(), collection)
             .await?;
 
-        info!("Starting Jobs for article: ID:{:?}, Title: {:?}", article.id, article.title);
-        println!("Starting Jobs for article: ID:{:?}, Title: {:?}", article.id, article.title);
+        info!("Processing article: ID:{:?}, Title: {:?}", article.id, article.title);
+        println!("Processing article: ID:{:?}, Title: {:?}", article.id, article.title);
 
-        let jobs = vec![
-            Job::StoreArticle(article.clone()),
-            Job::ConvertHtmlToMarkdown(article.clone()),
-            Job::GenerateEmbeddings(article.clone()),
-        ];
+        // Directly call the functions
+        self.store_article(&article).await?;
+        self.convert_html_to_markdown(&article).await?;
+        self.generate_article_embeddings(&article).await?;
 
-        Ok(jobs)
+        Ok(())
     }
 
-    pub async fn store_article(&self, article: &Article) -> Result<()> {
+    pub async fn store_article(&self, article: &Article) -> Result<Article> {
         info!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
         println!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
-        article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
-        Ok(())
+        let article =article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
+        Ok(article)
     }
 
     pub async fn convert_html_to_markdown(&self, article: &Article) -> Result<()> {

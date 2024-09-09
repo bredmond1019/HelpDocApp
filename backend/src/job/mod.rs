@@ -33,7 +33,7 @@ impl Job {
         job_queue: &JobQueue,
     ) -> Result<(Uuid, Result<(), anyhow::Error>), anyhow::Error> {
         let job_id = Uuid::new_v4();
-        log::info!("Starting to process job: {:?} (ID: {})", self, job_id);
+        log::info!("Starting to process job ID: {}", job_id);
         
         let result = match self {
             Job::SyncCollection(collection) => {
@@ -51,18 +51,8 @@ impl Job {
             Job::SyncArticle(article_ref, collection) => {
                 log::info!("Processing SyncArticle for article: {}", article_ref.id);
                 let result = processor.sync_article(article_ref, collection).await;
-                match result {
-                    Ok(jobs) => {
-                        info!("Jobs Total: {}", jobs.len());
-                        job_queue.enqueue_job(Job::EnqueueJobs(jobs)).await
-                            .map_err(SyncError::JobEnqueueError)?;
-                        Ok(())
-                    }
-                    Err(e) => {
-                        log::error!("SyncArticle failed for article: {}", article_ref.id);
-                        Err(e)
-                    }
-                }
+                log::info!("SyncArticle completed for article: {}", article_ref.id);
+                result
             }
             Job::EnqueueJobs(jobs) => {
                 for job in jobs {
@@ -75,7 +65,7 @@ impl Job {
                 log::info!("Processing StoreArticle for article: {}", article.id);
                 let result = processor.store_article(article).await;
                 log::info!("StoreArticle completed for article: {}", article.id);
-                result
+                Ok(())
             }
             Job::ConvertHtmlToMarkdown(article) => {
                 log::info!("Processing ConvertHtmlToMarkdown for article: {}", article.id);

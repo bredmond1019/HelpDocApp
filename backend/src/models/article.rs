@@ -3,6 +3,8 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::schema::articles;
+
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable)]
 #[diesel(table_name = crate::schema::articles)]
 pub struct Article {
@@ -45,28 +47,39 @@ impl Article {
         }
     }
 
-    pub fn store(&self, conn: &mut PgConnection) -> Result<(), diesel::result::Error> {
-        use crate::schema::articles::dsl::*;
+    pub fn store(&self, conn: &mut PgConnection) -> Result<Self, diesel::result::Error> {
 
-        diesel::insert_into(articles)
+        println!("Storing article: ID:{:?}, Title: {:?}", self.id, self.title);
+        log::info!("Storing article: ID:{:?}, Title: {:?}", self.id, self.title);
+
+        // let result =diesel::insert_into(articles::table)
+        //     .values(self)
+        //     .on_conflict(id)
+        //     .do_update()
+        //     .set((
+        //         collection_id.eq(self.collection_id),
+        //         title.eq(&self.title),
+        //         slug.eq(&self.slug),
+        //         html_content.eq(&self.html_content),
+        //         markdown_content.eq(&self.markdown_content),
+        //         version.eq(self.version),
+        //         last_edited_by.eq(&self.last_edited_by),
+        //         updated_at.eq(self.updated_at),
+        //         helpscout_collection_id.eq(&self.helpscout_collection_id),
+        //         helpscout_article_id.eq(&self.helpscout_article_id),
+        //     ))
+        //     .execute(conn)?;
+
+        let article: Self = diesel::insert_into(articles::table)
             .values(self)
-            .on_conflict(id)
-            .do_update()
-            .set((
-                collection_id.eq(self.collection_id),
-                title.eq(&self.title),
-                slug.eq(&self.slug),
-                html_content.eq(&self.html_content),
-                markdown_content.eq(&self.markdown_content),
-                version.eq(self.version),
-                last_edited_by.eq(&self.last_edited_by),
-                updated_at.eq(self.updated_at),
-                helpscout_collection_id.eq(&self.helpscout_collection_id),
-                helpscout_article_id.eq(&self.helpscout_article_id),
-            ))
-            .execute(conn)?;
+            .get_result(conn)
+            .expect("Error creating article");
+        println!("Result: {:?}", article);
+        log::info!("Result: {:?}", article);
 
-        Ok(())
+
+
+        Ok(article)
     }
 
     pub fn get_by_id(

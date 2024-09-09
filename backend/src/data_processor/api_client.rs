@@ -123,10 +123,10 @@ fn parse_collections(collections: Vec<CollectionItem>) -> Result<Vec<Collection>
 
 fn parse_collection(collection: &CollectionItem) -> Result<Collection> {
     Ok(Collection::new(
-        collection.id.clone(),
         collection.name.clone(),
         collection.description.clone(),
         collection.slug.clone(),
+        collection.id.clone(),
     ))
 }
 

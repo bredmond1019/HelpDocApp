@@ -27,6 +27,9 @@ async fn start_job_queue(
         .await
         .map_err(SyncError::CollectionFetchError)?;
 
+    // Fetch collections from the database
+    // let collections = Collection::get_all(&mut data_processor.db_pool.get().expect("Failed to get DB connection"))?;
+
     let mut job_ids = Vec::new();
 
     for collection in collections {
@@ -38,12 +41,12 @@ async fn start_job_queue(
                 error: e,
             })?;
 
-        job_ids.push(
-            job_queue
-                .enqueue_job(Job::EnqueueJobs(jobs))
-                .await
-                .map_err(SyncError::JobEnqueueError)?,
-        );
+        // job_ids.push(
+        //     job_queue
+        //         .enqueue_job(Job::EnqueueJobs(jobs))
+        //         .await
+        //         .map_err(SyncError::JobEnqueueError)?,
+        // );
     }
 
     Ok(job_ids)
