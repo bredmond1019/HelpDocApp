@@ -43,6 +43,7 @@ impl DataProcessor {
         println!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
 
         // let mut jobs = vec![Job::StoreCollection(collection.clone())];
+        self.sync_collection(collection).await?;
 
         let article_refs = self.api_client.get_list_articles(collection).await?;
         for article_ref in article_refs {
@@ -71,19 +72,39 @@ impl DataProcessor {
             .get_article(&article_ref.id.to_string(), collection)
             .await?;
 
-        info!("Processing article: ID:{:?}, Title: {:?}", article.id, article.title);
+        info!(
+            "Processing article: ID:{:?}, Title: {:?}, Collection ID: {:?}, Helpscout Collection ID: {:?}", 
+            article.id, 
+            article.title, 
+            collection.id, 
+            collection.helpscout_collection_id
+        );
         println!("Processing article: ID:{:?}, Title: {:?}", article.id, article.title);
 
+        // Enqueue jobs for processing
+
+        // let jobs = vec![
+        //     Job::StoreArticle(article.clone()),
+        //     Job::ConvertHtmlToMarkdown(article.clone()),
+        //     Job::GenerateEmbeddings(article.clone()),
+        // ];
         // Directly call the functions
         self.store_article(&article).await?;
         self.convert_html_to_markdown(&article).await?;
         self.generate_article_embeddings(&article).await?;
 
+        // Ok(jobs)
         Ok(())
     }
 
     pub async fn store_article(&self, article: &Article) -> Result<Article> {
-        info!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
+        info!(
+            "Storing article: ID:{:?}, Title: {:?}, Collection ID: {:?}, Helpscout Collection ID: {:?}",
+            article.id,
+            article.title,
+            article.collection_id,
+            article.helpscout_collection_id
+        );
         println!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
         let article =article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(article)
