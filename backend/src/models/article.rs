@@ -156,5 +156,5 @@ pub struct ArticleFull {
     #[serde(rename = "updatedAt")]
     pub updated_at: String,
     #[serde(rename = "lastPublishedAt")]
-    pub last_published_at: String,
+    pub last_published_at: Option<String>,
 }

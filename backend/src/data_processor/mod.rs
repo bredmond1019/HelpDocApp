@@ -84,11 +84,6 @@ impl DataProcessor {
             return Err(anyhow::anyhow!("Failed to convert HTML to Markdown: {}", e));
         }
 
-        // if let Err(e) = self.generate_article_embeddings(&article).await {
-        //     error!("Failed to generate embeddings for article ID:{}: {}", article.id, e);
-        //     return Err(anyhow::anyhow!("Failed to generate article embeddings: {}", e));
-        // }
-
         Ok(())
     }
 
@@ -120,23 +115,4 @@ impl DataProcessor {
         
         Ok(())
     }
-
-    // pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
-    //     info!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
-
-    //     let embedding_and_point = generate_embeddings(article.clone())
-    //         .await
-    //         .map_err(|e| anyhow::anyhow!("{}", e))
-    //         .context(format!("Failed to generate embeddings for article ID:{}", article.id))?;
-
-    //     store_embedding(
-    //         embedding_and_point,
-    //         self.vector_db_client.clone(),
-    //         self.db_pool.clone(),
-    //     )
-    //     .await
-    //     .context(format!("Failed to store embedding for article ID:{}", article.id))?;
-        
-    //     Ok(())
-    // }
 }
