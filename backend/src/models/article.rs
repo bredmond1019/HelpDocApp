@@ -120,7 +120,7 @@ pub struct ArticleRef {
     #[serde(rename = "updatedAt")]
     pub updated_at: Option<String>,
     #[serde(rename = "lastPublishedAt")]
-    pub last_published_at: String,
+    pub last_published_at: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]

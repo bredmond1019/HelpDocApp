@@ -1,4 +1,5 @@
 use anyhow::Result;
+use log::info;
 use qdrant_client::qdrant::{
     PointId, PointStruct, UpsertPointsBuilder, Value as QdrantValue, Vectors,
 };
@@ -35,10 +36,14 @@ fn get_or_initialize_model() -> &'static SentenceEmbeddingsModel {
 pub async fn generate_embeddings(
     article: Article,
 ) -> Result<(Embedding, PointStruct), Box<dyn std::error::Error + Send + Sync>> {
-    let embedding_and_point = task::spawn_blocking(move || {
+    let embedding_and_point = task::spawn_blocking(move || -> Result<_, Box<dyn std::error::Error + Send + Sync>> {
         let model = get_or_initialize_model();
-        let title = article.title.clone();
-        let embedding = model.encode(&[&title]).expect("Failed to encode article");
+        
+        let content_to_encode = article.html_content.as_deref().unwrap_or(&article.title);
+        
+        let embedding = model.encode(&[content_to_encode])
+            .map_err(|e| anyhow::anyhow!("Failed to encode article: {}", e))?;
+        
         let embedding_vec: Vec<f32> = embedding[0].clone().into();
 
         let mut payload = HashMap::new();
@@ -52,6 +57,9 @@ pub async fn generate_embeddings(
             payload,
             vectors: Some(Vectors::from(embedding_vec.clone())),
         };
+        info!("Point: {:?}", point);
+        info!("Embedding Vec: {:?}", embedding_vec);
+        info!("Vectors: {:?}", point.vectors);
 
         let embedding = Embedding {
             id: Uuid::new_v4(),
@@ -59,12 +67,16 @@ pub async fn generate_embeddings(
             embedding_vector: embedding_vec,
         };
 
-        (embedding, point)
+        Ok((embedding, point))
     })
     .await?;
 
-    Ok(embedding_and_point)
+    match embedding_and_point { 
+        Ok((embedding, point)) => Ok((embedding, point)),
+        Err(e) => Err(e),
+    }
 }
+
 
 pub async fn store_embedding(
     embedding_and_point: (Embedding, PointStruct),
