@@ -6,7 +6,7 @@ pub mod generate_embedding;
 
 pub use convert_html::html_to_markdown;
 pub use generate_embedding::{generate_embeddings, store_embedding};
-use log::info;
+use log::{info, error};
 
 use crate::data_processor::api_client::ApiClient;
 use crate::db::vector_db::init_vector_db;
@@ -26,11 +26,20 @@ pub struct DataProcessor {
 impl DataProcessor {
     pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
         let api_client = ApiClient::new(None, None).map_err(|e| anyhow::anyhow!("{}", e))?;
-        let vector_db_client = Arc::new(
-            init_vector_db()
-                .await
-                .map_err(|e| anyhow::anyhow!("{}", e))?,
-        );
+        
+        info!("Initializing vector DB...");
+        let vector_db_client = match init_vector_db().await {
+            Ok(client) => {
+                info!("Successfully initialized vector DB");
+                Arc::new(client)
+            },
+            Err(e) => {
+                error!("Failed to initialize vector DB: {:?}", e);
+                return Err(anyhow::anyhow!("Failed to initialize vector DB: {}", e));
+            }
+        };
+        
+        info!("DataProcessor initialization complete");
         Ok(Self {
             api_client,
             db_pool,

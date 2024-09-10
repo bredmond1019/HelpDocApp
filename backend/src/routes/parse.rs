@@ -1,5 +1,6 @@
 use crate::{data_processor::DataProcessor, errors::SyncError, job::{Job, JobQueue}};
 use actix_web::{post, web::Data, HttpResponse};
+use log::info;
 use serde_json::json;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -21,6 +22,7 @@ async fn start_job_queue(
     job_queue: Data<Arc<JobQueue>>,
     data_processor: Data<Arc<DataProcessor>>,
 ) -> Result<Vec<Uuid>, SyncError> {
+    info!("Starting job queue");
     let collections = data_processor
         .api_client
         .get_list_collections()

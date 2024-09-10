@@ -106,10 +106,10 @@ mod tests {
         let api_client = ApiClient::new(Some(base_url), Some("test_api_key".to_string()))?;
 
         let collection = Collection::new(
-            "5214c77c45667acd25394b51".to_string(),
             "Test Collection".to_string(),
             None,
             "test-collection".to_string(),
+            "5214c77c45667acd25394b51".to_string(),
         );
 
         let article = api_client
@@ -227,10 +227,10 @@ mod tests {
         let api_client = ApiClient::new(Some(base_url), Some("test_api_key".to_string()))?;
 
         let collection = Collection::new(
-            "5214c77c45667acd25394b51".to_string(),
             "Test Collection".to_string(),
             None,
             "test-collection".to_string(),
+            "5214c77c45667acd25394b51".to_string(),
         );
 
         let article_refs = api_client.get_list_articles(&collection).await?;

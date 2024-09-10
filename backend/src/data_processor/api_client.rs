@@ -45,7 +45,9 @@ impl ApiClient {
     }
 
     pub async fn get_list_collections(&self) -> Result<Vec<Collection>> {
+        info!("Fetching collections from API");
         let data = self.get("/v1/collections").await?;
+        info!("API Response | List Collections: {:?}", data);
         let collection_response: CollectionResponse = from_value(data)?;
         info!("API Response | List Collections: {:?}", collection_response.collections.items.len());
         println!("API Response | List Collections: {:?}", collection_response.collections.items.len());

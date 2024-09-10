@@ -34,7 +34,7 @@ async fn main() -> std::io::Result<()> {
     let data_processor = Arc::new(
         DataProcessor::new(Arc::new(pool.clone()))
             .await
-            .expect("Failed to create SyncProcessor"),
+            .expect("Failed to create DataProcessor"),
     );
 
     let job_queue = Arc::new(JobQueue::new(data_processor.clone()));
