@@ -44,12 +44,6 @@ impl Collection {
 
         Ok(collection)
     }
-
-    // pub fn get_all(conn: &mut PgConnection) -> Result<Vec<Collection>, diesel::result::Error> {
-    //     use crate::schema::collections::dsl::*;
-
-    //     collections.load::<Collection>(conn)
-    // }
 }
 
 impl From<CollectionItem> for Collection {

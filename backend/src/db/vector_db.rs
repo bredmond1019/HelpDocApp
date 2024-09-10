@@ -43,9 +43,9 @@ pub async fn init_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>> {
                 };
 
                 client.create_collection(create_collection).await?;
-                println!("Created 'article_embeddings' collection");
+                info!("Created 'article_embeddings' collection");
             } else {
-                println!("'article_embeddings' collection already exists");
+                info!("'article_embeddings' collection already exists");
             }
         }
         Err(e) => {
@@ -79,9 +79,9 @@ pub async fn init_test_vector_db() -> Result<Qdrant, Box<dyn std::error::Error>>
         };
 
         client.create_collection(create_collection).await?;
-        println!("Created 'testing' collection");
+        info!("Created 'testing' collection");
     } else {
-        println!("'testing' collection already exists");
+        info!("'testing' collection already exists");
     }
 
     Ok(client)

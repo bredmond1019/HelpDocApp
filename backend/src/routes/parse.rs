@@ -1,16 +1,14 @@
-use crate::{data_processor::DataProcessor, errors::SyncError, job::{Job, JobQueue}};
+use crate::{data_processor::DataProcessor, errors::SyncError};
 use actix_web::{post, web::Data, HttpResponse};
 use log::info;
 use serde_json::json;
 use std::sync::Arc;
-use uuid::Uuid;
 
 #[post("/parse")]
 pub async fn parse_data(
-    job_queue: Data<Arc<JobQueue>>,
     data_processor: Data<Arc<DataProcessor>>,
 ) -> HttpResponse {
-    tokio::spawn(start_job_queue(job_queue, data_processor));
+    tokio::spawn(start_job_queue(data_processor));
 
     HttpResponse::Accepted().json(json!({
         "message": "Job queue started successfully",
@@ -19,9 +17,8 @@ pub async fn parse_data(
 }
 
 async fn start_job_queue(
-    job_queue: Data<Arc<JobQueue>>,
     data_processor: Data<Arc<DataProcessor>>,
-) -> Result<Vec<Uuid>, SyncError> {
+) -> Result<(), SyncError> {
     info!("Starting job queue");
     let collections = data_processor
         .api_client
@@ -29,27 +26,15 @@ async fn start_job_queue(
         .await
         .map_err(SyncError::CollectionFetchError)?;
 
-    // Fetch collections from the database
-    // let collections = Collection::get_all(&mut data_processor.db_pool.get().expect("Failed to get DB connection"))?;
-
-    let mut job_ids = Vec::new();
-
     for collection in collections {
-        let jobs = data_processor
+        data_processor
             .prepare_sync_collection(&collection)
             .await
             .map_err(|e| SyncError::JobPreparationError {
                 collection_id: collection.id.to_string(),
                 error: e,
             })?;
-
-        // job_ids.push(
-        //     job_queue
-        //         .enqueue_job(Job::EnqueueJobs(jobs))
-        //         .await
-        //         .map_err(SyncError::JobEnqueueError)?,
-        // );
     }
 
-    Ok(job_ids)
+    Ok(())
 }

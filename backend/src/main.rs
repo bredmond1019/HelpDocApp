@@ -6,7 +6,6 @@ use std::env;
 use std::sync::Arc;
 
 use backend::db::DbPool;
-use backend::job::JobQueue;
 use backend::routes;
 use backend::{data_processor::DataProcessor, db};
 
@@ -37,16 +36,12 @@ async fn main() -> std::io::Result<()> {
             .expect("Failed to create DataProcessor"),
     );
 
-    let job_queue = Arc::new(JobQueue::new(data_processor.clone()));
-
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
-    println!("Server listening on 127.0.0.1:3000");
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(data_processor.clone()))
-            .app_data(web::Data::new(job_queue.clone()))
             .wrap(Logger::default())
             .wrap(Cors::permissive())
             .configure(routes::init_routes)

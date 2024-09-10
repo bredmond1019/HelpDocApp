@@ -45,7 +45,6 @@ impl JobQueue {
         job_queue.spawn_workers(receiver, sync_processor);
 
         info!("Job queue initialized with {} workers", num_workers);
-        println!("Job queue initialized with {} workers", num_workers);
 
         job_queue
     }

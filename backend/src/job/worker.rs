@@ -24,7 +24,6 @@ impl JobQueue {
             let job_queue = self.clone(); // Clone the JobQueue for use in the spawned task
     
             info!("Starting worker");
-            println!("Starting worker");
     
             tokio::spawn(async move {
                 loop {

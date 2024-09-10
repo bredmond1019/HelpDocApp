@@ -50,20 +50,15 @@ impl ApiClient {
         info!("API Response | List Collections: {:?}", data);
         let collection_response: CollectionResponse = from_value(data)?;
         info!("API Response | List Collections: {:?}", collection_response.collections.items.len());
-        println!("API Response | List Collections: {:?}", collection_response.collections.items.len());
         let collection_data = collection_response.collections;
         info!("Found {:?} collections", collection_data.items.len());
-        println!("Found {:?} collections", collection_data.items.len());
+
 
         let mut collections: Vec<Collection> = Vec::new();
 
         collections.extend(parse_collections(collection_data.items)?);
 
-        // let pages = collection_data.pages;
-        // for page in 1..=pages {
-        //     let data = self.get(&format!("/v1/collections?page={}", page)).await?;
-        //     collections.extend(parse_collections(data)?);
-        // }
+
         Ok(collections)
     }
 
@@ -71,38 +66,30 @@ impl ApiClient {
         let data = self.get(&format!("/v1/collections/{}", id)).await?;
         let collection_item: CollectionItem = from_value(data["collection"].clone())?;
         info!("API Response | Get Collection: {:?}", collection_item.id);
-        println!("API Response | Get Collection: {:?}", collection_item.id);
         parse_collection(&collection_item)
     }
 
     pub async fn get_list_articles(&self, collection: &Collection) -> Result<Vec<ArticleRef>> {
-        let data = self
-            .get(&format!(
-                "/v1/collections/{}/articles",
-                collection.helpscout_collection_id
-            ))
-            .await?;
-        let api_response: ArticleResponse = from_value(data)?;
-        info!("API Response | List Articles: {:?}", api_response.articles.items.len());
-        println!("API Response | List Articles: {:?}", api_response.articles.items.len());
-        let article_data = api_response.articles;
-        info!("Found {:?} articles in collection: {:?}", article_data.items.len(), collection.slug);
-        println!("Found {:?} articles in collection: {:?}", article_data.items.len(), collection.slug);
+        let helpscout_collection_id = &collection.helpscout_collection_id;
+        let mut articles_refs = Vec::new();
+        let mut page = 1;
 
-        let mut articles_refs: Vec<ArticleRef> = Vec::new();
+        loop {
+            let endpoint = format!("/v1/collections/{}/articles?page={}", helpscout_collection_id, page);
+            let data = self.get(&endpoint).await?;
+            let api_response: ArticleResponse = from_value(data)?;
+            let article_data = api_response.articles;
 
-        articles_refs.extend(article_data.items);
+            info!("Found {} articles on page {} for collection: {}", article_data.items.len(), page, collection.slug);
+            articles_refs.extend(article_data.items);
 
-        // let pages = article_data.pages;
-        // for page in 1..=pages {
-        //     let data = self
-        //         .get(&format!(
-        //             "/v1/collections/{}/articles?page={}",
-        //             helpscout_collection_id, page
-        //         ))
-        //         .await?;
-        //     articles.extend(parse_articles(data)?);
-        // }
+            if page >= article_data.pages {
+                break;
+            }
+            page += 1;
+        }
+
+        info!("Total articles fetched: {}", articles_refs.len());
         Ok(articles_refs)
     }
 
@@ -110,10 +97,8 @@ impl ApiClient {
         let data = self.get(&format!("/v1/articles/{}", id)).await?;
         let api_response: ArticleFullResponse = from_value(data)?;
         info!("API Response | Get Article: {:?}", api_response.article.id);
-        println!("API Response | Get Article: {:?}", api_response.article.id);
         let article = api_response.article;
         info!("Found article: ID:{:?}, Title: {:?}", article.id, article.name);
-        println!("Found article: ID:{:?}, Title: {:?}", article.id, article.name);
 
         parse_article(&article, collection)
     }

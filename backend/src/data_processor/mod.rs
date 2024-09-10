@@ -11,7 +11,6 @@ use log::{info, error};
 use crate::data_processor::api_client::ApiClient;
 use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
-use crate::job::Job;
 use crate::models::{Article, ArticleRef, Collection};
 
 use anyhow::Result;
@@ -49,24 +48,18 @@ impl DataProcessor {
 
     pub async fn prepare_sync_collection(&self, collection: &Collection) -> Result<(), anyhow::Error> {
         info!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
-        println!("Preparing to sync collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
-
-        // let mut jobs = vec![Job::StoreCollection(collection.clone())];
         self.sync_collection(collection).await?;
 
         let article_refs = self.api_client.get_list_articles(collection).await?;
         for article_ref in article_refs {
-            // jobs.push(Job::SyncArticle(article_ref, collection.clone()));
             self.sync_article(&article_ref, &collection).await?;
         }
 
         Ok(())
-        // Ok(jobs)
     }
 
     pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
         info!("Storing collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
-        println!("Storing collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
         collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(())
     }
@@ -88,21 +81,11 @@ impl DataProcessor {
             collection.id, 
             collection.helpscout_collection_id
         );
-        println!("Processing article: ID:{:?}, Title: {:?}", article.id, article.title);
 
-        // Enqueue jobs for processing
-
-        // let jobs = vec![
-        //     Job::StoreArticle(article.clone()),
-        //     Job::ConvertHtmlToMarkdown(article.clone()),
-        //     Job::GenerateEmbeddings(article.clone()),
-        // ];
-        // Directly call the functions
         self.store_article(&article).await?;
         self.convert_html_to_markdown(&article).await?;
         self.generate_article_embeddings(&article).await?;
 
-        // Ok(jobs)
         Ok(())
     }
 
@@ -114,14 +97,12 @@ impl DataProcessor {
             article.collection_id,
             article.helpscout_collection_id
         );
-        println!("Storing article: ID:{:?}, Title: {:?}", article.id, article.title);
         let article =article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(article)
     }
 
     pub async fn convert_html_to_markdown(&self, article: &Article) -> Result<()> {
         info!("Converting HTML to Markdown for article: ID:{:?}, Title: {:?}", article.id, article.title);
-        println!("Converting HTML to Markdown for article: ID:{:?}, Title: {:?}", article.id, article.title);
         let markdown = html_to_markdown(
             article
                 .html_content
@@ -137,7 +118,6 @@ impl DataProcessor {
 
     pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
         info!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
-        println!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
 
         let embedding_and_point = generate_embeddings(article.clone())
             .await

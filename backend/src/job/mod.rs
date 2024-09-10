@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use crate::data_processor::DataProcessor;
 use crate::errors::SyncError;
 use crate::models::Article;
@@ -7,7 +5,6 @@ use crate::models::{article::ArticleRef, Collection};
 
 use anyhow::Result;
 use uuid::Uuid;
-use log::info; // Assuming log is imported somewhere in the crate
 
 pub mod enqueue;
 pub mod job_queue;
@@ -63,7 +60,7 @@ impl Job {
             }
             Job::StoreArticle(article) => {
                 log::info!("Processing StoreArticle for article: {}", article.id);
-                let result = processor.store_article(article).await;
+                processor.store_article(article).await?;
                 log::info!("StoreArticle completed for article: {}", article.id);
                 Ok(())
             }
