@@ -1,2 +1,2 @@
 flask==2.0.1
-sentence-transformers==2.2.2
+sentence-transformers==2.2.2werkzeug==2.0.3

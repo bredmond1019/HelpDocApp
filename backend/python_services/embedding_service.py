@@ -20,6 +20,10 @@ except Exception as e:
     logger.error(f"Failed to load model: {str(e)}")
     raise
 
+@app.route('/')
+def index():
+    return jsonify({'message': 'Welcome to the embedding service'})
+
 @app.route('/embed', methods=['POST'])
 def embed_text():
     try:
