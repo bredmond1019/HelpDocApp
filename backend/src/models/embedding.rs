@@ -35,8 +35,13 @@ impl Embedding {
                 article_id.eq(self.article_id),
                 embedding_vector.eq(&self.embedding_vector),
             ))
-            .execute(conn)?;
+            .execute(conn)
+            .map_err(|e| {
+                log::error!("Failed to store embedding in database: {}", e);
+                e
+            })?;
 
+        log::info!("Successfully stored embedding for article {}", self.article_id);
         Ok(())
     }
 }

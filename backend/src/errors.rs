@@ -18,6 +18,9 @@ pub enum SyncError {
         collection_id: String,
         error: anyhow::Error,
     },
+    #[error("Failed to generate or store embedding: {0}")]
+    EmbeddingError(anyhow::Error),
+
     #[error("Other error: {0}")]
     Other(#[from] anyhow::Error),
 }

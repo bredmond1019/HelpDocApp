@@ -2,9 +2,10 @@
 
 pub mod api_client;
 pub mod convert_html;
-pub mod embedding;
+pub mod embedding_service;
 
 pub use convert_html::html_to_markdown;
+pub use embedding_service::generate_and_store_embedding;
 use log::{info, error};
 
 use crate::data_processor::api_client::ApiClient;

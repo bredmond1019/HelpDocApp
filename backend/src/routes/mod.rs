@@ -4,6 +4,7 @@ use actix_web::web;
 
 pub mod job;
 pub mod parse;
+pub mod embed;
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(index);  // Add this line

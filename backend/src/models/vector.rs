@@ -1,5 +1,5 @@
 use diesel::expression::AsExpression;
-use diesel::sql_types::{ VarChar};
+use diesel::sql_types::VarChar;
 use diesel::deserialize::{self, FromSql};
 use diesel::serialize::{self, ToSql, Output};
 use diesel::pg::{Pg, PgValue};
