@@ -2,47 +2,30 @@
 
 pub mod api_client;
 pub mod convert_html;
-pub mod generate_embedding;
 
 pub use convert_html::html_to_markdown;
-pub use generate_embedding::{generate_embeddings, store_embedding};
 use log::{info, error};
 
 use crate::data_processor::api_client::ApiClient;
-use crate::db::vector_db::init_vector_db;
 use crate::db::DbPool;
 use crate::models::{Article, ArticleRef, Collection};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::sync::Arc;
 
 pub struct DataProcessor {
     pub api_client: ApiClient,
     db_pool: Arc<DbPool>,
-    vector_db_client: Arc<qdrant_client::Qdrant>,
 }
 
 impl DataProcessor {
     pub async fn new(db_pool: Arc<DbPool>) -> Result<Self> {
         let api_client = ApiClient::new(None, None).map_err(|e| anyhow::anyhow!("{}", e))?;
         
-        info!("Initializing vector DB...");
-        let vector_db_client = match init_vector_db().await {
-            Ok(client) => {
-                info!("Successfully initialized vector DB");
-                Arc::new(client)
-            },
-            Err(e) => {
-                error!("Failed to initialize vector DB: {:?}", e);
-                return Err(anyhow::anyhow!("Failed to initialize vector DB: {}", e));
-            }
-        };
-        
         info!("DataProcessor initialization complete");
         Ok(Self {
             api_client,
             db_pool,
-            vector_db_client,
         })
     }
 
@@ -60,7 +43,13 @@ impl DataProcessor {
 
     pub async fn sync_collection(&self, collection: &Collection) -> Result<()> {
         info!("Storing collection: ID:{:?}, Slug: {:?}", collection.id, collection.slug);
-        collection.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
+        let mut conn = self.db_pool.get()
+            .context("Failed to get DB connection")?;
+
+        collection.store(&mut conn)
+            .with_context(|| format!("Failed to store collection: ID:{:?}, Slug:{:?}", collection.id, collection.slug))?;
+
+        info!("Successfully stored collection: ID:{:?}, Slug:{:?}", collection.id, collection.slug);
         Ok(())
     }
 
@@ -69,10 +58,13 @@ impl DataProcessor {
         article_ref: &ArticleRef,
         collection: &Collection,
     ) -> Result<()> {
-        let article = self
-            .api_client
-            .get_article(&article_ref.id.to_string(), collection)
-            .await?;
+        let article = match self.api_client.get_article(&article_ref.id.to_string(), collection).await {
+            Ok(article) => article,
+            Err(e) => {
+                error!("Failed to fetch article ID:{}: {}", article_ref.id, e);
+                return Err(anyhow::anyhow!("Failed to fetch article: {}", e));
+            }
+        };
 
         info!(
             "Processing article: ID:{:?}, Title: {:?}, Collection ID: {:?}, Helpscout Collection ID: {:?}", 
@@ -82,9 +74,20 @@ impl DataProcessor {
             collection.helpscout_collection_id
         );
 
-        self.store_article(&article).await?;
-        self.convert_html_to_markdown(&article).await?;
-        self.generate_article_embeddings(&article).await?;
+        if let Err(e) = self.store_article(&article).await {
+            error!("Failed to store article ID:{}: {}", article.id, e);
+            return Err(anyhow::anyhow!("Failed to store article: {}", e));
+        }
+
+        if let Err(e) = self.convert_html_to_markdown(&article).await {
+            error!("Failed to convert HTML to Markdown for article ID:{}: {}", article.id, e);
+            return Err(anyhow::anyhow!("Failed to convert HTML to Markdown: {}", e));
+        }
+
+        // if let Err(e) = self.generate_article_embeddings(&article).await {
+        //     error!("Failed to generate embeddings for article ID:{}: {}", article.id, e);
+        //     return Err(anyhow::anyhow!("Failed to generate article embeddings: {}", e));
+        // }
 
         Ok(())
     }
@@ -107,28 +110,33 @@ impl DataProcessor {
             article
                 .html_content
                 .as_ref()
-                .ok_or(anyhow::anyhow!("HTML content not found"))?,
-        );
-        article.update_markdown_content(
-            &mut self.db_pool.get().expect("Failed to get DB connection"),
-            markdown,
+                .ok_or_else(|| anyhow::anyhow!("HTML content not found for article ID:{}", article.id))?
         )?;
+
+        article.update_markdown_content(
+            &mut *self.db_pool.get().context("Failed to get DB connection")?,
+            markdown,
+        ).context(format!("Failed to update markdown content for article ID:{}", article.id))?;
+        
         Ok(())
     }
 
-    pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
-        info!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
+    // pub async fn generate_article_embeddings(&self, article: &Article) -> Result<()> {
+    //     info!("Generating embeddings for article: ID:{:?}, Title: {:?}", article.id, article.title);
 
-        let embedding_and_point = generate_embeddings(article.clone())
-            .await
-            .expect("Failed to generate embeddings");
+    //     let embedding_and_point = generate_embeddings(article.clone())
+    //         .await
+    //         .map_err(|e| anyhow::anyhow!("{}", e))
+    //         .context(format!("Failed to generate embeddings for article ID:{}", article.id))?;
 
-        store_embedding(
-            embedding_and_point,
-            self.vector_db_client.clone(),
-            self.db_pool.clone(),
-        )
-        .await?;
-        Ok(())
-    }
+    //     store_embedding(
+    //         embedding_and_point,
+    //         self.vector_db_client.clone(),
+    //         self.db_pool.clone(),
+    //     )
+    //     .await
+    //     .context(format!("Failed to store embedding for article ID:{}", article.id))?;
+        
+    //     Ok(())
+    // }
 }

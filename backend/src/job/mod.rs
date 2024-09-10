@@ -19,7 +19,6 @@ pub enum Job {
     SyncArticle(ArticleRef, Collection),
     StoreArticle(Article),
     ConvertHtmlToMarkdown(Article),
-    GenerateEmbeddings(Article),
     EnqueueJobs(Vec<Job>),
 }
 
@@ -68,12 +67,6 @@ impl Job {
                 log::info!("Processing ConvertHtmlToMarkdown for article: {}", article.id);
                 let result = processor.convert_html_to_markdown(article).await;
                 log::info!("ConvertHtmlToMarkdown completed for article: {}", article.id);
-                result
-            }
-            Job::GenerateEmbeddings(article) => {
-                log::info!("Processing GenerateEmbeddings for article: {}", article.id);
-                let result = processor.generate_article_embeddings(&article).await;
-                log::info!("GenerateEmbeddings completed for article: {}", article.id);
                 result
             }
         };

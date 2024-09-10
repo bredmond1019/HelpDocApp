@@ -112,7 +112,6 @@ impl ApiClient {
                     return Err(anyhow::anyhow!("Failed to deserialize API response: {}", e));
                 }
             };
-            // info!("API Response | Get List Articles: {:?}", api_response.articles.items.len());
             let article_data = api_response.articles;
             info!("Total pages: {}, Current page: {}", article_data.pages, page);
 

@@ -1,11 +1,20 @@
 use scraper::{Html, Selector};
+use thiserror::Error;
 
-pub fn html_to_markdown(html: &str) -> String {
-    let cleaned_html = clean_html(html);
-    html2md::parse_html(&cleaned_html)
+#[derive(Error, Debug)]
+pub enum HtmlConversionError {
+    #[error("Failed to clean HTML: {0}")]
+    CleaningError(String),
+    #[error("Failed to convert HTML to Markdown: {0}")]
+    ConversionError(String),
 }
 
-pub fn clean_html(html: &str) -> String {
+pub fn html_to_markdown(html: &str) -> Result<String, HtmlConversionError> {
+    let cleaned_html = clean_html(html)?;
+    Ok(html2md::parse_html(&cleaned_html))
+}
+
+pub fn clean_html(html: &str) -> Result<String, HtmlConversionError> {
     let mut cleaned_html = html.to_string();
     let mut previous_html;
 
@@ -51,5 +60,5 @@ pub fn clean_html(html: &str) -> String {
         }
     }
 
-    cleaned_html.trim().to_string()
+    Ok(cleaned_html.trim().to_string())
 }
