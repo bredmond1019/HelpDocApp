@@ -3,6 +3,7 @@ use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;
+use std::process::Command;
 use std::sync::Arc;
 
 use backend::db::DbPool;
@@ -28,6 +29,15 @@ async fn main() -> std::io::Result<()> {
 
     info!("Starting application");
 
+   
+
+    let mut python_service = Command::new("python")
+        .arg("python_services/embedding_service.py")
+        .spawn()
+        .expect("Failed to start Python service");
+
+    info!("Python service started with PID: {:?}", python_service.id());
+
     let pool: DbPool = db::init_pool();
 
     let data_processor = Arc::new(
@@ -38,7 +48,7 @@ async fn main() -> std::io::Result<()> {
 
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
             .app_data(web::Data::new(data_processor.clone()))
@@ -47,6 +57,11 @@ async fn main() -> std::io::Result<()> {
             .configure(routes::init_routes)
     })
     .bind("127.0.0.1:3000")?
-    .run()
-    .await
+    .run();
+
+    let server_result = server.await;
+
+    python_service.kill().expect("Failed to stop Python service");
+
+    server_result
 }
