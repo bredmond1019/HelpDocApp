@@ -5,4 +5,3 @@ pub mod job;
 pub mod models;
 pub mod routes;
 pub mod schema;
-pub mod embedding;

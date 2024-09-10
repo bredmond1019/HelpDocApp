@@ -2,6 +2,7 @@ pub mod article;
 pub mod collection;
 pub mod embedding;
 pub mod job_info;
+pub mod vector;
 
 pub use self::article::{Article, ArticleFull, ArticleFullResponse, ArticleRef, ArticleResponse};
 pub use self::collection::{Collection, CollectionItem, CollectionResponse};

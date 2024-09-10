@@ -2,6 +2,7 @@
 
 pub mod api_client;
 pub mod convert_html;
+pub mod embedding;
 
 pub use convert_html::html_to_markdown;
 use log::{info, error};

@@ -1,5 +1,11 @@
 // @generated automatically by Diesel CLI.
 
+pub mod sql_types {
+    #[derive(diesel::query_builder::QueryId, Clone, diesel::sql_types::SqlType)]
+    #[diesel(postgres_type(name = "vector"))]
+    pub struct Vector;
+}
+
 diesel::table! {
     articles (id) {
         id -> Uuid,
@@ -49,10 +55,13 @@ diesel::table! {
 }
 
 diesel::table! {
+    use diesel::sql_types::*;
+    use super::sql_types::Vector;
+
     embeddings (id) {
         id -> Uuid,
         article_id -> Uuid,
-        embedding_vector -> Array<Nullable<Float4>>,
+        embedding_vector -> VarChar,
     }
 }
 

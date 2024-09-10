@@ -4,13 +4,15 @@ use diesel::prelude::*;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use super::vector::Vector;
+
 #[derive(Debug, Serialize, Deserialize, Queryable, Insertable)]
 #[diesel(table_name = crate::schema::embeddings)]
 pub struct Embedding {
     pub id: Uuid,
     pub article_id: Uuid,
-    #[diesel(sql_type = Array<Float4>)]
-    pub embedding_vector: Vec<f32>,
+    #[diesel(sql_type = VarChar)]
+    pub embedding_vector: Vector,
 }
 
 impl Embedding {
@@ -18,7 +20,7 @@ impl Embedding {
         Self {
             id: Uuid::new_v4(),
             article_id,
-            embedding_vector,
+            embedding_vector: Vector(embedding_vector),
         }
     }
 
