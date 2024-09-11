@@ -2,6 +2,8 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use actix::Actor;
+use backend::services::search_service::SearchService;
+use backend::services::{AIModel, EmbeddingService};
 use dotenv::dotenv;
 use log::{error, info};
 use log4rs;
@@ -54,6 +56,20 @@ async fn main() -> std::io::Result<()> {
     let chat_server = ChatServer::new(arc_pool.clone()).start();
     info!("ChatServer initialized and started");
 
+    info!("Initializing EmbeddingService");
+    let embedding_service = Arc::new(EmbeddingService::new());
+    info!("EmbeddingService initialized");
+
+    info!("Initializing AIModel");
+    let ai_model = Arc::new(AIModel::new());
+    info!("AIModel initialized");
+
+    info!("Initializing SearchService");
+    let search_service = Arc::new(SearchService::new(arc_pool.clone(), ai_model.clone()));
+    info!("SearchService initialized");
+
+    
+
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
     let server = HttpServer::new(move || {
@@ -61,6 +77,9 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(arc_pool.clone()))
             .app_data(web::Data::new(data_processor.clone()))
             .app_data(web::Data::new(chat_server.clone()))
+            .app_data(web::Data::new(embedding_service.clone()))
+            .app_data(web::Data::new(search_service.clone()))
+            .app_data(web::Data::new(ai_model.clone()))
             .wrap(Logger::default())
             .wrap(Cors::permissive())
             .configure(routes::init_routes)

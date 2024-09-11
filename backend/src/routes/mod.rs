@@ -5,15 +5,16 @@ pub mod job;
 pub mod parse;
 pub mod embed;
 pub mod ws;
-
+pub mod search;
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(index); 
+    cfg.service(health);
     cfg.service(parse::parse_data);
     cfg.service(job::get_job_status);
     cfg.service(embed::generate_embeddings);
-    cfg.service(health);
     cfg.service(embed::get_failed_embedding_articles);
     cfg.service(embed::reembed_all_articles);
+    cfg.service(search::search);
 }
 
 #[get("/")]

@@ -211,6 +211,45 @@ impl Article {
         // Execute the query
         query.limit(10).load::<Article>(conn)
     }
+
+    pub fn keyword_search_with_ids(
+        conn: &mut PgConnection,
+        query: &str,
+        ids: &[Uuid],
+    ) -> Result<Vec<Article>, diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
+
+        let words: Vec<String> = query.split_whitespace().map(|w| w.to_lowercase()).collect();
+        
+        let mut query = articles.into_boxed();
+
+        // Add ILIKE conditions for each word
+        for word in &words {
+            let like_word = format!("%{}%", word);
+            query = query.filter(
+                title.ilike(like_word.clone()).or(markdown_content.ilike(like_word))
+            );
+        }
+
+        // Add filter for specific IDs
+        query = query.filter(id.eq_any(ids));
+
+        // Add ordering
+        query = query.order(
+            (
+                diesel::dsl::sql::<Integer>(&format!(
+                    "{}",
+                    words.iter()
+                        .map(|w| format!("CASE WHEN LOWER(title) LIKE '%{}%' THEN 1 ELSE 0 END", w))
+                        .collect::<Vec<_>>()
+                        .join(" + ")
+                ))
+            ).desc()
+        ).then_order_by(updated_at.desc());
+
+        // Execute the query
+        query.limit(10).load::<Article>(conn)
+    }
 }
 
 

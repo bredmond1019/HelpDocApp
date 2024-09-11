@@ -1,7 +1,7 @@
 use futures::stream::Stream;
 use log::{error, info};
 use ollama_rs::{
-    generation::chat::{request::ChatMessageRequest, ChatMessage, ChatMessageResponseStream},
+    generation::{chat::{request::ChatMessageRequest, ChatMessage, ChatMessageResponseStream}, completion::request::GenerationRequest},
     Ollama,
 };
 use std::error::Error as StdError;
@@ -22,7 +22,7 @@ impl AIModel {
         }
     }
 
-    pub async fn generate_response(
+    pub async fn generate_stream_response(
         &mut self,
         input: String,
     ) -> Result<
@@ -63,6 +63,22 @@ impl AIModel {
             }
         })))
     }
+
+    pub async fn generate_response(
+        &self,
+        input: String,
+    ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+        let model = "llama3.1:latest".to_string();
+
+        let res = self.ollama.generate(GenerationRequest::new(model, input)).await;
+
+        match res {
+            Ok(response) => Ok(response.response),
+            Err(e) => Err(Box::new(AIModelError::RequestError(e.to_string())) as Box<dyn std::error::Error + Send + Sync>)
+        }
+    }
+
+    
 }
 
 #[derive(Debug)]
