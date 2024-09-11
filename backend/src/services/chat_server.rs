@@ -11,13 +11,13 @@ use log::{error, info};
 use pgvector::Vector;
 use serde::Deserialize;
 use std::{collections::HashMap, sync::Arc};
-use diesel::{QueryDsl, RunQueryDsl};
+use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 use pgvector::VectorExpressionMethods;
 use diesel::sql_types::*;
 use diesel::ExpressionMethods;
 
 use super::chat_session::SessionId;
-use super::embedding_service::generate_embedding;
+use super::embedding_service::EmbeddingService;
 
 #[derive(Message)]
 #[rtype(result = "()")]
@@ -56,7 +56,8 @@ impl ChatServer {
 
 
     async fn process_message(&mut self, text: String) -> Result<String, Box<dyn std::error::Error>> {
-        let query_embedding = generate_embedding(&text).await?;
+        let embedding_service = EmbeddingService::new();
+        let query_embedding = embedding_service.generate_embedding(&text).await?;
         let query_embedding = Vector::from(query_embedding);
         let conn = &mut self.db_pool.get().expect("couldn't get db connection from pool");
         let relevant_articles = Article::find_relevant_articles(&query_embedding, conn).await?;
@@ -88,6 +89,39 @@ impl ChatServer {
             .join("");
 
         Ok(full_response)
+    }
+
+    pub async fn combined_search(
+        conn: &mut PgConnection,
+        query: &str,
+        embedding_service: &EmbeddingService,
+    ) -> Result<Vec<Article>, Box<dyn std::error::Error>> {
+        let keyword_results = Article::keyword_search(conn, query)?;
+        
+        let query_embedding = embedding_service.generate_embedding(query).await?;
+        let semantic_results = Article::find_relevant_articles(&query_embedding.into(), conn).await?;
+        
+        // Combine and deduplicate results
+        let mut combined_results: Vec<(Article, f64)> = Vec::new();
+        let mut seen_ids = std::collections::HashSet::new();
+        
+        for article in keyword_results {
+            if seen_ids.insert(article.id) {
+                combined_results.push((article, 1.0)); // Give keyword results a high score
+            }
+        }
+        
+        for (article, score) in semantic_results {
+            if seen_ids.insert(article.id) {
+                combined_results.push((article, score));
+            }
+        }
+        
+        // Sort combined results
+        combined_results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        combined_results.truncate(10); // Limit to top 10 results
+        
+        Ok(combined_results.into_iter().map(|(article, _)| article).collect())
     }
 }
 

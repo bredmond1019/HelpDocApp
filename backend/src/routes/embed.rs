@@ -10,7 +10,7 @@ use futures::stream::{self, StreamExt};
 
 use crate::errors::SyncError;
 use crate::models::Embedding;
-use crate::{services::generate_and_store_embedding, db::DbPool};
+use crate::{services::embedding_service::EmbeddingService, db::DbPool};
 use crate::models::article::Article;
 use crate::schema::articles;
 
@@ -42,6 +42,7 @@ async fn generate_all_embeddings(
     pool: web::Data<Arc<DbPool>>,
 ) -> Result<(), SyncError> {
     let mut conn = pool.get().expect("couldn't get db connection from pool");
+    let embedding_service = EmbeddingService::new();
 
     match articles::table.load::<Article>(&mut conn) {
         Ok(article_list) => {
@@ -57,9 +58,8 @@ async fn generate_all_embeddings(
                     let mut batch_success = 0;
                     let mut batch_error = 0;
                     for article in chunk {
-                        let markdown_content = article.markdown_content.or(article.html_content).unwrap_or_else(|| article.title.clone());
                         let mut conn = pool.get().expect("couldn't get db connection from pool");
-                        match generate_and_store_embedding(&mut conn, article.id, &markdown_content).await {
+                        match embedding_service.generate_and_store_embedding(&mut conn, &article).await {
                             Ok(_) => {
                                 batch_success += 1;
                                 info!("Successfully generated and stored embedding for article {}", article.id);
@@ -72,7 +72,7 @@ async fn generate_all_embeddings(
                     }
                     (batch_success, batch_error)
                 })
-                .buffer_unordered(4) // Process up to 4 batches concurrently
+                .buffer_unordered(4) 
                 .collect::<Vec<_>>()
                 .await;
 

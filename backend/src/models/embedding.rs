@@ -29,13 +29,13 @@ impl Embedding {
         }
     }
 
-    pub fn store(&self, conn: &mut PgConnection) -> Result<(), diesel::result::Error> {
-        diesel::insert_into(embeddings::table)
+    pub fn store(&self, conn: &mut PgConnection) -> Result<Self, diesel::result::Error> {
+        let embedding: Self = diesel::insert_into(embeddings::table)
         .values(self)
-        .execute(conn)?;
+        .get_result(conn)?;
 
         log::info!("Successfully stored embedding for article {}", self.article_id);
-        Ok(())
+        Ok(embedding)
     }
 
     pub fn get_failed_embeddings(conn: &mut PgConnection) -> Result<Vec<Embedding>, diesel::result::Error> {

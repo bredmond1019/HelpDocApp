@@ -4,6 +4,19 @@ diesel::table! {
     use diesel::sql_types::*;
     use pgvector::sql_types::*;
 
+    article_chunks (id) {
+        id -> Uuid,
+        article_id -> Uuid,
+        content -> Text,
+        is_title -> Bool,
+        embedding_id -> Nullable<Uuid>,
+    }
+}
+
+diesel::table! {
+    use diesel::sql_types::*;
+    use pgvector::sql_types::*;
+
     articles (id) {
         id -> Uuid,
         collection_id -> Uuid,
@@ -68,11 +81,13 @@ diesel::table! {
     }
 }
 
+diesel::joinable!(article_chunks -> articles (article_id));
 diesel::joinable!(articles -> collections (collection_id));
 diesel::joinable!(content_versions -> articles (article_id));
 diesel::joinable!(embeddings -> articles (article_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
+    article_chunks,
     articles,
     collections,
     content_versions,

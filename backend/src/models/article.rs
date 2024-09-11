@@ -1,10 +1,16 @@
+use std::collections::HashMap;
+
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
+use diesel::sql_query;
+use diesel::sql_types::Integer;
 use pgvector::Vector;
 use pgvector::VectorExpressionMethods;
+use diesel::ExpressionMethods;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::schema::article_chunks;
 use crate::schema::articles;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable)]
@@ -84,27 +90,147 @@ impl Article {
         Ok(())
     }
 
-    pub async fn find_relevant_articles(query_embedding: &Vector, conn: &mut PgConnection) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error>> {
-        use diesel::prelude::*;
-        use crate::schema::{articles, embeddings};
+    pub fn create_chunks(&self, chunk_size: usize) -> Vec<ArticleChunk> {
+        let mut chunks = Vec::new();
+        
+        // Add title as a separate chunk
+        let title_chunk = ArticleChunk {
+            id: Uuid::new_v4(),
+            article_id: self.id,
+            content: self.title.clone(),
+            is_title: true,
+            embedding_id: None,
+        };
+        chunks.push(title_chunk);
     
-        let results: Vec<(Article, f64)> = embeddings::table
-            .inner_join(articles::table)
+        if let Some(content) = &self.markdown_content {
+            // Split content into words
+            let words: Vec<&str> = content.split_whitespace().collect();
+            let mut current_chunk = String::new();
+            let mut word_count = 0;
+    
+            for word in words {
+                if word_count >= chunk_size {
+                    // If the current chunk has reached or exceeded the chunk size,
+                    // add it to the chunks vector and start a new chunk
+                    chunks.push(ArticleChunk {
+                        id: Uuid::new_v4(),
+                        article_id: self.id,
+                        content: current_chunk.trim().to_string(),
+                        is_title: false,
+                        embedding_id: None,
+                    });
+                    current_chunk.clear();
+                    word_count = 0;
+                }
+    
+                // Add the word to the current chunk
+                if !current_chunk.is_empty() {
+                    current_chunk.push(' ');
+                }
+                current_chunk.push_str(word);
+                word_count += 1;
+            }
+    
+            // Add any remaining content as the last chunk
+            if !current_chunk.is_empty() {
+                chunks.push(ArticleChunk {
+                    id: Uuid::new_v4(),
+                    article_id: self.id,
+                    content: current_chunk.trim().to_string(),
+                    is_title: false,
+                    embedding_id: None,
+                });
+            }
+        }
+    
+        chunks
+    }
+
+    pub async fn find_relevant_articles(
+        query_embedding: &Vector,
+        conn: &mut PgConnection,
+    ) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error>> {
+        use diesel::prelude::*;
+        use crate::schema::{articles, article_chunks, embeddings};
+
+        let results: Vec<(Article, f64, bool)> = article_chunks::table
+            .inner_join(articles::table.on(articles::id.eq(article_chunks::article_id)))
+            .inner_join(embeddings::table.on(embeddings::id.nullable().eq(article_chunks::embedding_id)))
             .select((
                 articles::all_columns,
-                embeddings::embedding_vector.cosine_distance(query_embedding)
+                embeddings::embedding_vector.cosine_distance(query_embedding),
+                article_chunks::is_title,
             ))
             .order(embeddings::embedding_vector.cosine_distance(query_embedding))
-            .limit(5)
+            .limit(20)
             .load(conn)?;
-    
-        // Convert distance to similarity (cosine similarity = 1 - cosine distance)
-        let results_with_similarity: Vec<(Article, f64)> = results
-            .into_iter()
-            .map(|(article, distance)| (article, 1.0 - distance))
-            .collect();
-    
-        Ok(results_with_similarity)
+
+        // Group by article and calculate weighted similarity
+        let mut article_similarities: HashMap<Uuid, (Article, f64)> = HashMap::new();
+        for (article, distance, is_title) in results {
+            let similarity = 1.0 - distance;
+            let weight = if is_title { 2.0 } else { 1.0 };
+            let entry = article_similarities.entry(article.id).or_insert_with(|| (article, 0.0));
+            entry.1 += similarity * weight;
+        }
+
+        let mut sorted_articles: Vec<(Article, f64)> = article_similarities.into_values().collect();
+        sorted_articles.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+        sorted_articles.truncate(5);
+
+        Ok(sorted_articles)
+    }
+
+    pub fn keyword_search(conn: &mut PgConnection, query: &str) -> Result<Vec<Article>, diesel::result::Error> {
+        let words: Vec<String> = query.split_whitespace().map(|w| w.to_lowercase()).collect();
+        
+        // Create the base query
+        let mut query = articles::table.into_boxed();
+
+        // Add ILIKE conditions for each word
+        for word in &words {
+            let like_word = format!("%{}%", word);
+            query = query.filter(
+                articles::title.ilike(like_word.clone()).or(articles::markdown_content.ilike(like_word))
+            );
+        }
+
+        // Add ordering
+        query = query.order(
+            (
+                diesel::dsl::sql::<Integer>(&format!(
+                    "{}",
+                    words.iter()
+                        .map(|w| format!("CASE WHEN LOWER(title) LIKE '%{}%' THEN 1 ELSE 0 END", w))
+                        .collect::<Vec<_>>()
+                        .join(" + ")
+                ))
+            ).desc()
+        ).then_order_by(articles::updated_at.desc());
+
+        // Execute the query
+        query.limit(10).load::<Article>(conn)
+    }
+}
+
+
+#[derive(Queryable, Insertable)]
+#[diesel(table_name = crate::schema::article_chunks)]
+pub struct ArticleChunk {
+    pub id: Uuid,
+    pub article_id: Uuid,
+    pub content: String,
+    pub is_title: bool,
+    pub embedding_id: Option<Uuid>,
+}
+
+impl ArticleChunk {
+    pub fn store(&self, conn: &mut PgConnection) -> Result<Self, diesel::result::Error> {
+        let chunk: Self = diesel::insert_into(article_chunks::table)
+            .values(self)
+            .get_result(conn)?;
+        Ok(chunk)
     }
 }
 
