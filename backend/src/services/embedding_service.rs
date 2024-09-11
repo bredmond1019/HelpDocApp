@@ -1,5 +1,3 @@
-// This could be in a separate file, e.g., embedding_service.rs
-
 use diesel::PgConnection;
 use reqwest::Client;
 use serde_json::json;

@@ -8,7 +8,7 @@ use futures::stream::{self, StreamExt};
 
 use crate::errors::SyncError;
 use crate::models::Embedding;
-use crate::{data_processor::generate_and_store_embedding, db::DbPool};
+use crate::{services::generate_and_store_embedding, db::DbPool};
 use crate::models::article::Article;
 use crate::schema::articles;
 

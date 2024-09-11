@@ -3,8 +3,8 @@ use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;
-use std::process::Command;
 use std::sync::Arc;
+// use std::process::Command;
 
 use backend::db::DbPool;
 use backend::routes;
@@ -30,12 +30,11 @@ async fn main() -> std::io::Result<()> {
     info!("Starting application");
 
    
-
+    // Python Service for Embedding
     // let mut python_service = Command::new("python")
     //     .arg("python_services/embedding_service.py")
     //     .spawn()
     //     .expect("Failed to start Python service");
-
     // info!("Python service started with PID: {:?}", python_service.id());
 
     let pool: DbPool = db::init_pool();

@@ -1,25 +1,19 @@
-use std::sync::Arc;
-
-use actix_web::{post, web};
+use actix_web::{post, get, web, HttpResponse, Responder};
+use reqwest::Client;
 
 pub mod job;
 pub mod parse;
 pub mod embed;
+pub mod ws;
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(index); 
     cfg.service(parse::parse_data);
-    cfg.service(get_collections);
     cfg.service(job::get_job_status);
     cfg.service(embed::generate_embeddings);
     cfg.service(health);
     cfg.service(embed::get_failed_embedding_articles);
 }
-
-use actix_web::{get, HttpResponse, Responder};
-use reqwest::Client;
-
-use crate::data_processor::DataProcessor;
 
 #[get("/")]
 pub async fn index() -> impl Responder {
@@ -48,10 +42,3 @@ pub async fn health() -> impl Responder {
     }
 }
 
-#[get("/collections")]
-async fn get_collections(data_processor: web::Data<Arc<DataProcessor>>) -> impl Responder {
-    match data_processor.api_client.get_list_collections().await {
-        Ok(collections) => HttpResponse::Ok().json(collections),
-        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
-    }
-}

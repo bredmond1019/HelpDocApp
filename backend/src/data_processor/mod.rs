@@ -2,11 +2,8 @@
 
 pub mod api_client;
 pub mod convert_html;
-pub mod embedding_service;
 
 pub use convert_html::html_to_markdown;
-pub use embedding_service::generate_and_store_embedding;
-use log::{info, error};
 
 use crate::data_processor::api_client::ApiClient;
 use crate::db::DbPool;
@@ -14,6 +11,7 @@ use crate::models::{Article, ArticleRef, Collection};
 
 use anyhow::{Context, Result};
 use std::sync::Arc;
+use log::{info, error};
 
 pub struct DataProcessor {
     pub api_client: ApiClient,

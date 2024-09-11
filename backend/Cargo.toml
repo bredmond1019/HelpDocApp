@@ -4,30 +4,34 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tokio = { version = "1.32", features = ["full", "rt-multi-thread", "macros"] }
+actix = "0.13.5"
+actix-cors = "0.7.0"
+actix-web = "4.9.0"
+actix-web-actors = "4.3.1"
+actix-web-codegen = "4.3.0"
+anyhow = "1.0.86"
 async-graphql = "7.0.9"
 async-graphql-actix-web = "7.0.9"
-actix-web = "4.9.0"
-serde = { version = "1.0", features = ["derive"] }
-dotenv = "0.15"
-reqwest = { version = "0.12.7", features = ["json"] }
-serde_json = "1.0.128"
-html2md = "0.2.14"
 chrono = { version = "0.4.38", features = ["serde"] }
-anyhow = "1.0.86"
+diesel = { version = "2.2.4", features = ["postgres", "r2d2", "chrono", "uuid"] }
+dotenv = "0.15"
+env_logger = "0.11.5"
+futures = "0.3.30"
+html2md = "0.2.14"
+log = "0.4.22"
+log4rs = "1.3.0"
+ollama-rs = { path = "../../ollama-rs", features = ["stream", "chat-history"] }
+pgvector = { version = "0.4", features = ["diesel", "serde"] }
+reqwest = { version = "0.12.7", features = ["json"] }
 scraper = "0.20.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.128"
+thiserror = "1.0.63"
+tokio = { version = "1.32", features = ["full", "rt-multi-thread", "macros"] }
+tokio-stream = "0.1.16"
 tonic = "0.12.2"
 url = "2.5.2"
 uuid = { version = "1.10.0", features = ["v4", "serde"] }
-diesel = { version = "2.2.4", features = ["postgres", "r2d2", "chrono", "uuid"] }
-pgvector = { version = "0.4", features = ["diesel", "serde"] }
-actix-cors = "0.7.0"
-log = "0.4.22"
-env_logger = "0.11.5"
-log4rs = "1.3.0"
-thiserror = "1.0.63"
-actix-web-codegen = "4.3.0"
-futures = "0.3.30"
 
 
 [dev-dependencies]
