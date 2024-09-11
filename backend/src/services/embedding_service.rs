@@ -1,12 +1,12 @@
 use diesel::PgConnection;
 use reqwest::Client;
 use serde_json::json;
-use uuid::Uuid;
+
 use log::{info, error};
 use anyhow::{Result, Context};
+use diesel::RunQueryDsl;
 
-use crate::models::{article::ArticleChunk, embedding::Embedding, Article};
-use crate::schema::article_chunks;
+use crate::models::{embedding::Embedding, Article};
 
 pub struct EmbeddingService {
     client: Client,
@@ -62,6 +62,27 @@ impl EmbeddingService {
         }
 
         info!("Successfully generated and stored embedding for article {}", article.id);
+        Ok(())
+    }
+
+    pub async fn reembed_all_articles(&self, conn: &mut PgConnection) -> Result<(), Box<dyn std::error::Error>> {
+        use crate::schema::articles::dsl::*;
+        use crate::schema::embeddings::dsl::*;
+        use crate::schema::article_chunks::dsl::*;
+        use diesel::delete;
+
+        // Step 1: Remove all existing embeddings and article chunks
+        delete(embeddings).execute(conn)?;
+        delete(article_chunks).execute(conn)?;
+
+        // Step 2: Fetch all articles
+        let all_articles = articles.load::<Article>(conn)?;
+
+        // Step 3: Generate new embeddings for each article
+        for article in all_articles {
+            self.generate_and_store_embedding(conn, &article).await?;
+        }
+
         Ok(())
     }
 

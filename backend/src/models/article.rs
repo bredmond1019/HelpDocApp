@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
-use diesel::sql_query;
 use diesel::sql_types::Integer;
 use pgvector::Vector;
 use pgvector::VectorExpressionMethods;
@@ -150,7 +149,7 @@ impl Article {
     pub async fn find_relevant_articles(
         query_embedding: &Vector,
         conn: &mut PgConnection,
-    ) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error>> {
+    ) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error + Send + Sync>> {
         use diesel::prelude::*;
         use crate::schema::{articles, article_chunks, embeddings};
 

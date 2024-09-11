@@ -38,6 +38,27 @@ pub async fn get_failed_embedding_articles(
         "status": "success"
     }))
 }
+
+#[post("/reembed-all")]
+pub async fn reembed_all_articles(
+    pool: web::Data<Arc<DbPool>>,
+) -> impl Responder {
+    let embedding_service = EmbeddingService::new();
+    let mut conn = pool.get().expect("couldn't get db connection from pool");
+
+    tokio::spawn(async move {
+        if let Err(e) = embedding_service.reembed_all_articles(&mut conn).await {
+            error!("Error re-embedding articles: {}", e);
+        }
+    });
+
+    HttpResponse::Ok().json(json!({
+        "message": "Started re-embedding all articles",
+        "status": "success"
+    }))
+}
+
+
 async fn generate_all_embeddings(
     pool: web::Data<Arc<DbPool>>,
 ) -> Result<(), SyncError> {

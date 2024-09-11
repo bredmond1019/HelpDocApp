@@ -27,7 +27,7 @@ impl AIModel {
         input: String,
     ) -> Result<
         Pin<Box<dyn Stream<Item = Result<String, Box<dyn std::error::Error>>> + Send>>,
-        Box<dyn std::error::Error>,
+        Box<dyn std::error::Error + Send + Sync>,
     > {
         info!("Generating AI response for input: {}", input);
         let stream: ChatMessageResponseStream = self
