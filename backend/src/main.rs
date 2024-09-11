@@ -1,17 +1,19 @@
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
+use actix::Actor;
 use dotenv::dotenv;
+use log::{error, info};
+use log4rs;
 use std::env;
 use std::sync::Arc;
 // use std::process::Command;
 
+use backend::{data_processor::DataProcessor, db};
+use backend::services::chat_server::ChatServer;
 use backend::db::DbPool;
 use backend::routes;
-use backend::{data_processor::DataProcessor, db};
 
-use log::{error, info};
-use log4rs;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -38,19 +40,27 @@ async fn main() -> std::io::Result<()> {
     // info!("Python service started with PID: {:?}", python_service.id());
 
     let pool: DbPool = db::init_pool();
+    let arc_pool = Arc::new(pool.clone());
 
+    info!("Initializing DataProcessor");
     let data_processor = Arc::new(
-        DataProcessor::new(Arc::new(pool.clone()))
+        DataProcessor::new(arc_pool.clone())
             .await
             .expect("Failed to create DataProcessor"),
     );
+    info!("DataProcessor initialized");
+
+    info!("Initializing ChatServer");
+    let chat_server = ChatServer::new(arc_pool.clone()).start();
+    info!("ChatServer initialized and started");
 
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
     let server = HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(pool.clone()))
+            .app_data(web::Data::new(arc_pool.clone()))
             .app_data(web::Data::new(data_processor.clone()))
+            .app_data(web::Data::new(chat_server.clone()))
             .wrap(Logger::default())
             .wrap(Cors::permissive())
             .configure(routes::init_routes)

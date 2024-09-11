@@ -1,5 +1,7 @@
 // routes.rs
 
+use std::sync::Arc;
+
 use diesel::prelude::*;
 use actix_web::{post, get, web, HttpResponse, Responder};
 use serde_json::json;
@@ -14,7 +16,7 @@ use crate::schema::articles;
 
 #[post("/generate-embeddings")]
 pub async fn generate_embeddings(
-    pool: web::Data<DbPool>,
+    pool: web::Data<Arc<DbPool>>,
 ) -> impl Responder {
     tokio::spawn(generate_all_embeddings(pool));
     
@@ -26,7 +28,7 @@ pub async fn generate_embeddings(
 
 #[get("/get-failed-embeddings")]
 pub async fn get_failed_embedding_articles(
-    pool: web::Data<DbPool>,
+    pool: web::Data<Arc<DbPool>>,
 ) -> impl Responder {
     let failed_articles = check_failed_embeddings(pool)
         .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))
@@ -37,7 +39,7 @@ pub async fn get_failed_embedding_articles(
     }))
 }
 async fn generate_all_embeddings(
-    pool: web::Data<DbPool>,
+    pool: web::Data<Arc<DbPool>>,
 ) -> Result<(), SyncError> {
     let mut conn = pool.get().expect("couldn't get db connection from pool");
 
@@ -94,7 +96,7 @@ async fn generate_all_embeddings(
 }
 
 
-fn check_failed_embeddings(pool: web::Data<DbPool>) -> Result<Vec<Article>, SyncError> {
+fn check_failed_embeddings(pool: web::Data<Arc<DbPool>>) -> Result<Vec<Article>, SyncError> {
     let mut conn = pool.get().expect("couldn't get db connection from pool");
     let failed_embeddings = Embedding::get_failed_embeddings(&mut conn)
         .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))?;

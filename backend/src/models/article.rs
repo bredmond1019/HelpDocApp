@@ -1,5 +1,7 @@
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
+use pgvector::Vector;
+use pgvector::VectorExpressionMethods;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -80,6 +82,29 @@ impl Article {
             .execute(conn)?;
 
         Ok(())
+    }
+
+    pub async fn find_relevant_articles(query_embedding: &Vector, conn: &mut PgConnection) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error>> {
+        use diesel::prelude::*;
+        use crate::schema::{articles, embeddings};
+    
+        let results: Vec<(Article, f64)> = embeddings::table
+            .inner_join(articles::table)
+            .select((
+                articles::all_columns,
+                embeddings::embedding_vector.cosine_distance(query_embedding)
+            ))
+            .order(embeddings::embedding_vector.cosine_distance(query_embedding))
+            .limit(5)
+            .load(conn)?;
+    
+        // Convert distance to similarity (cosine similarity = 1 - cosine distance)
+        let results_with_similarity: Vec<(Article, f64)> = results
+            .into_iter()
+            .map(|(article, distance)| (article, 1.0 - distance))
+            .collect();
+    
+        Ok(results_with_similarity)
     }
 }
 
