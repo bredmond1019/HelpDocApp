@@ -66,3 +66,5 @@ pub async fn generate_and_store_embedding(
     info!("Successfully generated and stored embedding for article {}", article_id);
     Ok(())
 }
+
+

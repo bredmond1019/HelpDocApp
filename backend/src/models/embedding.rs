@@ -37,4 +37,11 @@ impl Embedding {
         log::info!("Successfully stored embedding for article {}", self.article_id);
         Ok(())
     }
+
+    pub fn get_failed_embeddings(conn: &mut PgConnection) -> Result<Vec<Embedding>, diesel::result::Error> {
+        let failed_embeddings = embeddings::table
+            .filter(embeddings::embedding_vector.is_null())
+            .load::<Embedding>(conn)?;
+        Ok(failed_embeddings)
+    }
 }

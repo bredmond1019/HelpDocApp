@@ -13,6 +13,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(job::get_job_status);
     cfg.service(embed::generate_embeddings);
     cfg.service(health);
+    cfg.service(embed::get_failed_embedding_articles);
 }
 
 use actix_web::{get, HttpResponse, Responder};

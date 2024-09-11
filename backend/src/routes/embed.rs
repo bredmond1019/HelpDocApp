@@ -1,12 +1,13 @@
 // routes.rs
 
 use diesel::prelude::*;
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, get, web, HttpResponse, Responder};
 use serde_json::json;
 use log::{info, error};
 use futures::stream::{self, StreamExt};
 
 use crate::errors::SyncError;
+use crate::models::Embedding;
 use crate::{data_processor::generate_and_store_embedding, db::DbPool};
 use crate::models::article::Article;
 use crate::schema::articles;
@@ -23,6 +24,18 @@ pub async fn generate_embeddings(
     }))
 }
 
+#[get("/get-failed-embeddings")]
+pub async fn get_failed_embedding_articles(
+    pool: web::Data<DbPool>,
+) -> impl Responder {
+    let failed_articles = check_failed_embeddings(pool)
+        .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))
+        .expect("Failed to get failed embeddings");
+    HttpResponse::Ok().json(json!({
+        "articles": failed_articles,
+        "status": "success"
+    }))
+}
 async fn generate_all_embeddings(
     pool: web::Data<DbPool>,
 ) -> Result<(), SyncError> {
@@ -78,4 +91,25 @@ async fn generate_all_embeddings(
             Err(SyncError::EmbeddingError(anyhow::anyhow!("Failed to fetch articles: {}", e)))
         }
     }
+}
+
+
+fn check_failed_embeddings(pool: web::Data<DbPool>) -> Result<Vec<Article>, SyncError> {
+    let mut conn = pool.get().expect("couldn't get db connection from pool");
+    let failed_embeddings = Embedding::get_failed_embeddings(&mut conn)
+        .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))?;
+    info!("Found {} failed embeddings", failed_embeddings.len());
+
+    let mut failed_articles = Vec::new();
+
+    for embedding in failed_embeddings {
+        let article = Article::get_by_id(&mut conn, embedding.article_id)
+            .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get article: {}", e)))?;
+        if let Some(article) = article {
+            println!("Article: {:?}", article);
+            failed_articles.push(article);
+        }
+    }
+
+    Ok(failed_articles)
 }
