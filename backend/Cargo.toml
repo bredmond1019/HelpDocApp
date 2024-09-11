@@ -7,7 +7,7 @@ edition = "2021"
 tokio = { version = "1.32", features = ["full", "rt-multi-thread", "macros"] }
 async-graphql = "7.0.9"
 async-graphql-actix-web = "7.0.9"
-actix-web = "4.4"
+actix-web = "4.9.0"
 serde = { version = "1.0", features = ["derive"] }
 dotenv = "0.15"
 reqwest = { version = "0.12.7", features = ["json"] }

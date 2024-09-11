@@ -4,8 +4,9 @@ use diesel::PgConnection;
 use reqwest::Client;
 use serde_json::json;
 use uuid::Uuid;
-use crate::models::embedding::Embedding;
 use log::{info, error};
+
+use crate::models::embedding::Embedding;
 
 pub async fn generate_and_store_embedding(
     conn: &mut PgConnection,
@@ -18,7 +19,7 @@ pub async fn generate_and_store_embedding(
     let client = Client::new();
 
     // Send a POST request to the Python embedding service
-    let resp = client.post("http://localhost:5000/embed")
+    let resp = client.post("http://localhost:8080/embed")
         .json(&json!({
             "text": text
         }))
@@ -29,11 +30,16 @@ pub async fn generate_and_store_embedding(
             e
         })?;
 
+    info!("Embedding service response: {:?}", resp);
+    info!("Response status: {:?}", resp.status());
+    info!("Response headers: {:?}", resp.headers());
+
     // Check if the response is successful
     if !resp.status().is_success() {
+        let status = resp.status();
         let error_message = resp.text().await?;
         error!("Embedding service returned an error: {}", error_message);
-        return Err(format!("Embedding service error: {}", error_message).into());
+        return Err(format!("Embedding service error: {} - {}", status, error_message).into());
     }
 
     // Parse the response

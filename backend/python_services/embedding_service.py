@@ -42,5 +42,14 @@ def embed_text():
         logger.error(f"Error generating embedding: {str(e)}")
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok'}), 200
+
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get('PORT', 8080))
+    logger.info(f"Starting server on port {port}")
+    app.run(debug=True, port=port)
+    logger.info(f"Server started successfully on port {port}")
+

@@ -31,12 +31,12 @@ async fn main() -> std::io::Result<()> {
 
    
 
-    let mut python_service = Command::new("python")
-        .arg("python_services/embedding_service.py")
-        .spawn()
-        .expect("Failed to start Python service");
+    // let mut python_service = Command::new("python")
+    //     .arg("python_services/embedding_service.py")
+    //     .spawn()
+    //     .expect("Failed to start Python service");
 
-    info!("Python service started with PID: {:?}", python_service.id());
+    // info!("Python service started with PID: {:?}", python_service.id());
 
     let pool: DbPool = db::init_pool();
 
@@ -61,7 +61,7 @@ async fn main() -> std::io::Result<()> {
 
     let server_result = server.await;
 
-    python_service.kill().expect("Failed to stop Python service");
+    // python_service.kill().expect("Failed to stop Python service");
 
     server_result
 }
