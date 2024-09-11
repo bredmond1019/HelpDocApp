@@ -8,7 +8,6 @@ use futures::StreamExt;
 use log::{error, info};
 use pgvector::Vector;
 use serde::Deserialize;
-use tokio::task;
 use std::{collections::HashMap, sync::Arc};
 use diesel::PgConnection;
 

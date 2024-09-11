@@ -1,6 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use log::info;
+use serde::{Deserialize, Serialize};
 use tokio::task;
 use uuid::Uuid;
 
@@ -129,3 +130,20 @@ impl SearchService {
     }
 }
 
+#[derive(Deserialize)]
+pub struct SearchQuery {
+    pub query: String,
+}
+
+#[derive(Serialize)]
+pub struct SearchResult {
+    pub articles: Vec<ArticleResult>,
+    pub expanded_query: String,
+}
+
+#[derive(Serialize)]
+pub struct ArticleResult {
+    pub id: uuid::Uuid,
+    pub title: String,
+    pub content: String,
+}
