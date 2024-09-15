@@ -11,11 +11,14 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use log::info;
 
+use crate::models::Collection;
+
 use crate::schema::article_chunks;
 use crate::schema::articles;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable, Associations)]
 #[diesel(table_name = crate::schema::articles)]
+#[diesel(belongs_to(Collection, foreign_key = collection_id))]
 pub struct Article {
     pub id: Uuid,
     pub collection_id: Uuid,
