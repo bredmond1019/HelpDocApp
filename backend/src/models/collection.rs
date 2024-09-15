@@ -6,8 +6,8 @@ use uuid::Uuid;
 
 use crate::schema::collections;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable)]
-#[diesel(table_name = crate::schema::collections)]
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable, Identifiable)]
+#[diesel(table_name = collections)]
 pub struct Collection {
     pub id: Uuid,
     pub name: String,

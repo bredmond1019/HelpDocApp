@@ -16,6 +16,9 @@ use backend::services::chat_server::ChatServer;
 use backend::db::DbPool;
 use backend::routes;
 
+#[macro_use]
+extern crate diesel;
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

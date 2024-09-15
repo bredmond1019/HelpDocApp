@@ -1,12 +1,15 @@
 use std::collections::HashMap;
-
 use chrono::{DateTime, Utc};
-use diesel::debug_query;
+
+use diesel::associations::HasTable;
 use diesel::prelude::*;
 use diesel::sql_types::Integer;
+use diesel::ExpressionMethods;
+use diesel::BelongingToDsl;
+use diesel::debug_query;
+
 use pgvector::Vector;
 use pgvector::VectorExpressionMethods;
-use diesel::ExpressionMethods;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use log::info;
@@ -91,6 +94,11 @@ impl Article {
         use crate::schema::articles::dsl::*;
 
         articles.find(article_id).first(conn).optional()
+    }
+
+    pub fn belonging_to_collection(collection: &Collection, conn: &mut PgConnection) -> Result<Vec<Article>, diesel::result::Error> {
+        Article::belonging_to(collection).load::<Article>(conn)
+        // <articles::table as BelongingToDsl<&Collection>>::belonging_to(collection).load::<Article>(conn)
     }
 
     pub fn update_markdown_content(
@@ -309,6 +317,14 @@ impl Article {
         let results = query.limit(10).load::<Article>(conn)?;
         info!("Keyword search with IDs found {} results", results.len());
         Ok(results)
+    }
+}
+
+impl HasTable for Article {
+    type Table = articles::table;
+
+    fn table() -> Self::Table {
+        articles::table
     }
 }
 

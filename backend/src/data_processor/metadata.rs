@@ -73,7 +73,7 @@ impl DataProcessor {
 
     pub async fn generate_collection_metadata(&self, collection: &Collection) -> Result<(String, String, String), Box<dyn std::error::Error + Send + Sync>> {
         let mut conn = self.db_pool.get()?;
-        let articles = Article::belonging_to(collection).load::<Article>(&mut conn)?;
+        let articles = Article::belonging_to_collection(collection, &mut conn)?;
 
         let metadata = articles.iter()
             .map(|article| {
