@@ -35,10 +35,11 @@ async fn search(
             let articles: Vec<ArticleResult> = article_contents
                 .into_iter()
                 .enumerate()
-                .map(|(index, content)| ArticleResult {
-                    id: uuid::Uuid::new_v4(), // You might want to return actual article IDs
-                    title: format!("Result {}", index + 1), // You might want to return actual titles
-                    content,
+                .map(|(_, article)| ArticleResult {
+                    id: article.id,
+                    title: article.title,
+                    content: article.markdown_content.unwrap_or("No content found".to_string()),
+                    slug: article.slug,
                 })
                 .collect();
 

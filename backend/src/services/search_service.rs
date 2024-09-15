@@ -85,7 +85,7 @@ impl SearchService {
     pub async fn two_stage_retrieval(
         &self,
         query: &str,
-    ) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<Vec<Article>, Box<dyn std::error::Error + Send + Sync>> {
         info!("Starting two-stage retrieval for query: {}", query);
 
         // Stage 1: Semantic search
@@ -113,9 +113,13 @@ impl SearchService {
         // Sort and select top results
         let mut final_results: Vec<_> = combined_results.into_values().collect();
         final_results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
-        let top_results: Vec<String> = final_results.into_iter()
+        // let top_results: Vec<String> = final_results.into_iter()
+        //     .take(5)
+        //     .map(|(article, _)| article.markdown_content.unwrap_or(article.title))
+        //     .collect();
+        let top_results: Vec<Article> = final_results.into_iter()
             .take(5)
-            .map(|(article, _)| article.markdown_content.unwrap_or(article.title))
+            .map(|(article, _)| article)
             .collect();
  
         info!("Two-stage retrieval completed, returning {} top results", top_results.len());
@@ -155,4 +159,5 @@ pub struct ArticleResult {
     pub id: uuid::Uuid,
     pub title: String,
     pub content: String,
+    pub slug: String,
 }

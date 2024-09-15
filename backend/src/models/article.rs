@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
+use diesel::debug_query;
 use diesel::prelude::*;
 use diesel::sql_types::Integer;
 use pgvector::Vector;
@@ -28,6 +29,13 @@ pub struct Article {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub helpscout_article_id: Option<String>,
+    // Meta Data
+    pub paragraph_description: Option<String>,
+    pub bullet_points: Option<String>,
+    pub keywords: Option<String>,
+    pub paragraph_description_embedding: Option<Vector>,
+    pub bullet_points_embedding: Option<Vector>,
+    pub keywords_embedding: Option<Vector>,
 }
 
 impl Article {
@@ -52,6 +60,12 @@ impl Article {
             last_edited_by: None,
             created_at: Utc::now(),
             updated_at: Utc::now(),
+            paragraph_description: None,
+            bullet_points: None,
+            keywords: None,
+            paragraph_description_embedding: None,
+            bullet_points_embedding: None,
+            keywords_embedding: None,
         }
     }
 
@@ -147,6 +161,31 @@ impl Article {
         chunks
     }
 
+    pub fn update_metadata(
+        &self,
+        conn: &mut PgConnection,
+        paragraph_description: String,
+        bullet_points: String,
+        keywords: String,
+        paragraph_description_embedding: Vector,
+        bullet_points_embedding: Vector,
+        keywords_embedding: Vector,
+    ) -> Result<(), diesel::result::Error> {
+
+        diesel::update(articles::table.find(self.id))
+            .set((
+                articles::columns::paragraph_description.eq(paragraph_description),
+                articles::columns::bullet_points.eq(bullet_points),
+                articles::columns::keywords.eq(keywords),
+                articles::columns::paragraph_description_embedding.eq(paragraph_description_embedding),
+                articles::columns::bullet_points_embedding.eq(bullet_points_embedding),
+                articles::columns::keywords_embedding.eq(keywords_embedding),
+            ))
+            .execute(conn)?;
+
+        Ok(())
+    }
+
     pub async fn find_relevant_articles(
         query_embedding: &Vector,
         conn: &mut PgConnection,
@@ -228,6 +267,8 @@ impl Article {
         use crate::schema::articles::dsl::*;
 
         let words: Vec<String> = query.split_whitespace().map(|w| w.to_lowercase()).collect();
+
+        info!("Words: {:?}", words);
         
         let mut query = articles.into_boxed();
 
@@ -239,8 +280,12 @@ impl Article {
             );
         }
 
+        info!("Query after adding ILIKE conditions: {:?}", debug_query(&query));
+
         // Add filter for specific IDs
         query = query.filter(id.eq_any(ids));
+
+        info!("Query after adding filter for specific IDs: {:?}", debug_query(&query));
 
         // Add ordering
         query = query.order(
@@ -254,6 +299,8 @@ impl Article {
                 ))
             ).desc()
         ).then_order_by(updated_at.desc());
+
+        info!("Query after adding ordering: {:?}", debug_query(&query));
 
         // Execute the query
         let results = query.limit(10).load::<Article>(conn)?;

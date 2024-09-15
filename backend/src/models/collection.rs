@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
+use pgvector::Vector;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -15,6 +16,13 @@ pub struct Collection {
     pub helpscout_collection_id: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    // Meta Data
+    pub paragraph_description: Option<String>,
+    pub bullet_points: Option<String>,
+    pub keywords: Option<String>,
+    pub paragraph_description_embedding: Option<Vector>,
+    pub bullet_points_embedding: Option<Vector>,
+    pub keywords_embedding: Option<Vector>,
 }
 
 impl Collection {
@@ -32,6 +40,14 @@ impl Collection {
             helpscout_collection_id,
             created_at: Utc::now(),
             updated_at: Utc::now(),
+            // Meta Data
+            paragraph_description: None,
+            bullet_points: None,
+            keywords: None,
+            paragraph_description_embedding: None,
+            bullet_points_embedding: None,
+            keywords_embedding: None,
+
         }
     }
 
@@ -43,6 +59,32 @@ impl Collection {
             .expect("Error creating collection");
 
         Ok(collection)
+    }
+
+    pub fn update_metadata(
+        &self,
+        conn: &mut PgConnection,
+        paragraph_description: String,
+        bullet_points: String,
+        keywords: String,
+        paragraph_description_embedding: Vector,
+        bullet_points_embedding: Vector,
+        keywords_embedding: Vector,
+    ) -> Result<(), diesel::result::Error> {
+        
+
+        diesel::update(collections::table.find(self.id))
+            .set((
+                collections::columns::paragraph_description.eq(paragraph_description),
+                collections::columns::bullet_points.eq(bullet_points),
+                collections::columns::keywords.eq(keywords),
+                collections::columns::paragraph_description_embedding.eq(paragraph_description_embedding),
+                collections::columns::bullet_points_embedding.eq(bullet_points_embedding),
+                collections::columns::keywords_embedding.eq(keywords_embedding),
+            ))
+            .execute(conn)?;
+
+        Ok(())
     }
 }
 

@@ -34,6 +34,12 @@ diesel::table! {
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
         helpscout_article_id -> Nullable<Varchar>,
+        paragraph_description -> Nullable<Text>,
+        bullet_points -> Nullable<Text>,
+        keywords -> Nullable<Text>,
+        paragraph_description_embedding -> Nullable<Vector>,
+        bullet_points_embedding -> Nullable<Vector>,
+        keywords_embedding -> Nullable<Vector>,
     }
 }
 
@@ -52,6 +58,12 @@ diesel::table! {
         helpscout_collection_id -> Varchar,
         created_at -> Timestamptz,
         updated_at -> Timestamptz,
+        paragraph_description -> Nullable<Text>,
+        bullet_points -> Nullable<Text>,
+        keywords -> Nullable<Text>,
+        paragraph_description_embedding -> Nullable<Vector>,
+        bullet_points_embedding -> Nullable<Vector>,
+        keywords_embedding -> Nullable<Vector>,
     }
 }
 
