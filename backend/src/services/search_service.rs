@@ -7,20 +7,20 @@ use uuid::Uuid;
 
 use crate::{db::DbPool, models::Article};
 
-use super::{AIModel, EmbeddingService};
+use super::{AIService, EmbeddingService};
 
 pub struct SearchService {
     embedding_service: Arc<EmbeddingService>,
     db_pool: Arc<DbPool>,
-    ai_model: Arc<AIModel>,
+    ai_service: Arc<AIService>,
 }
 
 impl SearchService {
-    pub fn new(db_pool: Arc<DbPool>, ai_model: Arc<AIModel>) -> Self {
+    pub fn new(db_pool: Arc<DbPool>, ai_service: Arc<AIService>) -> Self {
         SearchService { 
             embedding_service: Arc::new(EmbeddingService::new()), 
             db_pool,
-            ai_model,
+            ai_service,
         }
     }
 
@@ -134,7 +134,7 @@ impl SearchService {
             Query: {}", query
         );
 
-        let ai_response = self.ai_model.generate_response(ai_query_instructions).await?;
+        let ai_response = self.ai_service.generate_response(ai_query_instructions).await?;
  
         let expanded_query = ai_response.trim().to_string();
  

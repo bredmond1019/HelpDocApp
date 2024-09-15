@@ -101,6 +101,10 @@ impl Article {
         // <articles::table as BelongingToDsl<&Collection>>::belonging_to(collection).load::<Article>(conn)
     }
 
+    pub fn load_all(conn: &mut PgConnection) -> Result<Vec<Article>, diesel::result::Error> {
+        articles::table.load::<Article>(conn)
+    }
+
     pub fn update_markdown_content(
         &self,
         conn: &mut PgConnection,

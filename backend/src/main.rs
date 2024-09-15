@@ -3,7 +3,7 @@ use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use actix::Actor;
 use backend::services::search_service::SearchService;
-use backend::services::{AIModel, EmbeddingService};
+use backend::services::{AIService, EmbeddingService};
 use dotenv::dotenv;
 use log::{error, info};
 use log4rs;
@@ -16,8 +16,8 @@ use backend::services::chat_server::ChatServer;
 use backend::db::DbPool;
 use backend::routes;
 
-#[macro_use]
-extern crate diesel;
+// #[macro_use]
+// extern crate diesel;
 
 
 #[actix_web::main]
@@ -63,12 +63,12 @@ async fn main() -> std::io::Result<()> {
     let embedding_service = Arc::new(EmbeddingService::new());
     info!("EmbeddingService initialized");
 
-    info!("Initializing AIModel");
-    let ai_model = Arc::new(AIModel::new());
-    info!("AIModel initialized");
+    info!("Initializing AIService");
+    let ai_service = Arc::new(AIService::new());
+    info!("AIService initialized");
 
     info!("Initializing SearchService");
-    let search_service = Arc::new(SearchService::new(arc_pool.clone(), ai_model.clone()));
+    let search_service = Arc::new(SearchService::new(arc_pool.clone(), ai_service.clone()));
     info!("SearchService initialized");
 
     
@@ -82,7 +82,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(chat_server.clone()))
             .app_data(web::Data::new(embedding_service.clone()))
             .app_data(web::Data::new(search_service.clone()))
-            .app_data(web::Data::new(ai_model.clone()))
+            .app_data(web::Data::new(ai_service.clone()))
             .wrap(Logger::default())
             .wrap(Cors::permissive())
             .configure(routes::init_routes)

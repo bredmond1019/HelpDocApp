@@ -1,6 +1,6 @@
 use crate::models::Article;
 use crate::{db::DbPool, models::message::Message};
-use crate::services::ai_service::AIModel;
+use crate::services::ai_service::AIService;
 
 use actix::prelude::*;
 
@@ -37,7 +37,7 @@ pub struct ClientMessage {
 
 pub struct ChatServer {
     sessions: HashMap<SessionId, Recipient<Message>>,
-    ai_model: AIModel,
+    ai_service: AIService,
     db_pool: Arc<DbPool>,
 }
 
@@ -45,7 +45,7 @@ impl ChatServer {
     pub fn new(db_pool: Arc<DbPool>) -> Self {
         Self {
             sessions: HashMap::new(),
-            ai_model: AIModel::new(),
+            ai_service: AIService::new(),
             db_pool,
         }
     }
@@ -75,7 +75,7 @@ impl ChatServer {
             context, text
         );
 
-        let response_stream = self.ai_model.generate_stream_response(prompt).await?;
+        let response_stream = self.ai_service.generate_stream_response(prompt).await?;
         
         // Collect the entire response
         let full_response = response_stream
@@ -154,13 +154,13 @@ impl Handler<ClientMessage> for ChatServer {
             "Received message from session {:?}: {}",
             client_message.session_id, client_message.message
         );
-        let mut ai_model = self.ai_model.clone();
+        let mut ai_service = self.ai_service.clone();
         let sessions = self.sessions.clone();
         let id = client_message.session_id;
 
         Box::pin(async move {
             info!("Generating AI response for session {:?}", id);
-            match ai_model.generate_stream_response(client_message.message).await {
+            match ai_service.generate_stream_response(client_message.message).await {
                 Ok(stream) => {
                     info!("AI response stream generated for session {:?}", id);
                     let addr = sessions.get(&id).cloned();

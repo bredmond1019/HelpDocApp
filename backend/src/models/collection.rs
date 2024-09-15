@@ -51,6 +51,10 @@ impl Collection {
         }
     }
 
+    pub fn load_all(conn: &mut PgConnection) -> Result<Vec<Collection>, diesel::result::Error> {
+        collections::table.load::<Collection>(conn)
+    }
+
     pub fn store(&self, conn: &mut PgConnection) -> Result<Self, diesel::result::Error> {
 
         let collection: Self = diesel::insert_into(collections::table)
