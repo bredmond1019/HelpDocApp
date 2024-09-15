@@ -86,15 +86,21 @@ impl SearchService {
         &self,
         query: &str,
     ) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+        info!("Starting two-stage retrieval for query: {}", query);
+
         // Stage 1: Semantic search
+        info!("Stage 1: Performing semantic search");
         let query_embedding = self.embedding_service.generate_embedding(query).await?;
         let mut conn = self.db_pool.get()?;
         let semantic_results = Article::find_relevant_articles(&query_embedding.into(), &mut conn).await?;
- 
+        info!("Semantic search found {} results", semantic_results.len());
+
         // Stage 2: Keyword search on semantic results
+        info!("Stage 2: Performing keyword search on semantic results");
         let semantic_ids: Vec<Uuid> = semantic_results.iter().map(|(article, _)| article.id).collect();
         let keyword_results = Article::keyword_search_with_ids(&mut conn, query, &semantic_ids)?;
- 
+        info!("Keyword search found {} results", keyword_results.len());
+
         // Combine and rank results
         let mut combined_results = HashMap::new();
         for (article, score) in semantic_results {
@@ -112,10 +118,12 @@ impl SearchService {
             .map(|(article, _)| article.markdown_content.unwrap_or(article.title))
             .collect();
  
+        info!("Two-stage retrieval completed, returning {} top results", top_results.len());
         Ok(top_results)
     }
 
     pub async fn expand_query(&self, query: &str) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+        info!("Expanding query: {}", query);
         let ai_query_instructions = format!(
             "Expand this query with relevant keywords and phrases to improve search results. Separate terms with commas.
             Keep it short and concise.
@@ -126,6 +134,7 @@ impl SearchService {
  
         let expanded_query = ai_response.trim().to_string();
  
+        info!("Query expanded to: {}", expanded_query);
         Ok(format!("{}, {}", query, expanded_query))
     }
 }

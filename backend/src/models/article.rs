@@ -8,6 +8,7 @@ use pgvector::VectorExpressionMethods;
 use diesel::ExpressionMethods;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use log::info;
 
 use crate::schema::article_chunks;
 use crate::schema::articles;
@@ -150,6 +151,7 @@ impl Article {
         query_embedding: &Vector,
         conn: &mut PgConnection,
     ) -> Result<Vec<(Article, f64)>, Box<dyn std::error::Error + Send + Sync>> {
+        info!("Finding relevant articles based on query embedding");
         use diesel::prelude::*;
         use crate::schema::{articles, article_chunks, embeddings};
 
@@ -178,10 +180,12 @@ impl Article {
         sorted_articles.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
         sorted_articles.truncate(5);
 
+        info!("Found {} relevant articles", sorted_articles.len());
         Ok(sorted_articles)
     }
 
     pub fn keyword_search(conn: &mut PgConnection, query: &str) -> Result<Vec<Article>, diesel::result::Error> {
+        info!("Performing keyword search for query: {}", query);
         let words: Vec<String> = query.split_whitespace().map(|w| w.to_lowercase()).collect();
         
         // Create the base query
@@ -189,6 +193,7 @@ impl Article {
 
         // Add ILIKE conditions for each word
         for word in &words {
+            info!("Adding ILIKE condition for word: {}", word);
             let like_word = format!("%{}%", word);
             query = query.filter(
                 articles::title.ilike(like_word.clone()).or(articles::markdown_content.ilike(like_word))
@@ -209,7 +214,9 @@ impl Article {
         ).then_order_by(articles::updated_at.desc());
 
         // Execute the query
-        query.limit(10).load::<Article>(conn)
+        let results = query.limit(10).load::<Article>(conn)?;
+        info!("Keyword search found {} results", results.len());
+        Ok(results)
     }
 
     pub fn keyword_search_with_ids(
@@ -217,6 +224,7 @@ impl Article {
         query: &str,
         ids: &[Uuid],
     ) -> Result<Vec<Article>, diesel::result::Error> {
+        info!("Performing keyword search with IDs for query: {}", query);
         use crate::schema::articles::dsl::*;
 
         let words: Vec<String> = query.split_whitespace().map(|w| w.to_lowercase()).collect();
@@ -248,7 +256,9 @@ impl Article {
         ).then_order_by(updated_at.desc());
 
         // Execute the query
-        query.limit(10).load::<Article>(conn)
+        let results = query.limit(10).load::<Article>(conn)?;
+        info!("Keyword search with IDs found {} results", results.len());
+        Ok(results)
     }
 }
 

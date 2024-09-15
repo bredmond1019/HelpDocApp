@@ -68,13 +68,20 @@ impl AIModel {
         &self,
         input: String,
     ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
+        info!("Generating AI response for input: {}", input);
         let model = "llama3.1:latest".to_string();
 
         let res = self.ollama.generate(GenerationRequest::new(model, input)).await;
 
         match res {
-            Ok(response) => Ok(response.response),
-            Err(e) => Err(Box::new(AIModelError::RequestError(e.to_string())) as Box<dyn std::error::Error + Send + Sync>)
+            Ok(response) => {
+                info!("AI response generated successfully");
+                Ok(response.response)
+            },
+            Err(e) => {
+                error!("Failed to generate AI response: {}", e);
+                Err(Box::new(AIModelError::RequestError(e.to_string())) as Box<dyn std::error::Error + Send + Sync>)
+            }
         }
     }
 
