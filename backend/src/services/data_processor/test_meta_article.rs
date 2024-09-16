@@ -31,7 +31,7 @@ impl DataProcessor {
                         && bullets != vec!["No facts available"]
                         && keywords != vec!["No keywords available"]
                     {
-                        // Successfully parsed and extracted meaningful content
+                        // Successfully parsed and extracted content from LLM response
                         return Ok(());
                     }
                 }

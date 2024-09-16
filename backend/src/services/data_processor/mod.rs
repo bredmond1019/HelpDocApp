@@ -11,8 +11,8 @@ use api_client::ApiClient;
 pub mod api_client;
 pub mod convert_html;
 pub mod data_sync;
-pub mod metadata;
-pub mod parse_meta_collection;
+pub mod process_meta_article;
+pub mod process_meta_collection;
 pub mod test_meta_article;
 
 pub use convert_html::html_to_markdown;
