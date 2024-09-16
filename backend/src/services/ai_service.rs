@@ -9,7 +9,7 @@ use std::fmt;
 use std::pin::Pin;
 use tokio_stream::StreamExt;
 
-use crate::models::Article;
+use crate::models::articles::Article;
 
 #[derive(Clone)]
 pub struct AIService {

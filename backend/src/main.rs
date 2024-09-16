@@ -1,7 +1,7 @@
+use actix::Actor;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
-use actix::Actor;
 use backend::services::search_service::SearchService;
 use backend::services::{AIService, EmbeddingService};
 use dotenv::dotenv;
@@ -11,14 +11,10 @@ use std::env;
 use std::sync::Arc;
 // use std::process::Command;
 
-use backend::{data_processor::DataProcessor, db};
-use backend::services::chat_server::ChatServer;
 use backend::db::DbPool;
 use backend::routes;
-
-// #[macro_use]
-// extern crate diesel;
-
+use backend::services::chat_server::ChatServer;
+use backend::{data_processor::DataProcessor, db};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -26,7 +22,6 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
     env::set_var("RUST_LOG", "info");
     env::set_var("RUST_BACKTRACE", "1");
-
 
     // Initialize logger
     match log4rs::init_file("log4rs.yaml", Default::default()) {
@@ -36,7 +31,6 @@ async fn main() -> std::io::Result<()> {
 
     info!("Starting application");
 
-   
     // Python Service for Embedding
     // let mut python_service = Command::new("python")
     //     .arg("python_services/embedding_service.py")
@@ -70,8 +64,6 @@ async fn main() -> std::io::Result<()> {
     info!("Initializing SearchService");
     let search_service = Arc::new(SearchService::new(arc_pool.clone(), ai_service.clone()));
     info!("SearchService initialized");
-
-    
 
     // Start the server
     info!("Server listening on 127.0.0.1:3000");

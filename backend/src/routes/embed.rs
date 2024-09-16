@@ -2,24 +2,22 @@
 
 use std::sync::Arc;
 
+use actix_web::{get, post, web, HttpResponse, Responder};
 use diesel::prelude::*;
-use actix_web::{post, get, web, HttpResponse, Responder};
-use serde_json::json;
-use log::{info, error};
 use futures::stream::{self, StreamExt};
+use log::{error, info};
+use serde_json::json;
 
 use crate::errors::SyncError;
+use crate::models::articles::Article;
 use crate::models::Embedding;
-use crate::{services::embedding_service::EmbeddingService, db::DbPool};
-use crate::models::article::Article;
 use crate::schema::articles;
+use crate::{db::DbPool, services::embedding_service::EmbeddingService};
 
 #[post("/generate-embeddings")]
-pub async fn generate_embeddings(
-    pool: web::Data<Arc<DbPool>>,
-) -> impl Responder {
+pub async fn generate_embeddings(pool: web::Data<Arc<DbPool>>) -> impl Responder {
     tokio::spawn(generate_all_embeddings(pool));
-    
+
     HttpResponse::Accepted().json(json!({
         "message": "Embedding generation process started",
         "status": "processing"
@@ -27,11 +25,11 @@ pub async fn generate_embeddings(
 }
 
 #[get("/get-failed-embeddings")]
-pub async fn get_failed_embedding_articles(
-    pool: web::Data<Arc<DbPool>>,
-) -> impl Responder {
+pub async fn get_failed_embedding_articles(pool: web::Data<Arc<DbPool>>) -> impl Responder {
     let failed_articles = check_failed_embeddings(pool)
-        .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))
+        .map_err(|e| {
+            SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e))
+        })
         .expect("Failed to get failed embeddings");
     HttpResponse::Ok().json(json!({
         "articles": failed_articles,
@@ -40,9 +38,7 @@ pub async fn get_failed_embedding_articles(
 }
 
 #[post("/reembed-all")]
-pub async fn reembed_all_articles(
-    pool: web::Data<Arc<DbPool>>,
-) -> impl Responder {
+pub async fn reembed_all_articles(pool: web::Data<Arc<DbPool>>) -> impl Responder {
     let embedding_service = EmbeddingService::new();
     let mut conn = pool.get().expect("couldn't get db connection from pool");
 
@@ -58,10 +54,7 @@ pub async fn reembed_all_articles(
     }))
 }
 
-
-async fn generate_all_embeddings(
-    pool: web::Data<Arc<DbPool>>,
-) -> Result<(), SyncError> {
+async fn generate_all_embeddings(pool: web::Data<Arc<DbPool>>) -> Result<(), SyncError> {
     let mut conn = pool.get().expect("couldn't get db connection from pool");
     let embedding_service = EmbeddingService::new();
 
@@ -80,20 +73,29 @@ async fn generate_all_embeddings(
                     let mut batch_error = 0;
                     for article in chunk {
                         let mut conn = pool.get().expect("couldn't get db connection from pool");
-                        match embedding_service.generate_and_store_embedding(&mut conn, &article).await {
+                        match embedding_service
+                            .generate_and_store_embedding(&mut conn, &article)
+                            .await
+                        {
                             Ok(_) => {
                                 batch_success += 1;
-                                info!("Successfully generated and stored embedding for article {}", article.id);
+                                info!(
+                                    "Successfully generated and stored embedding for article {}",
+                                    article.id
+                                );
                             }
                             Err(e) => {
                                 batch_error += 1;
-                                error!("Failed to generate/store embedding for article {}: {}", article.id, e);
+                                error!(
+                                    "Failed to generate/store embedding for article {}: {}",
+                                    article.id, e
+                                );
                             }
                         }
                     }
                     (batch_success, batch_error)
                 })
-                .buffer_unordered(4) 
+                .buffer_unordered(4)
                 .collect::<Vec<_>>()
                 .await;
 
@@ -111,23 +113,27 @@ async fn generate_all_embeddings(
         }
         Err(e) => {
             error!("Error fetching articles: {:?}", e);
-            Err(SyncError::EmbeddingError(anyhow::anyhow!("Failed to fetch articles: {}", e)))
+            Err(SyncError::EmbeddingError(anyhow::anyhow!(
+                "Failed to fetch articles: {}",
+                e
+            )))
         }
     }
 }
 
-
 fn check_failed_embeddings(pool: web::Data<Arc<DbPool>>) -> Result<Vec<Article>, SyncError> {
     let mut conn = pool.get().expect("couldn't get db connection from pool");
-    let failed_embeddings = Embedding::get_failed_embeddings(&mut conn)
-        .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e)))?;
+    let failed_embeddings = Embedding::get_failed_embeddings(&mut conn).map_err(|e| {
+        SyncError::EmbeddingError(anyhow::anyhow!("Failed to get failed embeddings: {}", e))
+    })?;
     info!("Found {} failed embeddings", failed_embeddings.len());
 
     let mut failed_articles = Vec::new();
 
     for embedding in failed_embeddings {
-        let article = Article::get_by_id(&mut conn, embedding.article_id)
-            .map_err(|e| SyncError::EmbeddingError(anyhow::anyhow!("Failed to get article: {}", e)))?;
+        let article = Article::get_by_id(&mut conn, embedding.article_id).map_err(|e| {
+            SyncError::EmbeddingError(anyhow::anyhow!("Failed to get article: {}", e))
+        })?;
         if let Some(article) = article {
             println!("Article: {:?}", article);
             failed_articles.push(article);
