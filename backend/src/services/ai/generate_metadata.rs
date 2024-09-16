@@ -10,9 +10,11 @@ impl AIService {
             "Read the following article and provide:\n
             1. A paragraph description of the article\n
             2. 5-10 bullet points of important facts\n
-            3. 5-20 keywords or phrases about the article\n
+            3. Relevant keywords to improve search results. Separate terms with commas.
+            Keep it short and concise to one or two words per term.
 
-            You response should be in the following format:\n
+            You response should be in the following format with the following headers
+            for each section. I need the headers to be able to parse the response:\n
             1. Response to part 1\n
             2. Response to part 2\n
             3. Response to part 3\n\n
@@ -53,12 +55,11 @@ impl AIService {
         let prompt = format!(
             "Based on the following metadata from articles in a collection, provide:\n
             1. A paragraph description of the collection\n
-            2. 5-10 bullet points summarizing the collection\n
-            3. 5-20 keywords or phrases about the collection\n\n
-            You response should be in the following format:\n
+            2. 5-10 bullet points summarizing the collection\n\n
+            You response should be in the following format with the following headers
+            for each section. I need the headers to be able to parse the response:\n
             1. Response to part 1\n
-            2. Response to part 2\n
-            3. Response to part 3\n\n
+            2. Response to part 2\n\n
             Collection metadata:\n{}",
             metadata
         );
