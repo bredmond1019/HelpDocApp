@@ -56,7 +56,7 @@ impl AIService {
         &self,
         input: String,
     ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-        info!("Generating AI response for current prompt");
+        info!("Starting Model Generation");
         let model = "llama3.1:latest".to_string();
 
         let res = self

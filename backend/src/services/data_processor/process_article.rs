@@ -1,5 +1,7 @@
 use actix_web::Result;
+use diesel::PgConnection;
 use log::{error, info, warn};
+use pgvector::Vector;
 use regex::Regex;
 
 use super::DataProcessor;
@@ -7,7 +9,7 @@ use super::DataProcessor;
 use crate::models::Article;
 
 impl DataProcessor {
-    pub async fn test_process_metadata(
+    pub async fn process_article_metadata(
         &self,
         article: &Article,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -16,10 +18,7 @@ impl DataProcessor {
         const MAX_ATTEMPTS: u8 = 3;
 
         while attempts < MAX_ATTEMPTS {
-            let response = self
-                .ai_data_service
-                .generate_article_metadata(article)
-                .await?;
+            let response = self.ai_service.generate_article_metadata(article).await?;
             match self.parse_llm_response(&response) {
                 Ok((paragraph, bullets, keywords)) => {
                     info!("Response for article: {}: {}", article.id, response);
@@ -31,7 +30,12 @@ impl DataProcessor {
                         && bullets != vec!["No facts available"]
                         && keywords != vec!["No keywords available"]
                     {
-                        // Successfully parsed and extracted content from LLM response
+                        // let embeddings = self
+                        //     .generate_embeddings(&paragraph, &bullets, &keywords)
+                        //     .await?;
+                        // self.update_article_metadata(
+                        //     &mut conn, article, paragraph, bullets, keywords, embeddings,
+                        // )?;
                         return Ok(());
                     }
                 }
@@ -110,4 +114,43 @@ impl DataProcessor {
 
         Ok((summary, facts, keywords))
     }
+
+    // async fn generate_embeddings(
+    //     &self,
+    //     paragraph: &str,
+    //     bullets: &[String],
+    //     keywords: &[String],
+    // ) -> Result<(Vec<f32>, Vec<f32>, Vec<f32>), Box<dyn std::error::Error + Send + Sync>> {
+    //     let paragraph_embedding = self.embedding_service.generate_embedding(paragraph).await?;
+    //     let bullets_embedding = self.embedding_service.generate_embedding(bullets).await?;
+    //     let keywords_embedding = self.embedding_service.generate_embedding(keywords).await?;
+
+    //     info!("Paragraph embedding: {:?}", paragraph_embedding);
+    //     info!("Bullets embedding: {:?}", bullets_embedding);
+    //     info!("Keywords embedding: {:?}", keywords_embedding);
+
+    //     Ok((paragraph_embedding, bullets_embedding, keywords_embedding))
+    // }
+
+    // fn update_article_metadata(
+    //     &self,
+    //     conn: &mut PgConnection,
+    //     article: &Article,
+    //     paragraph: String,
+    //     bullets: Vec<String>,
+    //     keywords: Vec<String>,
+    //     embeddings: (Vec<f32>, Vec<f32>, Vec<f32>),
+    // ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    //     let (paragraph_embedding, bullets_embedding, keywords_embedding) = embeddings;
+    //     article.update_metadata(
+    //         conn,
+    //         paragraph,
+    //         bullets,
+    //         keywords,
+    //         Vector::from(paragraph_embedding),
+    //         Vector::from(bullets_embedding),
+    //         Vector::from(keywords_embedding),
+    //     )?;
+    //     Ok(())
+    // }
 }

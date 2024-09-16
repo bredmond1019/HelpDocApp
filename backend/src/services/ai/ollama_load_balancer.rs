@@ -1,3 +1,4 @@
+use log::info;
 use ollama_rs::Ollama;
 use rayon::{ThreadPool, ThreadPoolBuilder};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -45,6 +46,9 @@ impl OllamaLoadBalancer {
         F: FnOnce() -> R + Send + 'static,
         R: Send + 'static,
     {
-        self.thread_pool.install(f)
+        info!("Executing task in ollama_balancer");
+        let result = self.thread_pool.install(f);
+        info!("Task execution completed in ollama_balancer");
+        result
     }
 }

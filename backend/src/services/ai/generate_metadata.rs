@@ -8,24 +8,6 @@ impl AIService {
         &self,
         article: &Article,
     ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-        // let prompt = format!(
-        //     "Read the following article and provide:\n
-        //     1. A paragraph description of the article\n
-        //     2. 5-10 bullet points of important facts\n
-        //     3. Relevant keywords to improve search results. Separate terms with commas.
-        //     Keep it short and concise to one or two words per term.
-
-        //     You response should be in the following format with the following headers
-        //     for each section. I need the headers to be able to parse the response:\n
-        //     1. Response to part 1\n
-        //     2. Response to part 2\n
-        //     3. Response to part 3\n\n
-        //     Article content:\n{}",
-        //     article
-        //         .markdown_content
-        //         .as_deref()
-        //         .unwrap_or(&article.title)
-        // );
         let prompt = format!(
             r#"Analyze the following article and provide a structured response EXACTLY as specified below. Follow these instructions precisely:
         

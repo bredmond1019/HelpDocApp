@@ -5,6 +5,7 @@ use futures::future::join_all;
 use futures::lock::Mutex;
 use log::{debug, error, info};
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use tokio::runtime::Runtime;
 use uuid::Uuid;
 
 use super::MetadataGenerator;
@@ -48,20 +49,28 @@ impl MetadataGenerator {
             .map(|chunk| chunk.to_vec())
             .collect();
 
+        info!("Chunk size: {}", chunk_size);
+
         let futures = article_chunks.into_iter().map(|chunk| {
             let data_processor = Arc::clone(&self.data_processor);
             let processed_ids = Arc::clone(&processed_ids);
             let ollama_balancer = Arc::clone(&self.ollama_balancer);
-
+    
             tokio::spawn(async move {
+                info!("Checkpoint 1");
                 ollama_balancer.execute(move || {
+                    info!("Checkpoint 2");
                     chunk
                         .into_par_iter()
                         .map(|article| {
+                            info!("Checkpoint 3");
                             let data_processor = Arc::clone(&data_processor);
                             let processed_ids = Arc::clone(&processed_ids);
-
-                            async move {
+    
+                            // Create a new Tokio runtime for each parallel task
+                            let rt = Runtime::new().unwrap();
+                            rt.block_on(async {
+                                info!("Checkpoint 4");
                                 info!(
                                     "Processing metadata for article: {} (ID: {})",
                                     article.title, article.id
@@ -70,9 +79,9 @@ impl MetadataGenerator {
                                 match &result {
                                     Ok(_) => {
                                         info!(
-                                        "Successfully processed metadata for article: {} (ID: {})",
-                                        article.title, article.id
-                                    );
+                                            "Successfully processed metadata for article: {} (ID: {})",
+                                            article.title, article.id
+                                        );
                                         processed_ids.lock().await.push(article.id);
                                     }
                                     Err(e) => {
@@ -83,13 +92,14 @@ impl MetadataGenerator {
                                     }
                                 }
                                 result
-                            }
+                            })
                         })
                         .collect::<Vec<_>>()
                 })
             })
         });
 
+        info!("Waiting for all futures to complete");
         let results = join_all(futures).await;
 
         for result in results {

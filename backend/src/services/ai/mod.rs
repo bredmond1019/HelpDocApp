@@ -3,7 +3,6 @@ use ollama_rs::Ollama;
 use std::error::Error as StdError;
 use std::fmt;
 
-pub mod ai_data_service;
 pub mod generate_metadata;
 pub mod generate_response;
 pub mod ollama_load_balancer;
