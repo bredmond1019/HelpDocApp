@@ -1,13 +1,11 @@
-use crate::{data_processor::DataProcessor, errors::SyncError};
+use crate::{errors::SyncError, services::DataProcessor};
 use actix_web::{post, web::Data, HttpResponse};
 use log::info;
 use serde_json::json;
 use std::sync::Arc;
 
 #[post("/parse")]
-pub async fn parse_data(
-    data_processor: Data<Arc<DataProcessor>>,
-) -> HttpResponse {
+pub async fn parse_data(data_processor: Data<Arc<DataProcessor>>) -> HttpResponse {
     tokio::spawn(start_job_queue(data_processor));
 
     HttpResponse::Accepted().json(json!({
@@ -16,9 +14,7 @@ pub async fn parse_data(
     }))
 }
 
-async fn start_job_queue(
-    data_processor: Data<Arc<DataProcessor>>,
-) -> Result<(), SyncError> {
+async fn start_job_queue(data_processor: Data<Arc<DataProcessor>>) -> Result<(), SyncError> {
     info!("Starting job queue");
     let collections = data_processor
         .api_client

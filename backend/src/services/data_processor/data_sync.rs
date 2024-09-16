@@ -1,6 +1,6 @@
 use super::DataProcessor;
 use log::{info, error};
-use crate::{data_processor::html_to_markdown, models::{Article, ArticleRef, Collection}};
+use crate::{models::{Article, ArticleRef, Collection}, services::data_processor::html_to_markdown};
 
 use anyhow::{Context, Result};
 

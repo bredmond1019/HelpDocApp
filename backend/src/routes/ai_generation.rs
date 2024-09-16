@@ -4,7 +4,11 @@ use actix_web::{get, web, HttpResponse, Responder};
 use log::{error, info};
 use serde_json::json;
 
-use crate::{data_processor::DataProcessor, db::DbPool, models::Article, services::AIService};
+use crate::{
+    db::DbPool,
+    models::Article,
+    services::{AIService, DataProcessor},
+};
 
 #[get("/generate-metadata")]
 pub async fn generate_metadata(

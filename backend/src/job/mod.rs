@@ -1,7 +1,7 @@
-use crate::data_processor::DataProcessor;
 use crate::errors::SyncError;
 use crate::models::articles::Article;
 use crate::models::{articles::ArticleRef, Collection};
+use crate::services::DataProcessor;
 
 use anyhow::Result;
 use uuid::Uuid;

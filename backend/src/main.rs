@@ -11,10 +11,10 @@ use std::env;
 use std::sync::Arc;
 // use std::process::Command;
 
+use backend::db;
 use backend::db::DbPool;
 use backend::routes;
-use backend::services::chat_server::ChatServer;
-use backend::{data_processor::DataProcessor, db};
+use backend::services::{chat_server::ChatServer, data_processor::DataProcessor};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

@@ -1,4 +1,5 @@
 use actix_web::Result;
+use log::{error, info};
 use pgvector::Vector;
 
 use super::DataProcessor;
@@ -13,6 +14,18 @@ impl DataProcessor {
         let mut conn = self.db_pool.get()?;
         let response = self.ai_service.generate_article_metadata(article).await?;
         let (paragraph, bullets, keywords) = self.parse_metadata(&response);
+
+        info!("Response: {}", response);
+        info!("Paragraph: {}", paragraph);
+        info!("Bullets: {}", bullets);
+        info!("Keywords: {}", keywords);
+
+        if paragraph.is_empty() || bullets.is_empty() || keywords.is_empty() {
+            error!(
+                "Metadata generation failed for article: {},\n title:{},\n response: {}",
+                article.id, article.title, response
+            );
+        }
 
         let paragraph_embedding = self
             .embedding_service

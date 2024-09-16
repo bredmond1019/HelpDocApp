@@ -6,8 +6,8 @@ mod tests {
     use serde_json::json;
     use tokio;
 
-    use backend::data_processor::api_client::ApiClient;
     use backend::models::Collection;
+    use backend::services::data_processor::api_client::ApiClient;
 
     #[tokio::test]
     async fn test_parse_collection() -> Result<()> {
