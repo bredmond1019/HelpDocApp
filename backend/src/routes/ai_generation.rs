@@ -7,8 +7,27 @@ use serde_json::json;
 use crate::{
     db::DbPool,
     models::Article,
-    services::{AIService, DataProcessor},
+    services::{AIService, DataProcessor, MetadataGenerator},
 };
+
+#[get("/test-metadata-generation/{limit}")]
+async fn test_metadata_generation(
+    metadata_service: web::Data<Arc<MetadataGenerator>>,
+) -> impl Responder {
+    tokio::spawn(async move {
+        let response = metadata_service.test_generate_metadata_articles(10).await;
+        match response {
+            Ok(results) => {
+                info!("Metadata generated: {:?}", results);
+            }
+            Err(e) => error!("Error generating metadata: {}", e),
+        }
+    });
+
+    HttpResponse::Accepted().json(json!({
+        "message": "Generating metadata",
+    }))
+}
 
 #[get("/generate-metadata")]
 pub async fn generate_metadata(

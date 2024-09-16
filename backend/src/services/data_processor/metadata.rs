@@ -34,15 +34,19 @@ impl DataProcessor {
         let bullets_embedding = self.embedding_service.generate_embedding(&bullets).await?;
         let keywords_embedding = self.embedding_service.generate_embedding(&keywords).await?;
 
-        article.update_metadata(
-            &mut conn,
-            paragraph,
-            bullets,
-            keywords,
-            Vector::from(paragraph_embedding),
-            Vector::from(bullets_embedding),
-            Vector::from(keywords_embedding),
-        )?;
+        info!("Paragraph embedding: {:?}", paragraph_embedding);
+        info!("Bullets embedding: {:?}", bullets_embedding);
+        info!("Keywords embedding: {:?}", keywords_embedding);
+
+        // article.update_metadata(
+        //     &mut conn,
+        //     paragraph,
+        //     bullets,
+        //     keywords,
+        //     Vector::from(paragraph_embedding),
+        //     Vector::from(bullets_embedding),
+        //     Vector::from(keywords_embedding),
+        // )?;
 
         Ok(())
     }

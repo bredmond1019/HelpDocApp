@@ -3,7 +3,7 @@ use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use backend::services::search::SearchService;
-use backend::services::{AIService, EmbeddingService};
+use backend::services::{AIService, EmbeddingService, MetadataGenerator};
 use dotenv::dotenv;
 use log::{error, info};
 use log4rs;
@@ -65,6 +65,10 @@ async fn main() -> std::io::Result<()> {
     let search_service = Arc::new(SearchService::new(arc_pool.clone(), ai_service.clone()));
     info!("SearchService initialized");
 
+    info!("Initializing MetadataGenerator");
+    let metadata_generator = Arc::new(MetadataGenerator::new(4));
+    info!("MetadataGenerator initialized");
+
     // Start the server
     info!("Server listening on 127.0.0.1:3000");
     let server = HttpServer::new(move || {
@@ -75,6 +79,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(embedding_service.clone()))
             .app_data(web::Data::new(search_service.clone()))
             .app_data(web::Data::new(ai_service.clone()))
+            .app_data(web::Data::new(metadata_generator.clone()))
             .wrap(Logger::default())
             .wrap(Cors::permissive())
             .configure(routes::init_routes)
