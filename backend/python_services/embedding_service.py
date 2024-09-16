@@ -13,7 +13,7 @@ To run this service, you need to have the SentenceTransformer model installed.
 You can install the model by running the following command:
 
 conda activate embed_service
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 '''
 
 app = Flask(__name__)
@@ -50,6 +50,20 @@ def embed_text():
         return jsonify({'embedding': embedding.tolist()})
     except Exception as e:
         logger.error(f"Error generating embedding: {str(e)}")
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+
+@app.route('/test-embed')
+def test_embed():
+    try:
+        test_text = "This is a test sentence for embedding."
+        embedding = model.encode([test_text])[0]
+        logger.info(f"Successfully generated test embedding for text: '{test_text}'")
+        return jsonify({
+            'test_text': test_text,
+            'embedding': embedding.tolist()
+        })
+    except Exception as e:
+        logger.error(f"Error generating test embedding: {str(e)}")
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 @app.route('/health')

@@ -56,3 +56,23 @@ pub async fn health() -> impl Responder {
         }
     }
 }
+
+#[get("/test-embed")]
+pub async fn test_embed() -> impl Responder {
+    let client = Client::new();
+    let resp = client.get("http://localhost:8080/test-embed").send().await;
+    match resp {
+        Ok(resp) => {
+            if resp.status().is_success() {
+                HttpResponse::Ok().body(resp.text().await.unwrap())
+            } else {
+                HttpResponse::InternalServerError().body("Test embed failed")
+            }
+        }
+        Err(e) => {
+            log::error!("Failed to connect to embedding service: {}", e);
+            HttpResponse::InternalServerError()
+                .body(format!("Failed to connect to embedding service: {}", e))
+        }
+    }
+}
