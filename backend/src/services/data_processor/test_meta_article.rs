@@ -63,9 +63,9 @@ impl DataProcessor {
         let section_re = Regex::new(r"(?m)^\[([^\]]+)\]")?;
         let sections: Vec<_> = section_re.find_iter(response).collect();
 
-        let mut summary = String::new();
-        let mut facts = Vec::new();
-        let mut keywords = Vec::new();
+        let mut summary = String::with_capacity(300);
+        let mut facts = Vec::with_capacity(10);
+        let mut keywords = Vec::with_capacity(20);
 
         for (i, section_match) in sections.iter().enumerate() {
             let section_name = &response[section_match.start() + 1..section_match.end() - 1];

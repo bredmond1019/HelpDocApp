@@ -12,6 +12,10 @@ use super::MetadataGenerator;
 use crate::models::Article;
 
 impl MetadataGenerator {
+    fn calculate_chunk_size(&self, total_articles: usize) -> usize {
+        (total_articles + self.concurrency_limit - 1) / self.concurrency_limit
+    }
+
     pub async fn test_generate_metadata_articles_balancer(
         &self,
         limit: usize,
@@ -38,7 +42,7 @@ impl MetadataGenerator {
             self.concurrency_limit
         );
 
-        let chunk_size = (total_articles + self.concurrency_limit - 1) / self.concurrency_limit;
+        let chunk_size = self.calculate_chunk_size(total_articles);
         let article_chunks: Vec<Vec<Article>> = articles_to_process
             .chunks(chunk_size)
             .map(|chunk| chunk.to_vec())
