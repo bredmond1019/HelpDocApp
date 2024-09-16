@@ -2,7 +2,6 @@ use actix_web::Result;
 use pgvector::Vector;
 
 use super::DataProcessor;
-
 use crate::models::{Article, Collection};
 
 impl DataProcessor {
