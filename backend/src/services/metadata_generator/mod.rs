@@ -7,11 +7,15 @@ use std::sync::Arc;
 
 use crate::db::{init_pool, DbPool};
 
-use super::data_processor::DataProcessor;
+use super::{
+    ai::{ai_data_service::AIDataService, ollama_load_balancer::OllamaLoadBalancer},
+    data_processor::DataProcessor,
+};
 
 pub mod article_generator;
 pub mod collection_generator;
-pub mod test_generator;
+pub mod test_generator_balancer;
+pub mod test_generator_buffer;
 
 #[derive(Serialize, Deserialize)]
 struct Checkpoint {
@@ -32,17 +36,26 @@ pub struct MetadataGenerator {
     pub data_processor: Arc<DataProcessor>,
     pub db_pool: Arc<DbPool>,
     concurrency_limit: usize,
+    ollama_balancer: Arc<OllamaLoadBalancer>,
 }
 
 impl MetadataGenerator {
-    pub async fn new(concurrency_limit: usize) -> Result<Self> {
+    pub async fn new(
+        concurrency_limit: usize,
+        server_ports: &[u16],
+        threads_per_server: usize,
+    ) -> Result<Self> {
         let db_pool = Arc::new(init_pool());
-        let data_processor = Arc::new(DataProcessor::new(db_pool.clone()).await?);
+        let ollama_balancer = Arc::new(OllamaLoadBalancer::new(server_ports, threads_per_server));
+        let ai_data_service = Arc::new(AIDataService::new(Arc::clone(&ollama_balancer)));
+        let data_processor =
+            Arc::new(DataProcessor::new(db_pool.clone(), ai_data_service.clone()).await?);
 
         Ok(Self {
             data_processor,
             db_pool,
             concurrency_limit,
+            ollama_balancer,
         })
     }
 

@@ -1,3 +1,5 @@
+use log::info;
+
 use super::AIService;
 use crate::models::articles::Article;
 
@@ -6,24 +8,50 @@ impl AIService {
         &self,
         article: &Article,
     ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-        let prompt = format!(
-            "Read the following article and provide:\n
-            1. A paragraph description of the article\n
-            2. 5-10 bullet points of important facts\n
-            3. Relevant keywords to improve search results. Separate terms with commas.
-            Keep it short and concise to one or two words per term.
+        // let prompt = format!(
+        //     "Read the following article and provide:\n
+        //     1. A paragraph description of the article\n
+        //     2. 5-10 bullet points of important facts\n
+        //     3. Relevant keywords to improve search results. Separate terms with commas.
+        //     Keep it short and concise to one or two words per term.
 
-            You response should be in the following format with the following headers
-            for each section. I need the headers to be able to parse the response:\n
-            1. Response to part 1\n
-            2. Response to part 2\n
-            3. Response to part 3\n\n
-            Article content:\n{}",
+        //     You response should be in the following format with the following headers
+        //     for each section. I need the headers to be able to parse the response:\n
+        //     1. Response to part 1\n
+        //     2. Response to part 2\n
+        //     3. Response to part 3\n\n
+        //     Article content:\n{}",
+        //     article
+        //         .markdown_content
+        //         .as_deref()
+        //         .unwrap_or(&article.title)
+        // );
+        let prompt = format!(
+            r#"Analyze the following article and provide a structured response EXACTLY as specified below. Follow these instructions precisely:
+        
+        1. Your response MUST contain these three sections in this order: [SUMMARY], [FACTS], and [KEYWORDS].
+        2. Each section MUST be preceded by its header in square brackets.
+        3. Do not include any text before [SUMMARY] or after [KEYWORDS].
+        4. If you cannot provide content for a section, use "N/A" as the content.
+        
+        [SUMMARY]
+        Provide a concise one-paragraph summary of the article's main points. If unable to summarize, write "N/A".
+        
+        [FACTS]
+        List 5-10 important facts from the article, each on a new line starting with a dash (-). If unable to extract facts, write "N/A".
+        
+        [KEYWORDS]
+        List relevant keywords or phrases, separated by commas, to improve search results. Use 1-2 words per term. If unable to provide keywords, write "N/A".
+        
+        Article content:
+        {}"#,
             article
                 .markdown_content
                 .as_deref()
                 .unwrap_or(&article.title)
         );
+
+        info!("Generating AI response for current prompt");
 
         let response = self.generate_response(prompt).await?;
         // let (paragraph, bullets, keywords) = self.parse_article_metadata(&response);

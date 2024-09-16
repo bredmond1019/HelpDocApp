@@ -22,6 +22,8 @@ log = "0.4.22"
 log4rs = "1.3.0"
 ollama-rs = { path = "../../ollama-rs", features = ["stream", "chat-history"] }
 pgvector = { version = "0.4", features = ["diesel", "serde"] }
+rayon = "1.10.0"
+regex = "1.10.6"
 reqwest = { version = "0.12.7", features = ["json"] }
 scraper = "0.20.0"
 serde = { version = "1.0", features = ["derive"] }

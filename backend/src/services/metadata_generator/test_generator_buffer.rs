@@ -14,7 +14,7 @@ use super::MetadataGenerator;
 use crate::models::Article;
 
 impl MetadataGenerator {
-    pub async fn test_generate_metadata_articles(
+    pub async fn test_generate_metadata_articles_buffer(
         &self,
         limit: usize,
     ) -> Result<Vec<Uuid>, anyhow::Error> {
@@ -26,8 +26,9 @@ impl MetadataGenerator {
             .db_pool
             .get()
             .context("Failed to get database connection")?;
-        let articles = Article::load_all(&mut conn).context("Failed to load articles")?;
-        let articles_to_process = articles.into_iter().take(limit).collect::<Vec<_>>();
+        let articles =
+            Article::load_batch(&mut conn, 0, limit).context("Failed to load articles")?;
+        let articles_to_process = articles.into_iter().collect::<Vec<_>>();
         let total_articles = articles_to_process.len();
 
         info!("Loaded {} articles for processing", total_articles);
@@ -68,7 +69,7 @@ impl MetadataGenerator {
                         "Processing metadata for article: {} (ID: {})",
                         article.title, article.id
                     );
-                    let result = data_processor.process_article_metadata(&article).await;
+                    let result = data_processor.test_process_metadata(&article).await;
                     let mut count = processed_count.lock().await;
                     *count += 1;
                     (article.id, article.title.clone(), result, *count)

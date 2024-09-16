@@ -107,6 +107,19 @@ impl Article {
         articles::table.load::<Article>(conn)
     }
 
+    pub fn load_batch(
+        conn: &mut PgConnection,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<Article>, diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
+
+        articles
+            .offset(offset as i64)
+            .limit(limit as i64)
+            .load::<Article>(conn)
+    }
+
     pub fn store(&self, conn: &mut PgConnection) -> Result<Self, diesel::result::Error> {
         log::info!("Storing article: ID:{:?}, Title: {:?}", self.id, self.title);
 

@@ -11,6 +11,7 @@ pub mod ws;
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(index);
     cfg.service(health);
+    cfg.service(test_embed);
     cfg.service(parse::parse_data);
     cfg.service(job::get_job_status);
     cfg.service(embed::generate_embeddings);

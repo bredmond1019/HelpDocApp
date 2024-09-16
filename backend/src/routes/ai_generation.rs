@@ -10,12 +10,14 @@ use crate::{
     services::{AIService, DataProcessor, MetadataGenerator},
 };
 
-#[get("/test-metadata-generation/{limit}")]
+#[get("/test-metadata-generation")]
 async fn test_metadata_generation(
     metadata_service: web::Data<Arc<MetadataGenerator>>,
 ) -> impl Responder {
     tokio::spawn(async move {
-        let response = metadata_service.test_generate_metadata_articles(10).await;
+        let response = metadata_service
+            .test_generate_metadata_articles_balancer(30)
+            .await;
         match response {
             Ok(results) => {
                 info!("Metadata generated: {:?}", results);

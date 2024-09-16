@@ -2,6 +2,8 @@ use actix::Actor;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
+use backend::services::ai::ai_data_service::AIDataService;
+use backend::services::ai::ollama_load_balancer::OllamaLoadBalancer;
 use backend::services::search::SearchService;
 use backend::services::{AIService, EmbeddingService, MetadataGenerator};
 use dotenv::dotenv;
@@ -41,9 +43,17 @@ async fn main() -> std::io::Result<()> {
     let pool: DbPool = db::init_pool();
     let arc_pool = Arc::new(pool.clone());
 
+    let server_ports: Vec<u16> = vec![11434, 11435, 11436, 11437];
+    let threads_per_server = 2;
+
+    info!("Initializing AIDataService");
+    let ollama_balancer = Arc::new(OllamaLoadBalancer::new(&server_ports, threads_per_server));
+    let ai_data_service = Arc::new(AIDataService::new(Arc::clone(&ollama_balancer)));
+    info!("AIDataService initialized");
+
     info!("Initializing DataProcessor");
     let data_processor = Arc::new(
-        DataProcessor::new(arc_pool.clone())
+        DataProcessor::new(arc_pool.clone(), ai_data_service.clone())
             .await
             .expect("Failed to create DataProcessor"),
     );
@@ -66,7 +76,11 @@ async fn main() -> std::io::Result<()> {
     info!("SearchService initialized");
 
     info!("Initializing MetadataGenerator");
-    let metadata_generator = Arc::new(MetadataGenerator::new(4));
+    let metadata_generator = Arc::new(
+        MetadataGenerator::new(8, &server_ports, threads_per_server)
+            .await
+            .expect("Failed to create MetadataGenerator"),
+    );
     info!("MetadataGenerator initialized");
 
     // Start the server
