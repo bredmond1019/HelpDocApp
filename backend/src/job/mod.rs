@@ -1,7 +1,7 @@
 use crate::data_processor::DataProcessor;
 use crate::errors::SyncError;
-use crate::models::Article;
-use crate::models::{article::ArticleRef, Collection};
+use crate::models::articles::Article;
+use crate::models::{articles::ArticleRef, Collection};
 
 use anyhow::Result;
 use uuid::Uuid;
@@ -30,18 +30,27 @@ impl Job {
     ) -> Result<(Uuid, Result<(), anyhow::Error>), anyhow::Error> {
         let job_id = Uuid::new_v4();
         log::info!("Starting to process job ID: {}", job_id);
-        
+
         let result = match self {
             Job::SyncCollection(collection) => {
-                log::info!("Processing SyncCollection for collection: {}", collection.id);
+                log::info!(
+                    "Processing SyncCollection for collection: {}",
+                    collection.id
+                );
                 let result = processor.prepare_sync_collection(collection).await;
                 log::info!("SyncCollection completed for collection: {}", collection.id);
                 result.map(|_| ())
             }
             Job::StoreCollection(collection) => {
-                log::info!("Processing StoreCollection for collection: {}", collection.id);
+                log::info!(
+                    "Processing StoreCollection for collection: {}",
+                    collection.id
+                );
                 let result = processor.sync_collection(collection).await;
-                log::info!("StoreCollection completed for collection: {}", collection.id);
+                log::info!(
+                    "StoreCollection completed for collection: {}",
+                    collection.id
+                );
                 result
             }
             Job::SyncArticle(article_ref, collection) => {
@@ -52,7 +61,9 @@ impl Job {
             }
             Job::EnqueueJobs(jobs) => {
                 for job in jobs {
-                    job_queue.enqueue_job(job.clone()).await
+                    job_queue
+                        .enqueue_job(job.clone())
+                        .await
                         .map_err(SyncError::JobEnqueueError)?;
                 }
                 Ok(())
@@ -64,9 +75,15 @@ impl Job {
                 Ok(())
             }
             Job::ConvertHtmlToMarkdown(article) => {
-                log::info!("Processing ConvertHtmlToMarkdown for article: {}", article.id);
+                log::info!(
+                    "Processing ConvertHtmlToMarkdown for article: {}",
+                    article.id
+                );
                 let result = processor.convert_html_to_markdown(article).await;
-                log::info!("ConvertHtmlToMarkdown completed for article: {}", article.id);
+                log::info!(
+                    "ConvertHtmlToMarkdown completed for article: {}",
+                    article.id
+                );
                 result
             }
         };

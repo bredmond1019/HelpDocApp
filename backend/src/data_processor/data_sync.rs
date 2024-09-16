@@ -71,7 +71,7 @@ impl DataProcessor {
             article.collection_id,
             article.helpscout_collection_id
         );
-        let article =article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
+        let article = article.store(&mut self.db_pool.get().expect("Failed to get DB connection"))?;
         Ok(article)
     }
 

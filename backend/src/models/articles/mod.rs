@@ -17,8 +17,6 @@ pub mod update;
 
 pub use self::article_chunk::*;
 pub use self::parse::*;
-pub use self::query::*;
-pub use self::update::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Selectable, Insertable, Associations)]
 #[diesel(table_name = crate::schema::articles)]

@@ -1,7 +1,7 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use std::sync::Arc;
 
-use crate::services::search_service::{ArticleResult, SearchQuery, SearchResult, SearchService};
+use crate::services::search::{ArticleResult, SearchQuery, SearchResult, SearchService};
 use log::info;
 
 #[post("/search")]
@@ -18,7 +18,7 @@ async fn search(
         Ok(expanded) => {
             info!("Query expanded to: {}", expanded);
             expanded
-        },
+        }
         Err(e) => {
             log::error!("Failed to expand query: {}", e);
             info!("Using original query due to expansion failure");
@@ -30,7 +30,10 @@ async fn search(
     info!("Performing two-stage retrieval");
     match search_service.two_stage_retrieval(&expanded_query).await {
         Ok(article_contents) => {
-            info!("Two-stage retrieval successful, found {} results", article_contents.len());
+            info!(
+                "Two-stage retrieval successful, found {} results",
+                article_contents.len()
+            );
             // Step 3: Convert the results to the desired format
             let articles: Vec<ArticleResult> = article_contents
                 .into_iter()
@@ -38,7 +41,9 @@ async fn search(
                 .map(|(_, article)| ArticleResult {
                     id: article.id,
                     title: article.title,
-                    content: article.markdown_content.unwrap_or("No content found".to_string()),
+                    content: article
+                        .markdown_content
+                        .unwrap_or("No content found".to_string()),
                     slug: article.slug,
                 })
                 .collect();

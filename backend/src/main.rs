@@ -2,7 +2,7 @@ use actix::Actor;
 use actix_cors::Cors;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
-use backend::services::search_service::SearchService;
+use backend::services::search::SearchService;
 use backend::services::{AIService, EmbeddingService};
 use dotenv::dotenv;
 use log::{error, info};

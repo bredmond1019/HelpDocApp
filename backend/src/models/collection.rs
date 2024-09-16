@@ -1,9 +1,8 @@
 use chrono::{DateTime, Utc};
 use diesel::{
-    dsl::{sql, Nullable},
+    dsl::Nullable,
     prelude::*,
-    sql_query,
-    sql_types::{Array, Double, SingleValue, Text, Timestamptz},
+    sql_types::{Array, Text, Timestamptz},
 };
 use pgvector::{Vector, VectorExpressionMethods};
 use serde::{Deserialize, Serialize};
@@ -131,6 +130,71 @@ impl Collection {
         Ok(unique_results)
     }
 
+    pub fn find_relevant_collection_ids(
+        query_embedding: &Vector,
+        conn: &mut PgConnection,
+    ) -> Result<Vec<(Uuid, f64)>, diesel::result::Error> {
+        let collection_table = collections::table;
+
+        let paragraph_description_embedding: Vec<(Collection, Option<f64>)> = collection_table
+            .select((
+                collections::all_columns,
+                collections::paragraph_description_embedding
+                    .cosine_distance(query_embedding)
+                    .nullable(),
+            ))
+            .filter(collections::paragraph_description_embedding.is_not_null())
+            .order(collections::paragraph_description_embedding.cosine_distance(query_embedding))
+            .limit(3)
+            .load::<(Collection, Option<f64>)>(conn)?;
+
+        let bullet_points_embedding: Vec<(Collection, Option<f64>)> = collection_table
+            .select((
+                collections::all_columns,
+                collections::bullet_points_embedding.cosine_distance(query_embedding),
+            ))
+            .filter(collections::bullet_points_embedding.is_not_null())
+            .order(collections::bullet_points_embedding.cosine_distance(query_embedding))
+            .limit(3)
+            .load::<(Collection, Option<f64>)>(conn)?;
+
+        let keywords_embedding: Vec<(Collection, Option<f64>)> = collection_table
+            .select((
+                collections::all_columns,
+                collections::keywords_embedding.cosine_distance(query_embedding),
+            ))
+            .filter(collections::keywords_embedding.is_not_null())
+            .order(collections::keywords_embedding.cosine_distance(query_embedding))
+            .limit(3)
+            .load::<(Collection, Option<f64>)>(conn)?;
+
+        // Combine all results
+        let mut combined_results: Vec<(Collection, f64)> = paragraph_description_embedding
+            .into_iter()
+            .chain(bullet_points_embedding)
+            .chain(keywords_embedding)
+            .filter_map(|(collection, distance)| distance.map(|d| (collection, d)))
+            .collect();
+
+        // Sort by distance (lower is better)
+        combined_results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal));
+
+        // Take the top 3 unique results
+        let mut unique_results = Vec::new();
+        let mut seen_ids = std::collections::HashSet::new();
+
+        for (collection, distance) in combined_results {
+            if seen_ids.insert(collection.id) {
+                unique_results.push((collection.id, distance));
+                if unique_results.len() == 3 {
+                    break;
+                }
+            }
+        }
+
+        Ok(unique_results)
+    }
+
     pub fn update_metadata(
         &self,
         conn: &mut PgConnection,
@@ -201,39 +265,4 @@ pub struct CollectionItem {
     pub created_at: String,
     #[serde(rename = "updatedAt")]
     pub updated_at: String,
-}
-
-use diesel::sql_types::*;
-
-#[derive(QueryableByName, Debug)]
-#[diesel(table_name = collections)]
-struct CollectionWithDistance {
-    #[diesel(sql_type = Uuid)]
-    id: uuid::Uuid,
-    #[diesel(sql_type = Text)]
-    name: String,
-    #[diesel(sql_type = Nullable<Text>)]
-    description: Option<String>,
-    #[diesel(sql_type = Text)]
-    slug: String,
-    #[diesel(sql_type = Text)]
-    helpscout_collection_id: String,
-    #[diesel(sql_type = Timestamptz)]
-    created_at: chrono::DateTime<chrono::Utc>,
-    #[diesel(sql_type = Timestamptz)]
-    updated_at: chrono::DateTime<chrono::Utc>,
-    #[diesel(sql_type = Nullable<Text>)]
-    paragraph_description: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    bullet_points: Option<String>,
-    #[diesel(sql_type = Nullable<Text>)]
-    keywords: Option<String>,
-    #[diesel(sql_type = Nullable<Array<Float8>>)]
-    paragraph_description_embedding: Option<Vec<f32>>,
-    #[diesel(sql_type = Nullable<Array<Float8>>)]
-    bullet_points_embedding: Option<Vec<f32>>,
-    #[diesel(sql_type = Nullable<Array<Float8>>)]
-    keywords_embedding: Option<Vec<f32>>,
-    #[diesel(sql_type = Float8)]
-    distance: f64,
 }
