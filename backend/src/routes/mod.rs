@@ -1,13 +1,15 @@
-use actix_web::{post, get, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use reqwest::Client;
 
+pub mod ai_generation;
+pub mod embed;
 pub mod job;
 pub mod parse;
-pub mod embed;
-pub mod ws;
 pub mod search;
+pub mod ws;
+
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
-    cfg.service(index); 
+    cfg.service(index);
     cfg.service(health);
     cfg.service(parse::parse_data);
     cfg.service(job::get_job_status);
@@ -15,6 +17,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(embed::get_failed_embedding_articles);
     cfg.service(embed::reembed_all_articles);
     cfg.service(search::search);
+    cfg.service(ai_generation::generate_metadata);
 }
 
 #[get("/")]
@@ -32,15 +35,23 @@ pub async fn health() -> impl Responder {
                 HttpResponse::Ok().body("Embedding service is healthy")
             } else {
                 let status = resp.status();
-                let body = resp.text().await.unwrap_or_else(|_| "Unable to read response body".to_string());
-                log::error!("Embedding service returned non-success status: {}. Body: {}", status, body);
-                HttpResponse::InternalServerError().body(format!("Embedding service error: Status {}", status))
+                let body = resp
+                    .text()
+                    .await
+                    .unwrap_or_else(|_| "Unable to read response body".to_string());
+                log::error!(
+                    "Embedding service returned non-success status: {}. Body: {}",
+                    status,
+                    body
+                );
+                HttpResponse::InternalServerError()
+                    .body(format!("Embedding service error: Status {}", status))
             }
-        },
+        }
         Err(e) => {
             log::error!("Failed to connect to embedding service: {}", e);
-            HttpResponse::InternalServerError().body(format!("Failed to connect to embedding service: {}", e))
+            HttpResponse::InternalServerError()
+                .body(format!("Failed to connect to embedding service: {}", e))
         }
     }
 }
-
