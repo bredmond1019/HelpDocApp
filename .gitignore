@@ -1,3 +1,4 @@
 .env
 ai_help_docs_backup.sql
 build_database.md
+**/.DS_Store

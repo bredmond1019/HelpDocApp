@@ -2,3 +2,4 @@
 .env
 /log
 log/application.log
+**/.DS_Store
