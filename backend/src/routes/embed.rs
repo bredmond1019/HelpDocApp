@@ -12,7 +12,7 @@ use crate::errors::SyncError;
 use crate::models::articles::Article;
 use crate::models::Embedding;
 use crate::schema::articles;
-use crate::{db::DbPool, services::embedding_service::EmbeddingService};
+use crate::{db::DbPool, services::embedding::EmbeddingService};
 
 #[post("/generate-embeddings")]
 pub async fn generate_embeddings(pool: web::Data<Arc<DbPool>>) -> impl Responder {

@@ -1,5 +1,6 @@
 use crate::models::Article;
 use crate::services::ai::AIService;
+use crate::services::EmbeddingService;
 use crate::{db::DbPool, models::message::Message};
 
 use actix::prelude::*;
@@ -10,7 +11,6 @@ use serde::Deserialize;
 use std::{collections::HashMap, sync::Arc};
 
 use super::chat_session::SessionId;
-use super::embedding_service::EmbeddingService;
 
 #[derive(Message)]
 #[rtype(result = "()")]

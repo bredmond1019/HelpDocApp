@@ -2,9 +2,9 @@ use diesel::PgConnection;
 use reqwest::Client;
 use serde_json::json;
 
-use log::{info, error};
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use diesel::RunQueryDsl;
+use log::{error, info};
 
 use crate::models::{embedding::Embedding, Article};
 
@@ -19,7 +19,9 @@ impl EmbeddingService {
         }
     }
     pub async fn generate_embedding(&self, text: &str) -> Result<Vec<f32>> {
-        let resp = self.client.post("http://localhost:8080/embed")
+        let resp = self
+            .client
+            .post("http://localhost:8080/embed")
             .json(&json!({ "text": text }))
             .send()
             .await
@@ -32,7 +34,11 @@ impl EmbeddingService {
             let status = resp.status();
             let error_message = resp.text().await?;
             error!("Embedding service returned an error: {}", error_message);
-            return Err(anyhow::anyhow!("Embedding service error: {} - {}", status, error_message));
+            return Err(anyhow::anyhow!(
+                "Embedding service error: {} - {}",
+                status,
+                error_message
+            ));
         }
 
         let embedding_data: serde_json::Value = resp.json().await.map_err(|e| {
@@ -61,14 +67,20 @@ impl EmbeddingService {
             chunk.store(conn)?;
         }
 
-        info!("Successfully generated and stored embedding for article {}", article.id);
+        info!(
+            "Successfully generated and stored embedding for article {}",
+            article.id
+        );
         Ok(())
     }
 
-    pub async fn reembed_all_articles(&self, conn: &mut PgConnection) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn reembed_all_articles(
+        &self,
+        conn: &mut PgConnection,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        use crate::schema::article_chunks::dsl::*;
         use crate::schema::articles::dsl::*;
         use crate::schema::embeddings::dsl::*;
-        use crate::schema::article_chunks::dsl::*;
         use diesel::delete;
 
         // Step 1: Remove all existing embeddings and article chunks
@@ -92,7 +104,10 @@ impl EmbeddingService {
         embedding: Embedding,
     ) -> Result<Embedding, Box<dyn std::error::Error>> {
         let stored_embedding = embedding.store(conn).map_err(|e| {
-            error!("Failed to store embedding for article {}: {}", embedding.article_id, e);
+            error!(
+                "Failed to store embedding for article {}: {}",
+                embedding.article_id, e
+            );
             e
         })?;
         Ok(stored_embedding)

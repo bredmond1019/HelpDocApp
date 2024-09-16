@@ -14,7 +14,7 @@ use std::sync::Arc;
 use backend::db;
 use backend::db::DbPool;
 use backend::routes;
-use backend::services::{chat_server::ChatServer, data_processor::DataProcessor};
+use backend::services::{chat::chat_server::ChatServer, data_processor::DataProcessor};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

@@ -1,5 +1,5 @@
-use crate::services::chat_server::ChatServer;
-use crate::services::chat_session::ChatSession;
+use crate::services::chat::chat_server::ChatServer;
+use crate::services::chat::chat_session::ChatSession;
 use actix_web::{web, Error, HttpRequest, HttpResponse};
 use actix_web_actors::ws;
 use log::{error, info};

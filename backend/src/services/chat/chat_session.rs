@@ -1,5 +1,5 @@
 use crate::models::message::Message;
-use crate::services::chat_server::{ChatServer, ClientMessage, Connect, Disconnect};
+use crate::services::chat::chat_server::{ChatServer, ClientMessage, Connect, Disconnect};
 use actix::prelude::*;
 use actix::{Actor, ActorContext, AsyncContext, Handler, StreamHandler};
 use actix_web_actors::ws;
