@@ -1,11 +1,9 @@
-use std::collections::HashMap;
-
 use log::info;
+use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::models::{Article, Collection};
-
 use super::SearchService;
+use crate::models::{Article, Collection};
 
 impl SearchService {
     pub async fn collection_based_search(

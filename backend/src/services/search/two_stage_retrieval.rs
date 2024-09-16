@@ -1,10 +1,8 @@
-use super::SearchService;
-
-use std::collections::HashMap;
-
 use log::info;
+use std::collections::HashMap;
 use uuid::Uuid;
 
+use super::SearchService;
 use crate::models::Article;
 
 impl SearchService {

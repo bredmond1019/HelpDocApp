@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use log::info;
 use serde::{Deserialize, Serialize};
-
-use crate::db::DbPool;
+use std::sync::Arc;
 
 use super::{AIService, EmbeddingService};
+use crate::db::DbPool;
 
 pub mod collection_search;
 pub mod combined_search;

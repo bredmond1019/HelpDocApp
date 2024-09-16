@@ -1,8 +1,7 @@
-use super::SearchService;
-
 use log::info;
 use tokio::task;
 
+use super::SearchService;
 use crate::models::Article;
 
 impl SearchService {
