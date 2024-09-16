@@ -1,5 +1,5 @@
 use crate::models::Article;
-use crate::services::ai_service::AIService;
+use crate::services::ai::AIService;
 use crate::{db::DbPool, models::message::Message};
 
 use actix::prelude::*;
