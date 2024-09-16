@@ -3,8 +3,6 @@ use crate::services::ai_service::AIService;
 use crate::{db::DbPool, models::message::Message};
 
 use actix::prelude::*;
-
-use diesel::PgConnection;
 use futures::StreamExt;
 use log::{error, info};
 use pgvector::Vector;

@@ -1,14 +1,9 @@
-use std::{collections::HashMap, sync::Arc};
+use std::sync::Arc;
 
 use log::info;
 use serde::{Deserialize, Serialize};
-use tokio::task;
-use uuid::Uuid;
 
-use crate::{
-    db::DbPool,
-    models::{Article, Collection},
-};
+use crate::db::DbPool;
 
 use super::{AIService, EmbeddingService};
 

@@ -1,18 +1,9 @@
 use super::SearchService;
 
-use std::{collections::HashMap, sync::Arc};
-
 use log::info;
-use serde::{Deserialize, Serialize};
 use tokio::task;
-use uuid::Uuid;
 
-use crate::{
-    db::DbPool,
-    models::{Article, Collection},
-};
-
-use super::{AIService, EmbeddingService};
+use crate::models::Article;
 
 impl SearchService {
     pub async fn combined_search(

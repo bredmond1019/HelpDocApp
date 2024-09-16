@@ -1,9 +1,5 @@
 use chrono::{DateTime, Utc};
-use diesel::{
-    dsl::Nullable,
-    prelude::*,
-    sql_types::{Array, Text, Timestamptz},
-};
+use diesel::prelude::*;
 use pgvector::{Vector, VectorExpressionMethods};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
