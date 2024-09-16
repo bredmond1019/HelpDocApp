@@ -6,6 +6,16 @@ from sentence_transformers import SentenceTransformer
 import numpy as np
 import logging
 
+'''
+This is a simple embedding service that uses the SentenceTransformer model to generate embeddings for text.
+
+To run this service, you need to have the SentenceTransformer model installed.
+You can install the model by running the following command:
+
+conda activate embed_service
+pip install -r requirements.txt
+'''
+
 app = Flask(__name__)
 
 # Set up logging
