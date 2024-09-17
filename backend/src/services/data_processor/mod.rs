@@ -3,6 +3,7 @@
 use anyhow::Result;
 use log::info;
 use std::sync::Arc;
+use uuid::Uuid;
 
 use crate::db::DbPool;
 use crate::services::{AIService, EmbeddingService};
@@ -35,5 +36,32 @@ impl DataProcessor {
             ai_service,
             embedding_service,
         })
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ProcessResult {
+    pub id: Uuid,
+    pub paragraph: Option<String>,
+    pub bullets: Option<Vec<String>>,
+    pub keywords: Option<Vec<String>>,
+}
+
+impl ProcessResult {
+    pub fn new(id: Uuid) -> Self {
+        Self {
+            id,
+            paragraph: None,
+            bullets: None,
+            keywords: None,
+        }
+    }
+
+    pub fn is_complete(&self) -> bool {
+        self.paragraph.is_some() && self.bullets.is_some() && self.keywords.is_some()
+    }
+
+    pub fn join_with_commas(items: Vec<String>) -> String {
+        items.join(", ")
     }
 }

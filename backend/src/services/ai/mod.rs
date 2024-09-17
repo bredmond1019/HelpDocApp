@@ -5,7 +5,6 @@ use std::fmt;
 
 pub mod generate_metadata;
 pub mod generate_response;
-pub mod ollama_load_balancer;
 
 #[derive(Clone)]
 pub struct AIService {

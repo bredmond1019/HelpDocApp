@@ -36,8 +36,8 @@ pub struct Article {
     pub helpscout_article_id: Option<String>,
     // Meta Data
     pub paragraph_description: Option<String>,
-    pub bullet_points: Option<String>,
-    pub keywords: Option<String>,
+    pub bullet_points: Option<Vec<Option<String>>>,
+    pub keywords: Option<Vec<Option<String>>>,
     pub paragraph_description_embedding: Option<Vector>,
     pub bullet_points_embedding: Option<Vector>,
     pub keywords_embedding: Option<Vector>,

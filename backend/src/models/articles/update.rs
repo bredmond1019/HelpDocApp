@@ -10,8 +10,8 @@ impl Article {
         &self,
         conn: &mut PgConnection,
         paragraph_description: String,
-        bullet_points: String,
-        keywords: String,
+        bullet_points: Vec<String>,
+        keywords: Vec<String>,
         paragraph_description_embedding: Vector,
         bullet_points_embedding: Vector,
         keywords_embedding: Vector,
@@ -19,8 +19,8 @@ impl Article {
         diesel::update(articles::table.find(self.id))
             .set((
                 articles::columns::paragraph_description.eq(paragraph_description),
-                articles::columns::bullet_points.eq(bullet_points),
-                articles::columns::keywords.eq(keywords),
+                articles::columns::bullet_points.eq(Some(bullet_points)),
+                articles::columns::keywords.eq(Some(keywords)),
                 articles::columns::paragraph_description_embedding
                     .eq(paragraph_description_embedding),
                 articles::columns::bullet_points_embedding.eq(bullet_points_embedding),

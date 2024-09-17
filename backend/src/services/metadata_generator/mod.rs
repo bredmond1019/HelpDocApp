@@ -56,7 +56,7 @@ impl MetadataGenerator {
     //     std::fs::remove_file("metadata_checkpoint.json").ok();
 
     //     Ok(())
-    // }
+    // }`
 
     fn load_checkpoint(&self) -> Result<Checkpoint> {
         let file =

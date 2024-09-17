@@ -1,11 +1,11 @@
-use std::sync::Arc;
+use std::{error::Error, sync::Arc};
 
 use anyhow::{Context, Result};
 use futures::{
     lock::Mutex,
     stream::{self, StreamExt},
 };
-use log::{debug, error, info};
+use log::{error, info, warn};
 use tokio::sync::Semaphore;
 use uuid::Uuid;
 
@@ -17,7 +17,7 @@ impl MetadataGenerator {
     pub async fn generate_article_metadata(
         &self,
         limit: usize,
-    ) -> Result<Vec<Uuid>, anyhow::Error> {
+    ) -> Result<(Vec<Uuid>, Vec<Uuid>), Box<dyn Error + Send + Sync>> {
         info!(
             "Starting test article metadata generation for up to {} articles",
             limit
@@ -35,7 +35,6 @@ impl MetadataGenerator {
 
         let semaphore = Arc::new(Semaphore::new(self.concurrency_limit));
         let processed_count = Arc::new(Mutex::new(0));
-        let processed_ids = Arc::new(Mutex::new(Vec::new()));
 
         info!(
             "Beginning concurrent processing with concurrency limit: {}",
@@ -71,32 +70,43 @@ impl MetadataGenerator {
             .collect::<Vec<_>>()
             .await;
 
+        let mut successful_ids = Vec::new();
+        let mut failed_ids = Vec::new();
+
         for (article_id, title, result, count) in results {
             match result {
-                Ok(_) => {
-                    info!(
-                        "({}/{}) Successfully processed metadata for article: {} (ID: {})",
-                        count, total_articles, title, article_id
-                    );
-                    processed_ids.lock().await.push(article_id);
-                    debug!("Added article ID: {} to processed_ids", article_id);
+                Ok(process_result) => {
+                    if process_result.is_complete() {
+                        info!(
+                            "({}/{}) Successfully processed metadata for article: {} (ID: {})",
+                            count, total_articles, title, article_id
+                        );
+                        successful_ids.push(article_id);
+                    } else {
+                        warn!(
+                            "({}/{}) Partially processed metadata for article: {} (ID: {})",
+                            count, total_articles, title, article_id
+                        );
+                        failed_ids.push(article_id);
+                    }
                 }
                 Err(e) => {
                     error!(
                         "({}/{}) Error processing metadata for article {} (ID: {}): {}",
                         count, total_articles, title, article_id, e
                     );
+                    failed_ids.push(article_id);
                 }
             }
         }
 
-        let final_processed_ids = processed_ids.lock().await.clone();
         info!(
-            "Completed test article metadata generation. Processed {} articles.",
-            final_processed_ids.len()
-        );
-        debug!("Final processed article IDs: {:?}", final_processed_ids);
+                "Completed article metadata generation. Processed {} articles. Successful: {}, Failed: {}",
+                total_articles,
+                successful_ids.len(),
+                failed_ids.len()
+            );
 
-        Ok(final_processed_ids)
+        Ok((successful_ids, failed_ids))
     }
 }
