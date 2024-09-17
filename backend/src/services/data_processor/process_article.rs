@@ -126,10 +126,10 @@ impl DataProcessor {
         if summary.is_empty() || summary == "N/A" {
             summary = "No summary available".to_string();
         }
-        if facts.is_empty() {
+        if facts.is_empty() || facts.contains(&"N/A".to_string()) {
             facts.push("No facts available".to_string());
         }
-        if keywords.is_empty() {
+        if keywords.is_empty() || keywords.contains(&"N/A".to_string()) {
             keywords.push("No keywords available".to_string());
         }
 

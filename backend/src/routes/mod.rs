@@ -19,6 +19,7 @@ pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(embed::reembed_all_articles);
     cfg.service(search::search);
     cfg.service(ai_generation::metadata_generation);
+    cfg.service(ai_generation::failed_articles_metadata_generation);
 }
 
 #[get("/")]

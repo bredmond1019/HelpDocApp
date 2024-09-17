@@ -33,19 +33,34 @@ impl DataProcessor {
                     // Bullet points
                     result.bullets = article.bullet_points.clone();
                     result.bullet_points_embedding = article.bullet_points_embedding.clone();
-                    if result.bullets.is_none() && bullets != vec!["No facts available"] {
-                        result.bullets = Some(bullets.clone().into_iter().map(Some).collect());
-                        result.bullet_points_embedding =
-                            Some(self.generate_embedding(&bullets.join(", ")).await?);
+                    if result.bullets.is_none()
+                        || result.bullets == Some(vec![Some("{NULL}".to_string())])
+                    {
+                        if bullets != vec!["No facts available"] {
+                            result.bullets = Some(bullets.clone().into_iter().map(Some).collect());
+                            result.bullet_points_embedding =
+                                Some(self.generate_embedding(&bullets.join(", ")).await?);
+                        } else {
+                            result.bullets = None;
+                            result.bullet_points_embedding = None;
+                        }
                     }
 
                     // Keywords
                     result.keywords = article.keywords.clone();
                     result.keywords_embedding = article.keywords_embedding.clone();
-                    if result.keywords.is_none() && keywords != vec!["No keywords available"] {
-                        result.keywords = Some(keywords.clone().into_iter().map(Some).collect());
-                        result.keywords_embedding =
-                            Some(self.generate_embedding(&keywords.join(", ")).await?);
+                    if result.keywords.is_none()
+                        || result.keywords == Some(vec![Some("{NULL}".to_string())])
+                    {
+                        if keywords != vec!["No keywords available"] {
+                            result.keywords =
+                                Some(keywords.clone().into_iter().map(Some).collect());
+                            result.keywords_embedding =
+                                Some(self.generate_embedding(&keywords.join(", ")).await?);
+                        } else {
+                            result.keywords = None;
+                            result.keywords_embedding = None;
+                        }
                     }
 
                     if result.is_complete() {

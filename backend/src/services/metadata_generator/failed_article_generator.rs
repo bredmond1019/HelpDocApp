@@ -118,7 +118,7 @@ impl MetadataGenerator {
     fn load_failed_article_ids(
         &self,
     ) -> Result<Vec<Uuid>, Box<dyn std::error::Error + Send + Sync>> {
-        let file = File::open("failed_article_ids_2.txt")?;
+        let file = File::open("failed_article_ids.txt")?;
         let reader = BufReader::new(file);
         let mut ids = Vec::new();
 
