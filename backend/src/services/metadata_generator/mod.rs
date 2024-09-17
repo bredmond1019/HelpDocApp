@@ -4,6 +4,7 @@ use std::sync::Arc;
 use super::data_processor::DataProcessor;
 use crate::db::{init_pool, DbPool};
 pub mod article_generator;
+pub mod failed_article_generator;
 
 pub struct MetadataGenerator {
     pub data_processor: Arc<DataProcessor>,

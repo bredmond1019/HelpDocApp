@@ -87,6 +87,17 @@ impl Article {
         articles.find(article_id).first(conn).optional()
     }
 
+    pub fn get_all_by_ids(
+        conn: &mut PgConnection,
+        article_ids: &[Uuid],
+    ) -> Result<Vec<Article>, diesel::result::Error> {
+        use crate::schema::articles::dsl::*;
+
+        articles
+            .filter(id.eq_any(article_ids))
+            .load::<Article>(conn)
+    }
+
     pub fn belonging_to_collection(
         collection: &Collection,
         conn: &mut PgConnection,

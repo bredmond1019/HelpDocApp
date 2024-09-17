@@ -1,5 +1,4 @@
 use actix_web::Result;
-use diesel::PgConnection;
 use log::{error, info, warn};
 use pgvector::Vector;
 use regex::Regex;
@@ -37,12 +36,12 @@ impl DataProcessor {
                             Some(self.generate_embedding(&paragraph).await?);
                     }
                     if bullets != vec!["No facts available"] {
-                        result.bullets = Some(bullets.clone());
+                        result.bullets = Some(bullets.clone().into_iter().map(Some).collect());
                         result.bullet_points_embedding =
                             Some(self.generate_embedding(&bullets.join(", ")).await?);
                     }
                     if keywords != vec!["No keywords available"] {
-                        result.keywords = Some(keywords.clone());
+                        result.keywords = Some(keywords.clone().into_iter().map(Some).collect());
                         result.keywords_embedding =
                             Some(self.generate_embedding(&keywords.join(", ")).await?);
                     }
@@ -82,7 +81,7 @@ impl DataProcessor {
         Ok(ProcessResult::new(article.id))
     }
 
-    fn parse_llm_response(
+    pub fn parse_llm_response(
         &self,
         response: &str,
     ) -> Result<(String, Vec<String>, Vec<String>), Box<dyn std::error::Error + Send + Sync>> {
@@ -137,7 +136,7 @@ impl DataProcessor {
         Ok((summary, facts, keywords))
     }
 
-    async fn generate_embedding(
+    pub async fn generate_embedding(
         &self,
         text: &str,
     ) -> Result<Vector, Box<dyn std::error::Error + Send + Sync>> {
@@ -145,7 +144,7 @@ impl DataProcessor {
         Ok(Vector::from(embedding))
     }
 
-    fn save_metadata_to_file(
+    pub fn save_metadata_to_file(
         &self,
         article_id: Uuid,
         result: &ProcessResult,

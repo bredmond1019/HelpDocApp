@@ -14,6 +14,7 @@ pub mod api_client;
 pub mod convert_html;
 pub mod data_sync;
 pub mod process_article;
+pub mod process_failed_articles;
 
 pub use convert_html::html_to_markdown;
 
@@ -44,8 +45,8 @@ impl DataProcessor {
 pub struct ProcessResult {
     pub id: Uuid,
     pub paragraph: Option<String>,
-    pub bullets: Option<Vec<String>>,
-    pub keywords: Option<Vec<String>>,
+    pub bullets: Option<Vec<Option<String>>>,
+    pub keywords: Option<Vec<Option<String>>>,
     pub paragraph_description_embedding: Option<Vector>,
     pub bullet_points_embedding: Option<Vector>,
     pub keywords_embedding: Option<Vector>,

@@ -1,32 +1,32 @@
-use std::{error::Error, fs::File, io::Write, sync::Arc};
-
-use anyhow::{Context, Result};
+use actix_web::Result;
+use anyhow::Context;
 use futures::{
     lock::Mutex,
     stream::{self, StreamExt},
 };
 use log::{error, info, warn};
+use std::io::{BufRead, BufReader, Write};
+use std::{error::Error, fs::File, sync::Arc};
 use tokio::sync::Semaphore;
 use uuid::Uuid;
 
 use super::MetadataGenerator;
-
 use crate::models::Article;
 
 impl MetadataGenerator {
-    pub async fn generate_article_metadata(
+    pub async fn generate_failed_article_metadata(
         &self,
-        limit: usize,
     ) -> Result<(Vec<Uuid>, Vec<Uuid>), Box<dyn Error + Send + Sync>> {
-        info!(
-            "Starting test article metadata generation for up to {} articles",
-            limit
-        );
+        info!("Starting failed article metadata generation");
         let mut conn = self
             .db_pool
             .get()
             .context("Failed to get database connection")?;
-        let articles = Article::load_all(&mut conn).context("Failed to load articles")?;
+
+        // Load all articles with the failed ids
+        let failed_article_ids = self.load_failed_article_ids()?;
+        let articles = Article::get_all_by_ids(&mut conn, &failed_article_ids)
+            .context("Failed to load articles")?;
         let articles_to_process = articles.into_iter().collect::<Vec<_>>();
         let total_articles = articles_to_process.len();
 
@@ -59,7 +59,9 @@ impl MetadataGenerator {
                         "Processing metadata for article: {} (ID: {})",
                         article.title, article.id
                     );
-                    let result = data_processor.process_article_metadata(&article).await;
+                    let result = data_processor
+                        .process_failed_article_metadata(&article)
+                        .await;
                     let mut count = processed_count.lock().await;
                     *count += 1;
                     (article.id, article.title.clone(), result, *count)
@@ -106,15 +108,33 @@ impl MetadataGenerator {
                 failed_ids.len()
             );
 
-        if let Err(e) = self.save_failed_article_ids(&failed_ids) {
+        if let Err(e) = self.save_second_attempt_failed_article_ids(&failed_ids) {
             error!("Failed to save failed article IDs: {}", e);
         }
 
         Ok((successful_ids, failed_ids))
     }
 
-    pub fn save_failed_article_ids(&self, failed_ids: &[Uuid]) -> std::io::Result<()> {
-        let mut file = File::create("failed_article_ids.txt")?;
+    fn load_failed_article_ids(
+        &self,
+    ) -> Result<Vec<Uuid>, Box<dyn std::error::Error + Send + Sync>> {
+        let file = File::open("failed_article_ids_2.txt")?;
+        let reader = BufReader::new(file);
+        let mut ids = Vec::new();
+
+        for line in reader.lines() {
+            let id = Uuid::parse_str(&line?)?;
+            ids.push(id);
+        }
+
+        Ok(ids)
+    }
+
+    pub fn save_second_attempt_failed_article_ids(
+        &self,
+        failed_ids: &[Uuid],
+    ) -> std::io::Result<()> {
+        let mut file = File::create("failed_article_ids_2.txt")?;
         for id in failed_ids {
             writeln!(file, "{}", id)?;
         }
