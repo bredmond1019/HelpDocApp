@@ -35,15 +35,33 @@ impl DataProcessor {
                         result.paragraph_description_embedding =
                             Some(self.generate_embedding(&paragraph).await?);
                     }
-                    if bullets != vec!["No facts available"] {
-                        result.bullets = Some(bullets.clone().into_iter().map(Some).collect());
-                        result.bullet_points_embedding =
-                            Some(self.generate_embedding(&bullets.join(", ")).await?);
+                    if bullets != vec![Some("No facts available".to_string())] {
+                        result.bullets = Some(bullets.clone());
+                        result.bullet_points_embedding = Some(
+                            self.generate_embedding(
+                                &bullets
+                                    .iter()
+                                    .filter_map(|b| b.as_ref())
+                                    .cloned()
+                                    .collect::<Vec<String>>()
+                                    .join(", "),
+                            )
+                            .await?,
+                        );
                     }
-                    if keywords != vec!["No keywords available"] {
-                        result.keywords = Some(keywords.clone().into_iter().map(Some).collect());
-                        result.keywords_embedding =
-                            Some(self.generate_embedding(&keywords.join(", ")).await?);
+                    if keywords != vec![Some("No keywords available".to_string())] {
+                        result.keywords = Some(keywords.clone());
+                        result.keywords_embedding = Some(
+                            self.generate_embedding(
+                                &keywords
+                                    .iter()
+                                    .filter_map(|k| k.as_ref())
+                                    .cloned()
+                                    .collect::<Vec<String>>()
+                                    .join(", "),
+                            )
+                            .await?,
+                        );
                     }
 
                     if result.has_content() {
@@ -84,7 +102,10 @@ impl DataProcessor {
     pub fn parse_llm_response(
         &self,
         response: &str,
-    ) -> Result<(String, Vec<String>, Vec<String>), Box<dyn std::error::Error + Send + Sync>> {
+    ) -> Result<
+        (String, Vec<Option<String>>, Vec<Option<String>>),
+        Box<dyn std::error::Error + Send + Sync>,
+    > {
         let section_re = Regex::new(r"(?m)^\[([^\]]+)\]")?;
         let sections: Vec<_> = section_re.find_iter(response).collect();
 
@@ -107,15 +128,27 @@ impl DataProcessor {
                 "FACTS" => {
                     facts = content
                         .lines()
-                        .map(|s| s.trim_start_matches('-').trim().to_string())
-                        .filter(|s| !s.is_empty())
+                        .map(|s| {
+                            let trimmed = s.trim_start_matches('-').trim().to_string();
+                            if trimmed.is_empty() || trimmed == "N/A" {
+                                None
+                            } else {
+                                Some(trimmed)
+                            }
+                        })
                         .collect()
                 }
                 "KEYWORDS" => {
                     keywords = content
                         .split(',')
-                        .map(|s| s.trim().to_string())
-                        .filter(|s| !s.is_empty())
+                        .map(|s| {
+                            let trimmed = s.trim().to_string();
+                            if trimmed.is_empty() || trimmed == "N/A" {
+                                None
+                            } else {
+                                Some(trimmed)
+                            }
+                        })
                         .collect()
                 }
                 _ => {}
@@ -126,11 +159,11 @@ impl DataProcessor {
         if summary.is_empty() || summary == "N/A" {
             summary = "No summary available".to_string();
         }
-        if facts.is_empty() || facts.contains(&"N/A".to_string()) {
-            facts.push("No facts available".to_string());
+        if facts.is_empty() || facts.contains(&Some("N/A".to_string())) {
+            facts.push(Some("No facts available".to_string()));
         }
-        if keywords.is_empty() || keywords.contains(&"N/A".to_string()) {
-            keywords.push("No keywords available".to_string());
+        if keywords.is_empty() || keywords.contains(&Some("N/A".to_string())) {
+            keywords.push(Some("No keywords available".to_string()));
         }
 
         Ok((summary, facts, keywords))
