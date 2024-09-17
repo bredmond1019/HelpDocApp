@@ -36,7 +36,6 @@ impl AIService {
         info!("Generating AI response for current prompt");
 
         let response = self.generate_response(prompt).await?;
-        // let (paragraph, bullets, keywords) = self.parse_article_metadata(&response);
 
         Ok(response)
     }

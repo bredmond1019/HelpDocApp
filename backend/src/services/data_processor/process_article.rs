@@ -3,6 +3,9 @@ use diesel::PgConnection;
 use log::{error, info, warn};
 use pgvector::Vector;
 use regex::Regex;
+use std::fs::OpenOptions;
+use std::io::Write;
+use uuid::Uuid;
 
 use super::{DataProcessor, ProcessResult};
 
@@ -30,23 +33,34 @@ impl DataProcessor {
 
                     if paragraph != "No summary available" {
                         result.paragraph = Some(paragraph.clone());
+                        result.paragraph_description_embedding =
+                            Some(self.generate_embedding(&paragraph).await?);
                     }
                     if bullets != vec!["No facts available"] {
                         result.bullets = Some(bullets.clone());
+                        result.bullet_points_embedding =
+                            Some(self.generate_embedding(&bullets.join(", ")).await?);
                     }
                     if keywords != vec!["No keywords available"] {
                         result.keywords = Some(keywords.clone());
+                        result.keywords_embedding =
+                            Some(self.generate_embedding(&keywords.join(", ")).await?);
                     }
 
-                    if result.is_complete() {
-                        let embeddings = self
-                            .generate_embeddings(&paragraph, &bullets, &keywords)
-                            .await?;
-                        self.update_article_metadata(
-                            &mut conn, article, paragraph, bullets, keywords, embeddings,
-                        )?;
-                        return Ok(result);
+                    if result.has_content() {
+                        info!("Updating metadata for article: {}", article.id);
+                        info!("Metadata: {:?}", result.clone());
+
+                        match article.update_metadata(&mut conn, result.clone()) {
+                            Ok(_) => return Ok(result),
+                            Err(e) => {
+                                warn!("Failed to update metadata in database for article: {}. Error: {}. Saving to file instead.", article.id, e);
+                                self.save_metadata_to_file(article.id, &result)?;
+                                return Ok(result);
+                            }
+                        }
                     } else {
+                        warn!("No content found in response for article: {}", article.id);
                         return Ok(result);
                     }
                 }
@@ -123,51 +137,32 @@ impl DataProcessor {
         Ok((summary, facts, keywords))
     }
 
-    async fn generate_embeddings(
+    async fn generate_embedding(
         &self,
-        paragraph: &str,
-        bullets: &[String],
-        keywords: &[String],
-    ) -> Result<(Vec<f32>, Vec<f32>, Vec<f32>), Box<dyn std::error::Error + Send + Sync>> {
-        let joined_bullets = ProcessResult::join_with_commas(bullets.to_vec());
-        let joined_keywords = ProcessResult::join_with_commas(keywords.to_vec());
-        let paragraph_embedding = self.embedding_service.generate_embedding(paragraph).await?;
-
-        let bullets_embedding = self
-            .embedding_service
-            .generate_embedding(&joined_bullets)
-            .await?;
-        let keywords_embedding = self
-            .embedding_service
-            .generate_embedding(&joined_keywords)
-            .await?;
-
-        info!("Paragraph embedding: {:?}", paragraph_embedding);
-        info!("Bullets embedding: {:?}", bullets_embedding);
-        info!("Keywords embedding: {:?}", keywords_embedding);
-
-        Ok((paragraph_embedding, bullets_embedding, keywords_embedding))
+        text: &str,
+    ) -> Result<Vector, Box<dyn std::error::Error + Send + Sync>> {
+        let embedding = self.embedding_service.generate_embedding(text).await?;
+        Ok(Vector::from(embedding))
     }
 
-    fn update_article_metadata(
+    fn save_metadata_to_file(
         &self,
-        conn: &mut PgConnection,
-        article: &Article,
-        paragraph: String,
-        bullets: Vec<String>,
-        keywords: Vec<String>,
-        embeddings: (Vec<f32>, Vec<f32>, Vec<f32>),
+        article_id: Uuid,
+        result: &ProcessResult,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let (paragraph_embedding, bullets_embedding, keywords_embedding) = embeddings;
-        article.update_metadata(
-            conn,
-            paragraph,
-            bullets,
-            keywords,
-            Vector::from(paragraph_embedding),
-            Vector::from(bullets_embedding),
-            Vector::from(keywords_embedding),
-        )?;
+        let file_name = format!("failed_metadata_updates_{}.txt", article_id);
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .append(true)
+            .open(file_name)?;
+
+        writeln!(file, "Article ID: {}", article_id)?;
+        writeln!(file, "Paragraph: {:?}", result.paragraph)?;
+        writeln!(file, "Bullets: {:?}", result.bullets)?;
+        writeln!(file, "Keywords: {:?}", result.keywords)?;
+        writeln!(file, "---")?;
+
         Ok(())
     }
 }

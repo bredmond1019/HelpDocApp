@@ -2,6 +2,7 @@
 
 use anyhow::Result;
 use log::info;
+use pgvector::Vector;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -45,6 +46,9 @@ pub struct ProcessResult {
     pub paragraph: Option<String>,
     pub bullets: Option<Vec<String>>,
     pub keywords: Option<Vec<String>>,
+    pub paragraph_description_embedding: Option<Vector>,
+    pub bullet_points_embedding: Option<Vector>,
+    pub keywords_embedding: Option<Vector>,
 }
 
 impl ProcessResult {
@@ -54,14 +58,22 @@ impl ProcessResult {
             paragraph: None,
             bullets: None,
             keywords: None,
+            paragraph_description_embedding: None,
+            bullet_points_embedding: None,
+            keywords_embedding: None,
         }
+    }
+
+    pub fn has_content(&self) -> bool {
+        self.paragraph.is_some()
+            || self.bullets.is_some()
+            || self.keywords.is_some()
+            || self.paragraph_description_embedding.is_some()
+            || self.bullet_points_embedding.is_some()
+            || self.keywords_embedding.is_some()
     }
 
     pub fn is_complete(&self) -> bool {
         self.paragraph.is_some() && self.bullets.is_some() && self.keywords.is_some()
-    }
-
-    pub fn join_with_commas(items: Vec<String>) -> String {
-        items.join(", ")
     }
 }

@@ -1,4 +1,4 @@
-use std::{error::Error, sync::Arc};
+use std::{error::Error, fs::File, io::Write, sync::Arc};
 
 use anyhow::{Context, Result};
 use futures::{
@@ -26,8 +26,7 @@ impl MetadataGenerator {
             .db_pool
             .get()
             .context("Failed to get database connection")?;
-        let articles =
-            Article::load_batch(&mut conn, 0, limit).context("Failed to load articles")?;
+        let articles = Article::load_all(&mut conn).context("Failed to load articles")?;
         let articles_to_process = articles.into_iter().collect::<Vec<_>>();
         let total_articles = articles_to_process.len();
 
@@ -107,6 +106,18 @@ impl MetadataGenerator {
                 failed_ids.len()
             );
 
+        if let Err(e) = self.save_failed_article_ids(&failed_ids) {
+            error!("Failed to save failed article IDs: {}", e);
+        }
+
         Ok((successful_ids, failed_ids))
+    }
+
+    fn save_failed_article_ids(&self, failed_ids: &[Uuid]) -> std::io::Result<()> {
+        let mut file = File::create("failed_article_ids.txt")?;
+        for id in failed_ids {
+            writeln!(file, "{}", id)?;
+        }
+        Ok(())
     }
 }

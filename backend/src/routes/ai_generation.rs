@@ -1,8 +1,7 @@
-use std::error::Error;
 use std::sync::Arc;
 
 use actix_web::{get, web, HttpResponse, Responder};
-use log::{error, info};
+use log::error;
 use serde_json::json;
 
 use crate::services::MetadataGenerator;
