@@ -44,3 +44,7 @@ mockito = "1.5.0"
 name = "backend"
 path = "src/lib.rs"
 
+[profile.dev]
+debug = "line-tables-only"    # keep panic/backtrace line numbers, drop full DWARF type descriptions
+split-debuginfo = "unpacked"  # skip macOS's dsymutil pass, a slow once-per-binary post-link step
+
