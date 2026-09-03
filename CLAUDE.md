@@ -1,226 +1,28 @@
 # CLAUDE.md — Rag Engine RS
 
-AI-assisted work guide for this repository.
+@AGENTS.md
 
-## Workflow engine telemetry
+The file above carries everything that is true for any agent working in this repo: what this
+project is, the standing rules, build/test/run, the directory map, the coding
+conventions, the gotchas, the response style and the stopping rule. **Read it as part of these instructions** — Claude Code
+loads it automatically through the `@` import.
 
-**After invoking `Workflow({name: 'sdlc-task'|'sdlc-flow', ...})`, load the `stamp-workflow-run-id`
-skill.** The engine script can't read its own Workflow run id back — the Workflow script API has no
-`runId` global and no filesystem access — so joining a run's `sdlc-task-state.json`/
-`sdlc-flow-state.json` to the exact Claude Code session transcript for cost telemetry relies on the
-*invoking* agent patching the id in after the call returns. Skip this and `workflow_run_id` simply
-stays `null` — a normal, expected state, never a defect to chase.
+Only Claude-specific content belongs below.
 
-## Before you start
+## Fleet & Core Skills
 
-- **Strategic context:** `planning/context.md` (read first) → `planning/status.md` (current state)
-- **Symlink warning:** the `planning/` directory is actually a local symlink pointing to the company brain repo's `_planning/` vault (e.g. `portfolio/_planning/rag-engine-rs/`). The brain repo is responsible for tracking all planning files under Git. Do not track `planning/` in this project's public Git repository (it is gitignored).
-- **Symlink traps:** `rg`/`grep`/`find` are symlink-blind by default — a search that must include `planning/` content needs `-L`/`--follow`. `git mv` fails through the symlink face ("source directory is empty") — move planning files via the real vault path (`.../_planning/<slug>/...`), never via `planning/...`. Planning changes are committed in the brain repo (`agentic-portfolio`) with an explicit pathspec, never in this repo.
+The harness carries specialized skills in `.claude/skills/` (and `.agents/skills/`). Always consult
+the corresponding skill before executing high-stakes fleet operations:
 
----
-
-## What this project is
-
-A Rust backend that ingests help-center articles from a HelpScout-style REST
-API, stores them in PostgreSQL, generates embeddings via a Python microservice,
-and serves hybrid semantic + keyword retrieval plus a streaming LLM chat over
-WebSockets. All inference is local via Ollama. No frontend.
-
----
-
-## Build, test, run
-
-### Prerequisites
-
-- Rust stable 1.78+
-- PostgreSQL with the `pgvector` extension
-- Diesel CLI: `cargo install diesel_cli --no-default-features --features postgres`
-- Ollama running locally (`ollama pull llama3.1`)
-- Python 3.9+ for `python_services/`
-
-**macOS / Homebrew:** before building, export:
-```
-export LIBRARY_PATH="/opt/homebrew/opt/libpq/lib:$LIBRARY_PATH"
-```
-
-### Build
-
-```bash
-cargo build --all-targets
-```
-
-### Test
-
-```bash
-cargo test
-```
-
-- `convert_html_tests` — 14 tests, fully self-contained, always runnable.
-- `api_client_tests` and `article_tests` require a running Postgres + valid
-  env vars; they fail gracefully on missing infra (not regressions).
-
-### Run
-
-```bash
-# Terminal 1 — Python embedding service
-cd python_services && pip install -r requirements.txt && python embedding_service.py
-
-# Terminal 2 — Rust backend
-cargo run
-# listens on http://127.0.0.1:3000
-```
-
-### Lint / format
-
-```bash
-cargo clippy -- -D warnings
-cargo fmt --check
-```
-
----
-
-## Directory map
-
-```
-src/
-  db/              — connection pool setup (r2d2 + Diesel)
-  errors.rs        — shared error types
-  job/             — async job queue (enqueue, worker, job_queue)
-  lib.rs           — crate root; re-exports all public modules
-  main.rs          — server startup, service initialization
-  models/          — Diesel models: articles, article_chunks, embeddings, collections
-  routes/          — Actix route handlers
-    ai_generation  — metadata generation endpoints
-    embed          — embedding endpoints
-    job            — job status endpoint
-    mod.rs         — init_routes; registers all handlers + GET /ws
-    parse          — article sync trigger
-    search         — hybrid search endpoint
-    ws             — WebSocket upgrade + ChatSession actor
-  schema.rs        — Diesel-generated table DSL (do not edit by hand)
-  services/
-    ai/            — AIService: wraps ollama-rs for chat completion
-    chat/          — Actix actor model: ChatServer + ChatSession + streaming
-    data_processor/ — API client, HTML→Markdown conversion, article sync
-    embedding/     — EmbeddingService: calls Python service at localhost:8080
-    metadata_generator/ — bounded-concurrency Ollama metadata pipeline
-    search/        — SearchService + two_stage_retrieval
-  utils/
-    ollama_load_balancer.rs — round-robin balancer across multiple Ollama instances
-                              (currently shelved; preserve, do not delete)
-
-vendor/
-  ollama-rs/       — vendored fork of ollama-rs 0.2.0 (see VENDORED.md)
-
-migrations/        — Diesel SQL migrations (run with `diesel migration run`)
-python_services/   — Python embedding microservice (Flask or similar, port 8080)
-```
-
----
-
-## Key invariants
-
-- **Embedding dimensions** are set by whatever model the Python service uses.
-  If you change the model, you must drop and re-run migrations to resize the
-  `pgvector` column, then re-embed all articles (`POST /reembed-all`).
-- **`src/schema.rs` is generated by Diesel** — never edit it manually. To
-  regenerate: `diesel print-schema > src/schema.rs`.
-- **Migrations are append-only.** Never modify an existing migration; always
-  add a new one.
-- **`vendor/ollama-rs`** is a pinned fork, not a copy of upstream. See
-  `vendor/ollama-rs/VENDORED.md` before updating it.
-- **`src/utils/` (`ollama_load_balancer.rs`, `ai_data_service.rs`, `test_generator_balancer.rs`)
-  is not currently compiled at all** — `src/lib.rs` declares no `mod utils;`, so this isn't just
-  "unwired," it's outside the crate entirely (verified 2026-08-03; nothing under `src/`
-  references `utils::`). It's a working feature shelved for hardware reasons — re-add
-  `pub mod utils;` to `lib.rs` before relying on or extending it. Do not delete it.
-
----
-
-## Standing rules
-
-1. **Every new function, module, or behaviour change ships with tests.** No exceptions — this applies to ad-hoc fixes and one-off changes just as much as formal blocks/tasks. If you add or change code, add or update the tests that cover it.
-2. **OKF frontmatter is required on every new `.md` file** under `docs/` and `planning/`.
-   Every new file must open with a YAML frontmatter block. Three fields are **required**:
-   `type`, `title`, `description`. Six fields are **optional but strongly encouraged**:
-   - `doc_id` — kebab-case stable id (defaults to filename stem if omitted)
-   - `layer` — list from closed vocab: `brain` · `engine` · `factory` · `console` · `surface` · `infra` · `business` · `content` · `meta`
-   - `project` — controlled slug (this repo: `rag-engine-rs`; omit for genuinely cross-cutting docs)
-   - `status` — one of: `active` · `draft` · `deprecated` · `superseded` · `archived`
-   - `keywords` — 3–7 free-form topic terms; never exceed 7
-   - `related` — list of `doc_id` values from other real docs in the repo
-   Canonical guide: `docs/okf-frontmatter.md` in the company-brain repo; governing decision: D27.
-   **Adding a file to a directory also requires updating that directory's `index.md`** — propagate
-   up the chain if the parent directory's scope changes.
-3. **Never add `Co-Authored-By:` lines to commit messages.**
-
-## Coding conventions
-
-- Error propagation uses `anyhow` with `.context(...)` throughout. Use `?`
-  and `.context()` rather than `.unwrap()` in request-path code.
-- Runtime-path `unwrap`/`expect` calls have been removed. Any remaining
-  `expect` is startup-only and carries a message pointing to `.env.example`.
-  Intentionally kept panics are annotated `// safe: <reason>`.
-- Logging: `info!` for coarse lifecycle events; `debug!` for per-item detail,
-  payloads, and per-token chat output. Never log full article HTML at `info!`.
-- No GraphQL — the stub was deleted. Don't re-add it unless implementing a
-  real layer.
-
----
-
-## Gotchas
-
-- **Ollama must be running** before the backend starts. The AI and chat
-  services will fail at the first inference call otherwise.
-- **Python embedding service must be running** at `localhost:8080` before you
-  embed or search. Check with `POST /health`.
-- **pgvector extension** must be installed in Postgres before running
-  migrations: `CREATE EXTENSION IF NOT EXISTS vector;`
-- **`diesel.toml`** points to `./migrations` (relative). Run `diesel` CLI from
-  the repo root.
-- The job queue reads `JOB_QUEUE_WORKERS` and `JOB_QUEUE_RATE_LIMIT_MS` at
-  startup. Defaults apply if unset (see `.env.example`).
-
-<!-- BEGIN:response-style -->
-## Response Style
-
-You are read by an operator scanning several concurrent agent sessions. Long prose is the failure
-mode, not thoroughness.
-
-1. **First line = the outcome** — what happened, and whether it needs them.
-2. **Then the specifics** — bullets, one line each, max ~6. Facts, not narration.
-3. **Last line = the ask**, if there is one. One question, answerable in a word.
-
-**Ceiling: 10 lines for a normal turn, 20 for an end-of-run report.** Only depth the operator
-explicitly asked for may exceed it.
-
-Durable detail goes to disk — the commands already require that. **Link the path; do not restate
-the file.** Lead with failures, blocks, and anything that did not match the ask, in plain words with
-the real error text. Cut reasoning narration, unasked-for next steps, and self-assessment.
-
-Full rationale, the complete cut-list, and worked before/after examples: the
-**`report-to-the-operator`** skill.
-<!-- END:response-style -->
-
-<!-- BEGIN:session-continuity -->
-## Stopping, continuing, and handing off
-
-**Run to completion. Never stop, clear, or hand off because context is getting large.** There is no
-token band, no percentage, and no "the next block would be cleaner in a fresh session." A chain runs
-every block it was given; a lane that stops after one block and waits to be relaunched by hand
-defeats the entire point of the run and puts the operator back in the loop after every block. If
-context genuinely runs out, the harness summarizes and you keep going — that is its job, not yours.
-
-There is exactly **one** reason to end a session early, and it is about correctness, not cost:
-**something the running session depends on changed underneath it** — an engine, command file,
-installed binary (`mev`, `bastion`), hook or `settings.json` edited this session, or a `CLAUDE.md`
-you already read. The running session is a launch-time snapshot (base-template standing rule 10), so
-it keeps producing pre-change results, which read as an unreliable agent rather than a stale
-snapshot. **Name the trigger, finish the unit of work in flight, and say plainly that a fresh
-session is needed.** Do not present it as a context-budget decision, and do not go looking for the
-trigger as an excuse to stop.
-
-Whenever you do hand off, write the entry point first — `status.md`, `handoff.md`, a spec's
-`tasks.json`, or an orchestration-run `notes.md` — so the next agent starts from an artifact instead
-of from your memory.
-<!-- END:session-continuity -->
+| Skill | Primary Focus | When to consult |
+|---|---|---|
+| **`commit-in-this-fleet`** | Safe git operations across multi-repo & vault symlinks | BEFORE any `git add`, `commit`, `stash`, `reset`, or `mv` |
+| **`derive-state-safely`** | Authored vs derived state and writer execution | BEFORE running `mev emit-state --write`, `set-block-status`, or other state writers |
+| **`edit-state-json`** | Canonical `planning/state.json` schema & graph edges | BEFORE hand-editing `state.json` or authoring `depends_on`/`carryover` |
+| **`notify-operator`** | Operator alerting discipline via `bastion notify` | BEFORE sending notifications or deciding a lane is blocked |
+| **`ping-agent`** | Cross-lane messaging envelopes & registry protocol | BEFORE sending or triaging cross-lane messages |
+| **`report-to-the-operator`** | Concise operator reporting ceiling & format | When drafting chat replies, turn outputs, and run reports |
+| **`run-the-gates`** | Fleet validation suite & gate diagnostics | BEFORE running `validate-brain` or `harness.json` checks |
+| **`stop-or-continue`** | Session restart vs continuation correctness criteria | When an underlying binary/engine changes; never restart for token budget |
+| **`write-okf-markdown`** | OKF YAML frontmatter & index.md row maintenance | BEFORE creating or editing any `.md` under `docs/` or `planning/` |
+| **`write-repo-doc`** | Reader-first internal documentation standards | BEFORE writing or restructuring docs under `docs/` or guides |
